@@ -1,0 +1,653 @@
+// ── Upcoming Match Card ──────────────────────────────────────────────
+.cscard-upcoming {
+  background: var(--color-cardBg);
+  border-left: 3px solid #f6ad55;
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+margin-bottom: 5px;
+  .upcoming-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(246,173,85,0.15);
+
+    .upcoming-badge {
+      font-size: 10px;
+      font-weight: 800;
+      color: #f6ad55;
+      background: rgba(246,173,85,0.12);
+      border: 1px solid rgba(246,173,85,0.4);
+      border-radius: 4px;
+      padding: 2px 8px;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    .upcoming-ename {
+      font-size: 11px;
+      font-weight: 600;
+      color: #a0aec0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+  }
+
+  .upcoming-teams {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 14px;
+    gap: 8px;
+
+    .upcoming-team {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+
+      .upcoming-team-abbr {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.06);
+        border: 2px solid rgba(255,255,255,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: 0.5px;
+      }
+
+      .upcoming-team-name {
+        font-size: 11px;
+        font-weight: 700;
+        color: #a0aec0;
+        text-align: center;
+        line-height: 1.3;
+      }
+
+      &.upcoming-team-left .upcoming-team-abbr {
+        border-color: rgba(79,172,254,0.4);
+        background: rgba(79,172,254,0.08);
+        color: #4facfe;
+      }
+
+      &.upcoming-team-right .upcoming-team-abbr {
+        border-color: rgba(246,173,85,0.4);
+        background: rgba(246,173,85,0.08);
+        color: #f6ad55;
+      }
+    }
+
+    .upcoming-vs-block {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px;
+
+      .upcoming-vs {
+        font-size: 13px;
+        font-weight: 900;
+        color: #4a5568;
+        letter-spacing: 2px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 6px;
+        padding: 4px 10px;
+      }
+
+      .upcoming-time {
+        font-size: 13px;
+        font-weight: 800;
+        color: #f6ad55;
+        letter-spacing: 0.3px;
+      }
+
+      .upcoming-date {
+        font-size: 10px;
+        color: #718096;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+      }
+    }
+  }
+}
+
+// ── Live Match Card ──────────────────────────────────────────────────
+.cscard {
+  background: var(--color-cardBg);
+  border-left: 3px solid #4facfe;
+  color: var(--color-text);
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+  margin-bottom: 5px;
+
+  // ── Header ──────────────────────────────
+  .cscard-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 14px;
+    background: rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(79,172,254,0.12);
+
+    .cscard-live {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #e74c3c;
+      letter-spacing: 0.8px;
+      flex-shrink: 0;
+
+      .live-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #e74c3c;
+        animation: livePulse 1s ease-in-out infinite;
+        flex-shrink: 0;
+      }
+    }
+
+    .cscard-ename {
+      font-size: 11px;
+      font-weight: 600;
+      color: #a0aec0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+
+    .cscard-format {
+      font-size: 11px;
+      font-weight: 600;
+      color: #4facfe;
+      background: rgba(79,172,254,0.12);
+      border: 1px solid rgba(79,172,254,0.3);
+      border-radius: 4px;
+      padding: 2px 7px;
+      letter-spacing: 0.5px;
+    }
+
+    .cscard-time {
+      font-size: 11px;
+      color: #718096;
+      flex-shrink: 0;
+    }
+
+    .cscard-voice-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px 4px;
+      border-radius: 4px;
+      opacity: 0.45;
+      transition: opacity 0.2s, background 0.2s;
+      flex-shrink: 0;
+
+      &:hover { opacity: 0.8; background: rgba(255,255,255,0.07); }
+
+      &.voice-on { opacity: 1; }
+    }
+  }
+
+  // ── Scores row ───────────────────────────
+  .cscard-scores {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+
+    .cs-team {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.2s;
+
+      &.batting {
+        background: rgba(79,172,254,0.08);
+        border-color: rgba(79,172,254,0.25);
+      }
+
+      &.team-right {
+        align-items: flex-end;
+        text-align: right;
+        .cs-team-key { flex-direction: row-reverse; }
+      }
+
+      .cs-team-key {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #a0aec0;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;
+        .bat-icon { font-size: 11px; flex-shrink: 0; }
+      }
+
+      .cs-score {
+        display: flex;
+        align-items: baseline;
+        gap: 3px;
+        strong {
+          font-size: 18px;
+          font-weight: 900;
+          color: #fff;
+          line-height: 1;
+        }
+        .cs-overs { font-size: 10px; color: #718096; }
+        .cs-prev-score { font-size: 12px; color: #718096; font-weight: 500; }
+      }
+
+      .cs-ytb {
+        font-size: 11px;
+        color: #718096;
+        font-style: italic;
+      }
+    }
+
+    .cs-vs {
+      font-size: 10px;
+      font-weight: 700;
+      color: #718096;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    .cs-lastball {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+  }
+
+  // ── Ball Event Banner ────────────────────
+  .cscard-ball-event {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    animation: beSlide 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+    .be-label {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 20px;
+      border-radius: 20px;
+    }
+
+    &.be-six {
+      background: linear-gradient(90deg, rgba(155,89,182,0.18), rgba(155,89,182,0.06));
+      border-top: 1px solid rgba(155,89,182,0.2);
+      border-bottom: 1px solid rgba(155,89,182,0.1);
+      .be-label {
+        color: #bb8fce;
+        background: rgba(155,89,182,0.2);
+        border: 1px solid rgba(155,89,182,0.5);
+        box-shadow: 0 0 18px rgba(155,89,182,0.5);
+        animation: beGlow 1.4s ease-in-out infinite;
+      }
+    }
+
+    &.be-four {
+      background: linear-gradient(90deg, rgba(39,174,96,0.14), rgba(39,174,96,0.04));
+      border-top: 1px solid rgba(39,174,96,0.18);
+      border-bottom: 1px solid rgba(39,174,96,0.08);
+      .be-label {
+        color: #2ecc71;
+        background: rgba(39,174,96,0.15);
+        border: 1px solid rgba(39,174,96,0.5);
+        box-shadow: 0 0 14px rgba(39,174,96,0.45);
+        animation: beGlow 1.6s ease-in-out infinite;
+      }
+    }
+
+    &.be-wicket {
+      background: linear-gradient(90deg, rgba(231,76,60,0.18), rgba(231,76,60,0.06));
+      border-top: 1px solid rgba(231,76,60,0.2);
+      border-bottom: 1px solid rgba(231,76,60,0.1);
+      .be-label {
+        color: #f1948a;
+        background: rgba(231,76,60,0.2);
+        border: 1px solid rgba(231,76,60,0.5);
+        box-shadow: 0 0 16px rgba(231,76,60,0.5);
+        animation: beGlow 1.2s ease-in-out infinite;
+      }
+    }
+
+    &.be-run {
+      .be-label {
+        color: #4facfe;
+        background: rgba(79,172,254,0.1);
+        border: 1px solid rgba(79,172,254,0.35);
+      }
+    }
+
+    &.be-wide, &.be-noball {
+      .be-label {
+        color: #f9ca7a;
+        background: rgba(243,156,18,0.1);
+        border: 1px dashed rgba(243,156,18,0.4);
+      }
+    }
+
+    &.be-dot {
+      .be-label {
+        color: #4a5568;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+    }
+
+    &.be-over {
+      .be-label {
+        color: #805ad5;
+        background: rgba(128,90,213,0.12);
+        border: 1px solid rgba(128,90,213,0.35);
+        letter-spacing: 1.5px;
+      }
+    }
+  }
+
+  // ── Rates ────────────────────────────────
+  .cscard-rates {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 14px 8px;
+    flex-wrap: wrap;
+
+    .rate-chip {
+      font-size: 11px;
+      color: #a0aec0;
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+      padding: 2px 8px;
+
+      strong { color: #f6ad55; font-weight: 700; margin-left: 3px; }
+      &.score-raw { color: #4facfe; font-weight: 600; margin-left: auto; }
+    }
+  }
+
+  // ── Chase banner ─────────────────────────
+  .cscard-chase {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 7px 14px;
+    background: linear-gradient(90deg, rgba(231,76,60,0.1), rgba(243,156,18,0.06));
+    border-top: 1px solid rgba(231,76,60,0.18);
+    border-bottom: 1px solid rgba(231,76,60,0.08);
+
+    .chase-team  { font-size: 12px; font-weight: 700; color: #f1948a; }
+    .chase-text  { font-size: 12px; color: #a0aec0; }
+    .chase-runs  { font-size: 15px; font-weight: 900; color: #e74c3c; }
+    .chase-balls { font-size: 15px; font-weight: 900; color: #f6ad55; }
+  }
+
+  // ── Players ──────────────────────────────
+  .cscard-players {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 14px 8px;
+    border-top: 1px solid rgba(79,172,254,0.08);
+
+    .players-col {
+      flex: 1;
+      min-width: 0;
+      &.bowler {
+        flex: 0 0 auto;
+        min-width: 100px;
+        text-align: right;
+        .player-row { justify-content: flex-end; }
+      }
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 0;
+      .player-icon  { font-size: 12px; flex-shrink: 0; }
+      .player-name  {
+        font-size: 12px; color: #a0aec0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        flex: 1; min-width: 0;
+      }
+      .player-score {
+        font-size: 12px; font-weight: 700; color: #fff;
+        margin-left: 4px; white-space: nowrap; flex-shrink: 0;
+      }
+    }
+  }
+
+  // ── Recent Balls ─────────────────────────
+  .cscard-balls {
+    padding: 6px 14px 10px;
+    border-top: 1px solid rgba(79,172,254,0.08);
+
+    .balls-label {
+      font-size: 10px; font-weight: 600; color: #718096;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      display: block; margin-bottom: 6px;
+    }
+
+    .balls-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+
+      .balls-sep { color: #4a5568; font-size: 14px; padding: 0 2px; }
+
+      .ball {
+        width: 26px; height: 26px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 700; flex-shrink: 0;
+      }
+
+      .ball-dot    { background: rgba(255,255,255,0.06); color: #718096; }
+      .ball-run    { background: rgba(79,172,254,0.2);   color: #4facfe; border: 1px solid rgba(79,172,254,0.5); }
+      .ball-four   { background: rgba(39,174,96,0.2);    color: #2ecc71; border: 1px solid rgba(39,174,96,0.6); }
+      .ball-six    { background: rgba(155,89,182,0.25);  color: #bb8fce; border: 1px solid rgba(155,89,182,0.6); }
+      .ball-wicket { background: rgba(231,76,60,0.25);   color: #f1948a; border: 1px solid rgba(231,76,60,0.6); }
+      .ball-wide   { background: rgba(243,156,18,0.15);  color: #f9ca7a; border: 1px dashed rgba(243,156,18,0.5); }
+      .ball-noball { background: rgba(230,126,34,0.15);  color: #f0a165; border: 1px dashed rgba(230,126,34,0.5); }
+    }
+
+    .ball-commentary {
+      display: block; margin-top: 7px;
+      font-size: 11px; color: #a0aec0;
+      font-style: italic; line-height: 1.4;
+    }
+  }
+
+  // ── Bowler Summary ───────────────────────
+  .cscard-bowler-summary {
+    padding: 6px 14px 8px;
+    border-top: 1px solid rgba(79,172,254,0.08);
+
+    .bs-title {
+      font-size: 10px; font-weight: 700; color: #718096;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .bs-table {
+      width: 100%;
+      border-collapse: collapse;
+
+      .bs-th {
+        font-size: 10px; color: #4a5568; font-weight: 600;
+        text-align: center; padding: 3px 6px;
+        &.bs-th-left { text-align: left; }
+      }
+
+      .bs-td {
+        font-size: 11px; color: #a0aec0;
+        text-align: center; padding: 3px 6px;
+        border-top: 1px solid rgba(255,255,255,0.04);
+        &.bs-td-left { text-align: left; color: #fff; font-weight: 600; }
+      }
+    }
+  }
+
+  // ── Partnership Detail ────────────────────
+  .cscard-partnership {
+    padding: 6px 14px 10px;
+    border-top: 1px solid rgba(79,172,254,0.08);
+
+    .pship-title {
+      font-size: 10px; font-weight: 700; color: #718096;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .pship-runs {
+      font-size: 13px; font-weight: 800; color: #fff;
+      text-align: center; margin-bottom: 6px;
+    }
+
+    .pship-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 3px;
+
+      .pship-bat-name {
+        font-size: 10px; color: #a0aec0; font-weight: 600;
+        white-space: nowrap; flex-shrink: 0;
+        &.pship-bat-right { text-align: right; }
+      }
+
+      .pship-bar {
+        flex: 1;
+        height: 6px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 3px;
+        overflow: hidden;
+
+        .pship-bar-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #4facfe, #2ecc71);
+          border-radius: 3px;
+          transition: width 0.4s ease;
+        }
+      }
+    }
+
+    .pship-scores {
+      display: flex;
+      justify-content: space-between;
+      .pship-score-left, .pship-score-right {
+        font-size: 11px; font-weight: 700; color: #4facfe;
+      }
+    }
+  }
+
+  // ── Status bar ───────────────────────────
+  .cscard-status {
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #f6ad55;
+    background: rgba(246,173,85,0.07);
+    border-top: 1px solid rgba(246,173,85,0.18);
+    text-align: center;
+  }
+
+  // ── Expand / Collapse toggle ─────────────
+  .cscard-toggle {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0 6px;
+    cursor: pointer;
+
+    .cscard-chevron {
+      font-size: 22px;
+      color: rgba(160, 174, 192, 0.5);
+      line-height: 1;
+      display: inline-block;
+      transition: transform 0.3s ease, color 0.2s;
+      transform: rotate(0deg);
+
+      &.up {
+        transform: rotate(180deg);
+        color: rgba(160, 174, 192, 0.85);
+      }
+    }
+  }
+
+  // ── Expanded sections slide-in ───────────
+  .cscard-bowler-summary,
+  .cscard-partnership {
+    animation: expandIn 0.25s ease forwards;
+  }
+}
+
+@keyframes expandIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.35; transform: scale(0.7); }
+}
+
+@keyframes lbPop {
+  0%   { transform: scale(0) rotate(-15deg); opacity: 0; }
+  65%  { transform: scale(1.18) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes lbGlow {
+  0%, 100% { filter: brightness(1);    transform: scale(1); }
+  50%       { filter: brightness(1.35); transform: scale(1.1); }
+}
+
+@keyframes ballLivePulse {
+  0%, 100% { opacity: 1;    box-shadow: 0 0 0px rgba(79,172,254,0); }
+  50%       { opacity: 0.75; box-shadow: 0 0 8px rgba(79,172,254,0.5); }
+}
+
+@keyframes beSlide {
+  0%   { transform: translateY(-8px) scale(0.85); opacity: 0; }
+  70%  { transform: translateY(2px)  scale(1.04); opacity: 1; }
+  100% { transform: translateY(0)    scale(1);    opacity: 1; }
+}
+
+@keyframes beGlow {
+  0%, 100% { filter: brightness(1);    transform: scale(1); }
+  50%       { filter: brightness(1.4); transform: scale(1.06); }
+}

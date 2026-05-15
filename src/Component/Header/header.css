@@ -1,0 +1,38 @@
+.hedaer_main table {
+  all: revert;
+  width: 100%;
+}
+.hedaer_main .profile_img {
+  width: 100%;
+}
+.hedaer_main .FontTextWhite {
+  color: #fff;
+  border: none;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  text-align: center;
+}
+.hedaer_main .FontTextWhite h1,
+.hedaer_main .FontTextWhite .profile_coin {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+.hedaer_main .FontTextWhite h1 p,
+.hedaer_main .FontTextWhite .profile_coin p {
+  margin: 0;
+}
+.hedaer_main a {
+  text-decoration: unset;
+}
+.hedaer_main .logout_btn {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.main-header {
+  background: #0336FF !important;
+}
+
+/*# sourceMappingURL=header.css.map */

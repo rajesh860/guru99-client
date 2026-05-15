@@ -1,0 +1,245 @@
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popZoomModal {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.result-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fadeInOverlay 0.3s ease-in-out;
+  
+  .result-modal {
+    background: #fff;
+    width: 520px;
+    border-radius: 5px;
+    position: relative;
+    padding-bottom: 30px;
+    animation: popZoomModal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    @media screen and (max-width: 767px) {
+      width: 98%;
+    }
+  }
+  
+  .close-btn {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    z-index: 10;
+    
+    &:hover {
+      color: #000;
+    }
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    text-align: center;
+    padding: 15px;
+    border-radius: 5px 5px 0 0;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .round-id {
+    text-align: center;
+    font-size: 16px;
+    margin: 20px 0;
+    color: #333;
+    font-weight: 500;
+  }
+
+  .joker-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    
+    .joker-card {
+      position: relative;
+      
+      &::before {
+        content: "";
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      
+      .card-display {
+        width: 60px;
+        height: 80px;
+        border: 2px solid #333;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        font-size: 18px;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        
+        // Red color for hearts and diamonds
+        &:has-text("♥"), &:has-text("♦") {
+          color: #dc3545;
+        }
+        
+        // Black color for spades and clubs  
+        &:has-text("♠"), &:has-text("♣") {
+          color: #000;
+        }
+      }
+    }
+  }
+
+  .game-rows {
+    margin: 20px;
+    
+    .game-row {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      
+      .row-label {
+        font-size: 24px;
+        font-weight: bold;
+        margin-right: 15px;
+        width: 30px;
+        text-align: center;
+        margin-top: 10px;
+      }
+      
+      .cards-sequence {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        flex: 1;
+        
+        .sequence-card {
+          width: 45px;
+          height: 60px;
+          border: 1.5px solid #666;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: white;
+          font-size: 14px;
+          font-weight: bold;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          
+          // Red suits
+          &:contains("♥"), &:contains("♦") {
+            color: #dc3545;
+          }
+          
+          // Black suits
+          &:contains("♠"), &:contains("♣") {
+            color: #000;
+          }
+        }
+      }
+    }
+  }
+
+  .result-section {
+    text-align: center;
+    margin-top: 25px;
+    padding: 15px 20px;
+    border-top: 2px solid #eee;
+    
+    .result-label {
+      font-size: 16px;
+      color: #28a745;
+      font-weight: 500;
+    }
+    
+    .result-value {
+      font-size: 20px;
+      font-weight: bold;
+      margin-left: 10px;
+      color: #333;
+    }
+  }
+
+  .loading, .error {
+    text-align: center;
+    padding: 40px;
+    font-size: 16px;
+  }
+
+  .loading {
+    color: #666;
+  }
+
+  .error {
+    color: #dc3545;
+  }
+
+  // Responsive design
+  @media (max-width: 576px) {
+    .result-modal {
+      margin: 10px;
+      width: calc(100vw - 20px);
+    }
+    
+    .game-rows {
+      margin: 15px;
+      
+      .game-row {
+        .cards-sequence {
+          .sequence-card {
+            width: 35px;
+            height: 50px;
+            font-size: 12px;
+          }
+        }
+      }
+    }
+    
+    .joker-section {
+      .joker-card {
+        .card-display {
+          width: 50px;
+          height: 70px;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}

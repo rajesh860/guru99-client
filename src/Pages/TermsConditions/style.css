@@ -1,0 +1,40 @@
+.skills {
+  /* margin-top: 10px; */
+  padding: 25px;
+  background: #000;
+  margin-bottom: 18px;
+}
+
+.drag_drop {
+  background: #FFF;
+  padding: 0.5em;
+  margin: 10px;
+}
+.drag_drop h4 {
+  font-weight: 700;
+  margin: 15px 0px;
+  line-height: 18px;
+}
+
+.modal-content {
+  border: none;
+  border-radius: 0;
+}
+
+.modal-header {
+  border-radius: 0;
+}
+
+.modal-footer {
+  border-radius: 0;
+}
+
+.modal-xl {
+  margin-top: 0 !important;
+}
+
+.ng-star-inserted {
+  letter-spacing: 0;
+}
+
+/*# sourceMappingURL=style.css.map */

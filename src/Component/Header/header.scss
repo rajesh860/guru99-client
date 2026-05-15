@@ -1,0 +1,51 @@
+.hedaer_main {
+
+  table {
+    all: revert;
+    width: 100%;
+  }
+  .profile_img {
+    width: 85px;
+    padding-left: 10px;
+  }
+  .FontTextWhite {
+    color: #fff;
+    border: none;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 13px;
+    text-align: left;
+    h1,
+    .profile_coin {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 400;
+      display: flex;
+      p {
+        margin: 0;
+        padding-right: 10px;
+        &:last-child {
+          padding-left: 10px;
+          border-left: 1px solid #fff;
+        }
+      }
+    }
+  }
+  a{
+    text-decoration: unset;
+  }
+  .logout_btn{
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+}
+
+.main-header {
+  background: var(--color-headerBg) !important;
+  transition: background 0.3s ease;
+}
+
+.hedaer_main {
+  background: var(--color-headerBg);
+  transition: background 0.3s ease;
+}

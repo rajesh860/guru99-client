@@ -1,0 +1,197 @@
+.casino-ledger-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.casino-ledger-modal {
+  background: #1a1a1a;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.casino-ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #333;
+  background: #222;
+
+  h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #ff4444;
+    }
+  }
+}
+
+.casino-ledger-info {
+  display: flex;
+  gap: 30px;
+  padding: 16px 24px;
+  background: #252525;
+  border-bottom: 1px solid #333;
+
+  span {
+    color: #aaa;
+    font-size: 14px;
+
+    strong {
+      color: #fff;
+      margin-left: 5px;
+    }
+  }
+}
+
+.casino-ledger-table-wrap {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0;
+}
+
+.casino-ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  thead {
+    position: sticky;
+    top: 0;
+    background: #2a2a2a;
+    z-index: 1;
+
+    th {
+      padding: 12px 16px;
+      text-align: left;
+      color: #fff;
+      font-weight: 600;
+      border-bottom: 2px solid #444;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #2a2a2a;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #252525;
+      }
+
+      td {
+        padding: 12px 16px;
+        color: #ddd;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .bet-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+
+    &.back {
+      background: rgba(114, 192, 245, 0.15);
+      color: #72c0f5;
+    }
+
+    &.lay {
+      background: rgba(250, 171, 184, 0.15);
+      color: #faabb8;
+    }
+  }
+
+  .result-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+
+    &.won {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4caf50;
+    }
+
+    &.lost {
+      background: rgba(244, 67, 54, 0.15);
+      color: #f44336;
+    }
+  }
+
+  .pl-positive {
+    color: #4caf50;
+    font-weight: 600;
+  }
+
+  .pl-negative {
+    color: #f44336;
+    font-weight: 600;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .casino-ledger-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .casino-ledger-table-wrap {
+    overflow-x: auto;
+  }
+
+  .casino-ledger-table {
+    font-size: 12px;
+
+    thead th,
+    tbody td {
+      padding: 8px 12px;
+    }
+  }
+
+  .casino-ledger-info {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

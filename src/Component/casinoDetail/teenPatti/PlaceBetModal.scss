@@ -1,0 +1,317 @@
+.place-bet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.place-bet-modal {
+  background: linear-gradient(145deg, #1a1f2e 0%, #252d42 100%);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    width: 95%;
+    padding: 20px;
+    border-radius: 16px;
+  }
+}
+
+.bet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bet-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bet-type-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+
+  &.back {
+    background: linear-gradient(135deg, #72b4ff 0%, #4a9eff 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(74, 158, 255, 0.3);
+  }
+
+  &.lay {
+    background: linear-gradient(135deg, #ffa3d8 0%, #ff7ec4 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 126, 196, 0.3);
+  }
+}
+
+.bet-team-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.bet-countdown {
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  min-width: 50px;
+  text-align: center;
+}
+
+.bet-odds-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.odds-label {
+  font-size: 12px;
+  color: #a0a8b8;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.odds-value {
+  font-size: 32px;
+  font-weight: 700;
+  
+  &.back {
+    color: #72b4ff;
+    text-shadow: 0 0 20px rgba(114, 180, 255, 0.3);
+  }
+  
+  &.lay {
+    color: #ffa3d8;
+    text-shadow: 0 0 20px rgba(255, 163, 216, 0.3);
+  }
+}
+
+.bet-amount-section {
+  margin-bottom: 20px;
+}
+
+.amount-label {
+  display: block;
+  font-size: 13px;
+  color: #a0a8b8;
+  margin-bottom: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0 16px;
+  transition: all 0.3s ease;
+
+  &:focus-within {
+    border-color: #72b4ff;
+    background: rgba(114, 180, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(114, 180, 255, 0.1);
+  }
+}
+
+.currency-symbol {
+  font-size: 20px;
+  color: #a0a8b8;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.amount-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+
+  &::placeholder {
+    color: #5a6477;
+  }
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.quick-amount-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(114, 180, 255, 0.15);
+    border-color: #72b4ff;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.potential-win-section {
+  background: rgba(40, 199, 111, 0.1);
+  border: 1px solid rgba(40, 199, 111, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.potential-label {
+  font-size: 13px;
+  color: #a0a8b8;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.potential-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #28c76f;
+}
+
+.bet-actions {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 12px;
+}
+
+.btn-cancel,
+.btn-place-bet {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-place-bet {
+  &.back {
+    background: linear-gradient(135deg, #72b4ff 0%, #4a9eff 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(74, 158, 255, 0.4);
+
+    &:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(74, 158, 255, 0.6);
+      transform: translateY(-2px);
+    }
+  }
+
+  &.lay {
+    background: linear-gradient(135deg, #ffa3d8 0%, #ff7ec4 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 126, 196, 0.4);
+
+    &:hover:not(:disabled) {
+      box-shadow: 0 6px 20px rgba(255, 126, 196, 0.6);
+      transform: translateY(-2px);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}

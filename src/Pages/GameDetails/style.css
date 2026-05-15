@@ -1,0 +1,484 @@
+.menu {
+  background: #263238;
+}
+
+.navMain li a {
+  display: block;
+  font-size: 0.8em;
+  padding: 8px 10px;
+  text-transform: uppercase;
+  color: #24476c;
+}
+
+.show-tv a {
+  background-color: #344F1F;
+  border: 1px solid #2f5c94;
+}
+.show-tv a:hover {
+  background-color: #87bb33;
+}
+
+.navMain li a:hover,
+.navMain li.active a {
+  font-family: Tahoma, Geneva, sans-serif;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.price-btn {
+  color: #fff;
+  display: block;
+  padding: 0.5em 0;
+  font-size: 1em;
+  background: #00ffff;
+  border: 1px solid #000;
+}
+
+.price-btn:hover {
+  color: #59b7e6;
+}
+
+.FontText {
+  color: #000;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10px;
+  line-height: 20px;
+  font-weight: 700;
+}
+
+.FontTextBlue {
+  color: #000;
+  border: none;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.FontTextWhite {
+  color: #fff;
+  border: none;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.FontTextWhite10px {
+  color: #fff;
+  border: none;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.FontTextWhite10px {
+  color: #fff;
+  border: none;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.FontTextBlack10px {
+  color: #000;
+  border: none;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.ButtonL,
+.ButtonNRun {
+  background-repeat: no-repeat;
+  background-position: 3px 3px;
+  background-color: transparent;
+  border: 0px solid;
+  color: red;
+  border-color: #696 #363 #363 #696;
+  height: 30px;
+  width: 60px;
+  text-align: center;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ButtonNRate {
+  background-color: transparent;
+  border: 0px solid;
+  color: red;
+  height: 15px;
+  width: 40px;
+  text-align: center !important;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ButtonYRun {
+  background-repeat: no-repeat;
+  background-position: 3px 3px;
+  background-color: transparent;
+  border: 0px solid;
+  color: #009;
+  border-color: #696 #363 #363 #696;
+  height: 30px;
+  width: 60px;
+  text-align: center;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.ButtonYRate {
+  background-repeat: no-repeat;
+  background-position: 3px 3px;
+  background-color: transparent;
+  border: 0px solid;
+  color: #009;
+  border-color: #696 #363 #363 #696;
+  height: 15px;
+  width: 40px;
+  text-align: center;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.profile-details {
+  float: left;
+  width: 100%;
+  margin-right: 3%;
+  background: #fff;
+}
+
+.TeamName {
+  background: #ff0266;
+  padding: 0.1em 0;
+  border-top: 1px solid #fc3;
+  text-align: center;
+  border-radius: 7px 7px 0 0;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.TeamName-in {
+  background: #ff0266;
+  padding: 0.1em 0;
+  border-top: 1px solid #fc3;
+  text-align: center;
+  border-radius: 7px 7px 0 0;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+.TeamName-in a {
+  font-size: 0.85em;
+  color: #fff;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.TeamName a {
+  font-size: 0.85em;
+  color: #fff;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.GameList {
+  color: #000;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 0.8em;
+  line-height: 22px;
+  font-weight: 700;
+}
+
+table {
+  all: revert;
+  width: 100%;
+}
+
+table {
+  all: revert;
+  width: 100%;
+}
+
+th {
+  text-align: center;
+}
+
+body {
+  background-color: #e9e9e9;
+}
+
+.center {
+  text-align: center;
+}
+
+.pagination {
+  display: inline-block;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 767px) {
+  .teamNameForOdds {
+    font-size: x-small;
+  }
+}
+@media (min-width: 1024px) {
+  .teamNameForOdds {
+    font-size: small;
+  }
+}
+.ScoreCard {
+  background: #fff;
+  padding: 0.2em;
+}
+
+.ScoreCard p {
+  font-size: 0.6em;
+  color: #000;
+  padding: 2px;
+  text-align: center;
+  line-height: 20px;
+  text-transform: uppercase;
+  font-family: Verdana, Geneva, sans-serif;
+  font-weight: 700;
+}
+
+.ButtonSess {
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: 0px solid;
+  color: white;
+  border-color: #696 #363 #363 #696;
+  height: 15px;
+  width: 150px;
+  text-align: center;
+  font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.MatchAmount {
+  background: #fff;
+  color: #000;
+  border: none;
+  text-align: center;
+  width: 120px;
+  font-weight: 700;
+  font-size: 16px;
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+.AmountTime {
+  font-family: Tahoma, Geneva, sans-serif;
+  font-size: 24px;
+  text-align: center;
+  color: red;
+  width: 35px;
+  font-weight: bolder;
+  background-color: transparent;
+  border: none;
+}
+
+.AmountTime {
+  background: #2486b2;
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+p {
+  margin-bottom: 0;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-top: 2px solid #333;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.score_iframe {
+  height: 220px;
+}
+
+.betslip-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.betslip-modal {
+  width: 520px;
+  max-width: calc(100vw - 24px);
+  background: #ffffff;
+  border: 2px solid #2c8cc2;
+  border-radius: 2px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  position: relative;
+  padding: 10px;
+}
+
+.betslip-modal--back {
+  border-color: #2c8cc2;
+}
+
+.betslip-modal--lay {
+  border-color: #c25b5b;
+}
+
+.betslip-modal-panel {
+  padding: 12px;
+  background: #73b9ea;
+}
+
+.betslip-modal--back .betslip-modal-panel {
+  background: #73b9ea;
+}
+
+.betslip-modal--lay .betslip-modal-panel {
+  background: #e59b9b;
+}
+
+.betslip-modal-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 28px;
+  color: #666;
+  cursor: pointer;
+}
+
+.betslip-modal-top {
+  background: transparent;
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  color: #000;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+
+.betslip-modal-input {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d4d4d4;
+  outline: none;
+  background: #fff;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.betslip-modal-quick {
+     display: grid;
+    /* flex-wrap: wrap; */
+    gap: 8px;
+    row-gap: 10px;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.betslip-modal-quick2 {
+  margin-top: 5px;
+}
+
+.betslip-modal-chip {
+  border: 0;
+  background: #2f4859;
+  color: #fff;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.betslip-modal-chip-danger {
+  background: #e54b59;
+}
+
+.betslip-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 10px 2px 0;
+}
+
+#sessionTable tbody td:first-child {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+#sessionTable thead th {
+  background: #9adcae !important;
+  color: #000 !important;
+}
+
+.betslip-modal-action {
+  border: 0;
+  border-radius: 2px;
+  padding: 7px 14px;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.betslip-modal-cancel {
+  background: #f0b000;
+  color: #000;
+}
+
+.betslip-modal-submit {
+  background: #1aa21a;
+  color: #fff;
+}
+
+/*# sourceMappingURL=style.css.map */

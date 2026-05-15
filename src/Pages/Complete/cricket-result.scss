@@ -1,0 +1,46 @@
+.cr-match-name-bg {
+  background: var(--color-cardBg);
+  color: var(--color-text);
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 16px;
+  text-align: center;
+  padding: 8px 0;
+}
+
+.cr-section-header {
+  background: var(--color-cardBg);
+  color: var(--color-text);
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0.5em 0;
+  margin: 0;
+  text-align: center;
+  width: 100%;
+  display: block;
+  border-left: 3px solid var(--color-primary);
+}
+
+.cr-th {
+  background: var(--color-primary) !important;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.cr-tr {
+  background: var(--bg-panel);
+  color: var(--color-text);
+
+  td { color: var(--color-text); }
+}
+
+.cr-summary-row {
+  background: var(--bg-panel);
+  color: var(--color-text);
+
+  td { color: var(--color-text); }
+}

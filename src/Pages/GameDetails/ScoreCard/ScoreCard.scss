@@ -1,0 +1,295 @@
+.scorecard-compact,
+.scorecard-expanded {
+  // background: var(--color-surface);
+  // border-radius: 12px;
+  padding: 10px;
+  // margin: 10px;
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.scorecard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team-abbr {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-textSecondary);
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 24px;
+  font-weight: 600;
+
+  &.timeout {
+    color: var(--color-warning);
+  }
+
+  &.ball {
+    color: var(--color-warning);
+  }
+
+  &.finished {
+    color: var(--color-error);
+  }
+}
+
+.score-main {
+  margin-bottom: 12px;
+}
+
+.score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+
+  .runs {
+    font-size: 35px;
+    font-weight: 600;
+    color: var(--color-success);
+  }
+
+  .overs {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-textSecondary);
+  }
+}
+
+.score-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--color-textSecondary);
+
+  strong {
+    color: var(--color-text);
+  }
+
+  .separator {
+    margin: 0 8px;
+  }
+
+  .rate-info {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.match-status {
+  background: rgba(234, 179, 8, 0.15);
+  color: var(--color-warning);
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.recent-overs,
+.recent-balls {
+  margin-top: 12px;
+
+  .over-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-textSecondary);
+    margin-right: 8px;
+  }
+}
+
+.balls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+
+  .ball {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-cardBg);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+
+    &.wicket {
+      background: var(--color-error);
+      color: #fff;
+    }
+
+    &.wide {
+      background: var(--color-info);
+      color: #fff;
+    }
+
+    &.four {
+      background: var(--color-success);
+      color: #fff;
+    }
+
+    &.six {
+      background: #A442DA;
+      color: #fff;
+    }
+
+    &.dot {
+      background: var(--color-cardBg);
+      color: var(--color-textSecondary);
+      font-size: 24px;
+    }
+  }
+
+  .ball-label {
+    font-size: 12px;
+    color: var(--color-textSecondary);
+    padding: 0 4px;
+  }
+
+  .ball-total {
+    margin-left: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+}
+
+.stats-table {
+  margin: 16px 0;
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    thead {
+      tr {
+        border-bottom: 1px solid var(--color-border);
+        
+        th {
+          padding: 8px 4px;
+          text-align: center;
+          font-weight: 600;
+          color: var(--color-textSecondary);
+          font-size: 12px;
+
+          &.text-left {
+            text-align: left;
+          }
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid var(--color-border);
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        td {
+          padding: 10px 4px;
+          text-align: center;
+          color: var(--color-text);
+
+          &.text-left {
+            text-align: left;
+          }
+
+          .bat-icon {
+            margin-left: 4px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.match-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+  font-size: 12px;
+
+  .info-item {
+    flex: 1;
+    padding: 8px;
+    background: var(--color-cardBg);
+    border-radius: 6px;
+    text-align: center;
+    color: var(--color-textSecondary);
+
+    &:first-child {
+      text-align: left;
+      padding-left: 12px;
+    }
+
+    &:last-child {
+      text-align: right;
+      padding-right: 12px;
+    }
+  }
+}
+
+.scorecard-loading {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+  color: var(--color-textSecondary);
+  margin-bottom: 12px;
+}
+
+.both-teams-score {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+
+  .team-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 14px;
+
+    .team-name {
+      color: var(--color-textSecondary);
+      font-weight: 600;
+    }
+
+    .score {
+      color: var(--color-text);
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .rr {
+      color: var(--color-success);
+      font-size: 12px;
+      margin-left: 8px;
+    }
+  }
+}

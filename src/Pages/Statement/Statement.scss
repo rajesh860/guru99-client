@@ -1,0 +1,159 @@
+.statement-ss2 {
+  background: var(--color-background);
+  padding: 8px 0 14px;
+  min-height: 100vh;
+}
+
+.statement-ss2__container {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 0px;
+}
+
+.statement-ss2__card {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.statement-ss2__title {
+  background: var(--color-gradient);
+  color: #fff;
+  text-align: center;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 4px 4px 0 0;
+}
+
+.statement-ss2__tableWrap {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  
+  /* Hide scrollbar */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.statement-ss2__table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+.statement-ss2__table th {
+  background: var(--color-cardBg);
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 6px;
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.statement-ss2__table td {
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 6px;
+  border: 1px solid var(--color-border);
+  vertical-align: top;
+  line-height: 14px;
+  white-space: normal;
+}
+
+.statement-ss2__desc {
+  font-weight: 700;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.statement-ss2__num {
+  text-align: right;
+}
+
+.statement-ss2__date {
+  font-weight: 700;
+}
+
+.statement-ss2__balance {
+  color: var(--color-success);
+}
+
+.statement-ss2__credit {
+  color: var(--color-success);
+}
+
+.statement-ss2__debit {
+  color: var(--color-error);
+}
+
+.statement-ss2__empty {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-textSecondary);
+}
+
+.statement-ss2__pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--color-surface);
+  border-radius: 0 0 4px 4px;
+}
+
+.statement-ss2__pagination-btn {
+  padding: 8px 16px;
+  background: var(--color-cardBg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+
+  &:disabled {
+    background: var(--color-surface);
+    color: var(--color-textSecondary);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.statement-ss2__pagination-info {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+@media screen and (max-width: 520px) {
+  .statement-ss2__card {
+    max-width: 100%;
+  }
+
+  .statement-ss2__table {
+    min-width: 820px;
+  }
+}

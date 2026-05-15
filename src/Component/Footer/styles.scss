@@ -1,0 +1,16 @@
+.footer {
+  background: var(--color-background);
+  color: white;
+  padding: 0.979em;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.theme-switcher-fixed {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}

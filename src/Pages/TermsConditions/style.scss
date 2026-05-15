@@ -1,0 +1,144 @@
+.terms-page {
+  background: var(--color-background);
+  min-height: 100vh;
+  padding: 0;
+}
+
+.terms-header {
+  background: var(--color-headerBg);
+  padding: 15px 20px;
+  text-align: center;
+
+  h1 {
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+}
+
+.terms-continue-btn {
+  background: var(--color-primary);
+  padding: 15px 20px;
+  margin: 15px 20px;
+  border-radius: 8px;
+  text-align: center;
+
+  a {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    display: block;
+  }
+}
+
+.terms-content {
+  background: var(--color-surface);
+  padding: 20px;
+  color: var(--color-text);
+}
+
+.terms-subtitle {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin: 0 0 25px 0;
+  color: var(--color-text);
+}
+
+.terms-note {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 15px 0;
+  color: var(--color-text);
+}
+
+.terms-rules {
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rule-item {
+  display: flex;
+  padding: 15px;
+  border-bottom: 2px solid var(--color-border);
+  gap: 10px;
+  align-items: flex-start;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.rule-long {
+    display: block;
+    padding: 15px;
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+      font-size: 15px;
+      color: var(--color-text);
+    }
+  }
+}
+
+.rule-number {
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 20px;
+}
+
+.rule-text {
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.terms-bottom-continue {
+  margin-top: 30px;
+  text-align: center;
+  background: var(--color-primary);
+  padding: 15px;
+  border-radius: 8px;
+
+  a {
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+    display: block;
+  }
+}
+
+@media (max-width: 600px) {
+  .terms-header h1 {
+    font-size: 18px;
+  }
+
+  .terms-subtitle {
+    font-size: 20px;
+  }
+
+  .terms-note {
+    font-size: 14px;
+  }
+
+  .rule-number,
+  .rule-text {
+    font-size: 14px;
+  }
+
+  .rule-item {
+    padding: 12px;
+
+    &.rule-long p {
+      font-size: 14px;
+    }
+  }
+}

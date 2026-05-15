@@ -1,0 +1,35 @@
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #3e454f;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-height: 180px;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &__image {
+    margin-bottom: 5px;
+
+    img {
+      display: block;
+    }
+  }
+
+  &__title {
+    text-align: center;
+
+    .tital_name_dash {
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}

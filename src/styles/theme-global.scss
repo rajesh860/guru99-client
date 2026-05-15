@@ -1,0 +1,430 @@
+// Global Theme Styles - Apply to all components
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+// Common page backgrounds
+.content,
+.inplay-container,
+.casino-container,
+.ledger-container,
+.statement-container,
+.profile-container,
+.game-details-container {
+  color: var(--color-text) !important;
+}
+
+// Card backgrounds
+.card,
+.match-card,
+.game-card,
+.bet-card,
+.info-card {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+// Table styles
+table {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  
+  thead {
+    background: var(--color-cardBg) !important;
+    color: var(--color-text) !important;
+  }
+  
+  tbody tr {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+    
+    &:hover {
+      background: var(--color-cardBg) !important;
+    }
+  }
+  
+  th, td {
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+  }
+}
+
+// Buttons
+.btn,
+button:not(.theme-toggle-btn):not(.theme-option) {
+  &.btn-primary {
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+  }
+  
+  &.btn-success {
+    background: var(--color-success) !important;
+    border-color: var(--color-success) !important;
+  }
+  
+  &.btn-danger {
+    background: var(--color-error) !important;
+    border-color: var(--color-error) !important;
+  }
+  
+  &.btn-warning {
+    background: var(--color-warning) !important;
+    border-color: var(--color-warning) !important;
+  }
+}
+
+// Modals
+
+.modal-content,
+.modal-dialog {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+.modal-header {
+  background: var(--color-cardBg) !important;
+  border-color: var(--color-border) !important;
+}
+
+// Forms
+input,
+select,
+textarea {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+  
+  &:focus {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25) !important;
+  }
+  
+  &::placeholder {
+    color: var(--color-textSecondary) !important;
+  }
+}
+
+// Panels and sections
+.panel,
+.section,
+.widget,
+.box {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+// Sidebar/Menu
+.sidebar,
+.menu,
+.nav-menu {
+  background: var(--color-sidebarBg) !important;
+  color: var(--color-text) !important;
+  
+  a, .menu-item {
+    color: var(--color-text) !important;
+    
+    &:hover {
+      background: var(--color-cardBg) !important;
+      color: var(--color-primary) !important;
+    }
+    
+    &.active {
+      background: var(--color-primary) !important;
+      color: white !important;
+    }
+  }
+}
+
+// Specific page overrides
+
+
+.casino-ledger-container {
+  background: var(--color-background) !important;
+  
+  .ledger-header {
+    background: var(--color-cardBg) !important;
+    color: var(--color-text) !important;
+  }
+  
+  .ledger-item {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+    
+    &:hover {
+      background: var(--color-cardBg) !important;
+    }
+  }
+}
+
+// Statement page
+.statement-container {
+  .filter-section {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+  }
+  
+  .statement-row {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+    
+    &:hover {
+      background: var(--color-cardBg) !important;
+    }
+  }
+}
+
+// Game Details page
+.game-details-container {
+  background: var(--color-background) !important;
+  
+  .odds-container {
+    background: var(--color-surface) !important;
+  }
+  
+  .bet-slip {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+  }
+}
+
+// Profile page
+.profile-container {
+  .profile-card {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+  }
+  
+  .profile-info {
+    color: var(--color-text) !important;
+  }
+}
+
+// Ledger page
+.ledger-container {
+  .ledger-table {
+    background: var(--color-surface) !important;
+  }
+  
+  .total-row {
+    background: var(--color-cardBg) !important;
+    font-weight: bold;
+  }
+}
+
+// Matka pages
+.matka-container {
+  background: var(--color-background) !important;
+  
+  .matka-card {
+    background: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+  }
+  
+  .matka-result {
+    background: var(--color-cardBg) !important;
+  }
+}
+
+// Casino pages
+.casino-game-card {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  
+  &:hover {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  }
+}
+
+// Scrollbars
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+  
+  &:hover {
+    background: var(--color-primary);
+  }
+}
+
+// Text colors
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text) !important;
+}
+
+p, span, label {
+  color: var(--color-text);
+}
+
+a {
+  color: var(--color-primary);
+  
+  &:hover {
+    color: var(--color-secondary);
+  }
+}
+
+// Badge colors
+.badge {
+  &.badge-success {
+    background: var(--color-success) !important;
+  }
+  
+  &.badge-error, &.badge-danger {
+    background: var(--color-error) !important;
+  }
+  
+  &.badge-warning {
+    background: var(--color-warning) !important;
+  }
+  
+  &.badge-info {
+    background: var(--color-info) !important;
+  }
+  
+  &.badge-primary {
+    background: var(--color-primary) !important;
+  }
+}
+
+// Alert messages
+.alert {
+  &.alert-success {
+    background: rgba(16, 185, 129, 0.1) !important;
+    border-color: var(--color-success) !important;
+    color: var(--color-success) !important;
+  }
+  
+  &.alert-error, &.alert-danger {
+    background: rgba(239, 68, 68, 0.1) !important;
+    border-color: var(--color-error) !important;
+    color: var(--color-error) !important;
+  }
+  
+  &.alert-warning {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-color: var(--color-warning) !important;
+    color: var(--color-warning) !important;
+  }
+  
+  &.alert-info {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-color: var(--color-info) !important;
+    color: var(--color-info) !important;
+  }
+}
+
+// Loading spinners
+.spinner,
+.loader {
+  border-top-color: var(--color-primary) !important;
+}
+
+// Dropdown menus
+.dropdown-menu {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  
+  .dropdown-item {
+    color: var(--color-text) !important;
+    
+    &:hover {
+      background: var(--color-cardBg) !important;
+      color: var(--color-primary) !important;
+    }
+  }
+}
+
+// Tabs
+.tabs,
+.tab-list {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  
+  .tab {
+    color: var(--color-textSecondary) !important;
+    
+    &.active {
+      background: var(--color-primary) !important;
+      color: white !important;
+    }
+    
+    &:hover:not(.active) {
+      background: var(--color-cardBg) !important;
+      color: var(--color-text) !important;
+    }
+  }
+}
+
+// Dividers
+hr {
+  border-color: var(--color-border) !important;
+}
+
+// Tooltips
+.tooltip {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+// Light theme overrides for components with hardcoded secondary colors
+[data-theme="light"] {
+  // CricketScoreCard secondary text
+  .cscard, .cscard-upcoming {
+    .upcoming-ename,
+    .upcoming-team-name,
+    .cscard-ename { color: #374151 !important; }
+
+    .upcoming-vs { color: #374151 !important; background: rgba(0,0,0,0.05) !important; }
+    .upcoming-date { color: #6b7280 !important; }
+
+    .upcoming-badge-row,
+    .cscard-header {
+      background: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .upcoming-team-abbr {
+      background: rgba(255,255,255,0.8) !important;
+      border-color: var(--color-border) !important;
+    }
+
+    // Score text — white in dark theme, dark in light theme
+    .cs-score strong { color: var(--color-text) !important; }
+    .pship-runs { color: var(--color-text) !important; }
+    .player-score { color: var(--color-text) !important; }
+    .cs-team-key { color: #374151 !important; }
+  }
+
+  // InPlay match cards
+  .match-card {
+    .team-name { color: var(--color-text) !important; }
+    .bookmaker-title { color: var(--color-text) !important; }
+    .league-name { color: var(--color-text) !important; }
+    .league-name-wrapper {
+      background: rgba(0, 0, 0, 0.06) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    }
+    .match-time { color: #1565c0 !important; text-shadow: none !important; }
+  }
+
+  // MyBets / CompletedBets tables
+  .my-bets-table,
+  .completed-bets-table {
+    background: var(--color-surface) !important;
+    th { background: var(--color-cardBg) !important; color: var(--color-text) !important; }
+    td { color: var(--color-text) !important; border-color: var(--color-border) !important; }
+    tr:hover td { background: var(--color-cardBg) !important; }
+  }
+}

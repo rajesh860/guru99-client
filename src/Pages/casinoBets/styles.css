@@ -1,0 +1,59 @@
+.casino-bets-wrapper {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+.casino-bets-wrapper .table-header {
+  background-color: #35344d;
+  color: white;
+  padding: 10px 20px;
+  color: #FFF;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+}
+.casino-bets-wrapper .table-container {
+  overflow-x: scroll;
+  width: 100%;
+}
+.casino-bets-wrapper .table-container .casino-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+.casino-bets-wrapper .table-container .casino-table th, .casino-bets-wrapper .table-container .casino-table td {
+  padding: 16px 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+.casino-bets-wrapper .table-container .casino-table th {
+  color: #333;
+  font-weight: 400;
+  font-size: 14px;
+}
+.casino-bets-wrapper .table-container .casino-table th:first-child {
+  border-right: 1px solid #e0e0e0;
+  position: sticky;
+  left: 0%;
+  background-color: white;
+}
+.casino-bets-wrapper .table-container .casino-table td {
+  color: #333;
+  font-size: 14px;
+  font-weight: 400;
+}
+.casino-bets-wrapper .table-container .casino-table td:first-child {
+  border-right: 1px solid #e0e0e0;
+  position: sticky;
+  left: 0%;
+  background-color: white;
+}
+.casino-bets-wrapper .table-container .casino-table .loss {
+  color: #ff007f;
+  font-weight: 600;
+}
+.casino-bets-wrapper .table-container .casino-table .profit {
+  color: #00b300;
+  font-weight: 600;
+}
+
+/*# sourceMappingURL=styles.css.map */

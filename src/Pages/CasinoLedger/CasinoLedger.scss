@@ -1,0 +1,166 @@
+.casino-ledger-page {
+  background: #1a2332;
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.casino-ledger-page__container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.casino-ledger-page__card {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.casino-ledger-page__title {
+  background: #2d3e50;
+  color: #fff;
+  text-align: center;
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 4px 4px 0 0;
+}
+
+// .casino-ledger-page__info {
+//   display: flex;
+//   gap: 30px;
+//       padding: 9px 7px;
+//   background: #253548;
+//   border-left: 1px solid #3a4a5a;
+//   border-right: 1px solid #3a4a5a;
+//   font-family: Verdana, Geneva, sans-serif;
+//   flex-wrap: wrap;
+
+//   span {
+//     color: #aaa;
+//     font-size: 12px;
+
+//     strong {
+//       color: #fff;
+//       margin-left: 5px;
+
+//       &.text-won {
+//         color: #4caf50;
+//       }
+
+//       &.text-lost {
+//         color: #f44336;
+//       }
+//     }
+//   }
+// }
+
+.casino-ledger-page__tableWrap {
+  width: 100%;
+  background: #2a3847;
+  border: 1px solid #3a4a5a;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+.casino-ledger-page__table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: Verdana, Geneva, sans-serif;
+
+  th {
+    background: #3a4a5a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 6px;
+    border: 1px solid #3a4a5a;
+    text-align: left;
+  }
+
+  td {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    padding: 8px 6px;
+    border: 1px solid #3a4a5a;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    background: #2a3847;
+
+    &:hover {
+      background: #303f50;
+    }
+  }
+}
+
+.casino-ledger-page__betType {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+
+  &.back {
+    background: rgba(114, 192, 245, 0.2);
+    color: #72c0f5;
+  }
+
+  &.lay {
+    background: rgba(250, 171, 184, 0.2);
+    color: #faabb8;
+  }
+}
+
+.casino-ledger-page__result {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+
+  &.won {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+  }
+
+  &.lost {
+    background: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+  }
+}
+
+.casino-ledger-page__pl--positive {
+  color: #4caf50;
+  font-weight: 700;
+}
+
+.casino-ledger-page__pl--negative {
+  color: #f44336;
+  font-weight: 700;
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .casino-ledger-page__info {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .casino-ledger-page__table {
+    font-size: 11px;
+
+    th,
+    td {
+      padding: 6px 4px;
+      font-size: 10px;
+    }
+  }
+}

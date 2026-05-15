@@ -1,0 +1,19 @@
+.menu_marqueee {
+  background: var(--color-sidebarBg);
+  li.active a {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 13px;
+    color: var(--color-text);
+    font-weight: 700;
+    padding: 8px 10px;
+    display: block;
+    background: var(--color-primary);
+  }
+}
+
+ol,
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

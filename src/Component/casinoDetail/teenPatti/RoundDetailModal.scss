@@ -1,0 +1,558 @@
+.round-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-out;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.round-detail-modal {
+  background: #1a1f2e;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-out;
+  padding: 15px;
+  position: relative;
+
+  @media (max-width: 768px) {
+    width: 95%;
+    max-width: 99%;
+    padding: 5px;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+
+    @media (max-width: 768px) {
+      font-size: 20px;
+    }
+  }
+
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 32px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    line-height: 1;
+    padding: 0;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+
+    &:hover {
+      color: #cccccc;
+    }
+  }
+}
+
+.round-id-section {
+  font-size: 14px;
+  color: #ffffff;
+  margin-bottom: 24px;
+  font-weight: 500;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+}
+
+.cards-section {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 24px;
+  justify-content: center;
+
+  @media (max-width: 768px) {
+    gap: 24px;
+    margin-bottom: 20px;
+  }
+
+  .player-cards {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .player-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      @media (max-width: 768px) {
+        margin-bottom: 12px;
+      }
+
+      .player-label {
+        font-size: 20px;
+        font-weight: 700;
+        color: #ffffff;
+
+        @media (max-width: 768px) {
+          font-size: 18px;
+        }
+      }
+
+      .trophy-icon {
+        font-size: 24px;
+
+        @media (max-width: 768px) {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .cards-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+
+      @media (max-width: 768px) {
+        gap: 8px;
+      }
+
+      .card-image {
+        height: 50px;
+        width: auto;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s ease;
+
+        @media (max-width: 768px) {
+          height: 35px;
+        }
+      }
+    }
+  }
+}
+
+.winner-banner {
+  text-align: center;
+  padding: 6px;
+  background: #252d42;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  width: 50%;
+  margin: auto;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 12px;
+    font-size: 16px;
+    width: 100%;
+  }
+}
+
+.description-section {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 8px;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+
+  .desc-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .desc-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px 14px;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #ffffff;
+      font-weight: 400;
+      line-height: 1.5;
+
+      @media (max-width: 768px) {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
+.my-bets-section {
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .bets-table {
+    overflow-x: auto;
+    margin-bottom: 16px;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        tr {
+          background: rgba(255, 255, 255, 0.05);
+
+          th {
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a0a8b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.02);
+          }
+
+          td {
+            padding: 12px 10px;
+            font-size: 13px;
+            color: #ffffff;
+
+            .bet-type {
+              padding: 4px 10px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 600;
+              text-transform: uppercase;
+
+              &.lagai {
+                background: rgba(114, 180, 255, 0.2);
+                color: #72b4ff;
+              }
+
+              &.khai {
+                background: rgba(255, 163, 216, 0.2);
+                color: #ffa3d8;
+              }
+            }
+
+            .status {
+              padding: 4px 10px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 600;
+              text-transform: uppercase;
+
+              &.won {
+                background: rgba(40, 199, 111, 0.2);
+                color: #28c76f;
+              }
+
+              &.lost {
+                background: rgba(234, 84, 85, 0.2);
+                color: #ea5455;
+              }
+
+              &.pending {
+                background: rgba(255, 159, 67, 0.2);
+                color: #ff9f43;
+              }
+            }
+
+            .profit {
+              color: #28c76f;
+              font-weight: 600;
+            }
+
+            .loss {
+              color: #ea5455;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .total-profit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .label {
+      font-size: 14px;
+      color: #a0a8b8;
+      font-weight: 600;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 700;
+
+      &.profit {
+        color: #28c76f;
+      }
+
+      &.loss {
+        color: #ea5455;
+      }
+    }
+  }
+}
+
+.no-bets {
+  padding: 40px 24px;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #a0a8b8;
+  }
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #a0a8b8;
+}
+
+.error-state {
+  color: #ea5455;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.my-bets-section {
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .bets-table {
+    overflow-x: auto;
+    margin-bottom: 16px;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        tr {
+          background: rgba(255, 255, 255, 0.05);
+
+          th {
+            padding: 12px 10px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a0a8b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.02);
+          }
+
+          td {
+            padding: 12px 10px;
+            font-size: 13px;
+            color: #ffffff;
+
+            .bet-type {
+              padding: 4px 10px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 600;
+              text-transform: uppercase;
+
+              &.lagai {
+                background: rgba(114, 180, 255, 0.2);
+                color: #72b4ff;
+              }
+
+              &.khai {
+                background: rgba(255, 163, 216, 0.2);
+                color: #ffa3d8;
+              }
+            }
+
+            .status {
+              padding: 4px 10px;
+              border-radius: 12px;
+              font-size: 11px;
+              font-weight: 600;
+              text-transform: uppercase;
+
+              &.won {
+                background: rgba(40, 199, 111, 0.2);
+                color: #28c76f;
+              }
+
+              &.lost {
+                background: rgba(234, 84, 85, 0.2);
+                color: #ea5455;
+              }
+
+              &.pending {
+                background: rgba(255, 159, 67, 0.2);
+                color: #ff9f43;
+              }
+            }
+
+            .profit {
+              color: #28c76f;
+              font-weight: 600;
+            }
+
+            .loss {
+              color: #ea5455;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .total-profit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .label {
+      font-size: 14px;
+      color: #a0a8b8;
+      font-weight: 600;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 700;
+
+      &.profit {
+        color: #28c76f;
+      }
+
+      &.loss {
+        color: #ea5455;
+      }
+    }
+  }
+}
+
+.no-bets {
+  padding: 40px 24px;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #a0a8b8;
+  }
+}
+
+.loading-state,
+.error-state {
+  padding: 60px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #a0a8b8;
+}
+
+.error-state {
+  color: #ea5455;
+}

@@ -1,0 +1,551 @@
+.teenpatti-container {
+  font-family: sans-serif;
+  background: #dddddd;
+  color: #000;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  .back {
+    background-color: #72c3f6;
+  }
+  @media screen and (max-width: 767px) {
+    flex-direction: column;
+  }
+  .left-col {
+    width: 100%;
+    @media screen and (max-width: 767px) {
+      width: 100%;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #4b5965;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 700;
+      min-height: 50px;
+      @media screen and (max-width: 767px) {
+        flex-direction: column;
+        //  font-size: 20px;
+      }
+      .left {
+        width: fit-content;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        span {
+          // color: #00b4ff;
+          margin-left: 3px;
+          display: flex;
+          align-items: center;
+        }
+      }
+
+      .center,
+      .right {
+        font-size: 13px;
+      }
+    }
+
+    .table-section {
+      width: 100%;
+
+      .table-row {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        margin: auto;
+        border-top: 1px solid #000;
+
+        &:first-child {
+          border-top: none;
+        }
+
+        &.ander {
+          background-color: #fda4af;
+          border-bottom: 1px solid #dee2e6;
+        }
+
+        &.baher {
+          background-color: #93c5fd;
+        }
+
+        .label {
+          width: 72px;
+          font-weight: bold;
+          text-align: center;
+        }
+
+        .cards {
+          // display: flex;
+          flex-wrap: nowrap;
+          gap: 0.5rem;
+          width: calc(100% - 72px);
+          overflow-x: auto;
+          justify-content: center;
+          border-left: 1px solid #dee2e6;
+          .slick-slider {
+            .slick-prev {
+              left: -5px;
+            }
+            .slick-next {
+              right: -5px;
+            }
+          }
+          .card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            &.slide-gap {
+              padding: 0 6px; // Left-right spacing between slides
+              box-sizing: border-box;
+              display: flex !important;
+            }
+            img {
+              width: 40px;
+              height: 60px;
+              border: 2px solid yellow;
+            }
+
+            .card-pnl {
+              font-size: 0.9rem;
+              text-align: center;
+              margin-top: 0.25rem;
+            }
+          }
+        }
+      }
+    }
+  }
+  .right-col {
+    width: 33.33333333%;
+    display: none;
+    @media screen and (max-width: 767px) {
+      width: 100%;
+    }
+    .my-bet {
+      background: #ddd;
+      padding-left: 20px;
+      height: 400px;
+      @media screen and (max-width: 767px) {
+        padding-left: 0%;
+      }
+      .title {
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 4px;
+        padding: 10px 16px;
+        align-items: center;
+        border: 0;
+        display: flex;
+        background: #2c3e50;
+        border-radius: 0;
+        color: white;
+      }
+
+      .sub-title {
+        font-size: 12px;
+        color: #444;
+        margin-bottom: 10px;
+      }
+
+      .bet-table {
+        width: 100%;
+        background: #fff;
+        border-collapse: collapse;
+        margin-bottom: 10px;
+
+        th {
+          text-align: left;
+          padding: 6px;
+          font-size: 14px;
+          background-color: #d7d7d7;
+        }
+      }
+      .see-btn {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        .see-all {
+          background: #0f0f0f;
+          color: #fff;
+          border: none;
+          padding: 8px 16px;
+          font-weight: bold;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+      }
+    }
+  }
+}
+
+.rate-table-container {
+  font-family: Arial, sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4px;
+
+  .rate-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #eaeaea;
+    border-bottom: 1px solid #fff;
+
+    &.rate-minmax {
+      font-size: 14px;
+      font-weight: 500;
+      span {
+        width: 60%;
+        min-width: 60%;
+        max-width: 60%;
+        padding-left: 5px;
+      }
+      .back-header {
+        background: #72bbef;
+        color: #000;
+        font-weight: bold;
+        padding: 5px 0;
+        text-align: center;
+        width: 40%;
+        min-width: 40%;
+        max-width: 40%;
+      }
+    }
+
+    .player-name {
+      font-size: 15px;
+      font-weight: 500;
+      width: 60%;
+      min-width: 60%;
+      max-width: 60%;
+      padding-left: 5px;
+    }
+
+    .rate-box {
+      background: #72c3f6;
+      padding: 5px 0;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      width: 40%;
+      min-width: 40%;
+      max-width: 40%;
+      position: relative;
+      .overlay {
+        position: absolute;
+        left: 0%;
+        top: 0%;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        svg {
+          color: white;
+        }
+      }
+      .rate {
+        font-size: 14px;
+        font-weight: bold;
+        color: #000;
+      }
+
+      .stake {
+        font-size: 11px;
+        color: #000;
+      }
+    }
+  }
+}
+
+// .card-wrapper {
+//   min-width: 50px;
+// }
+
+.andar_color {
+  background-color: lightsalmon;
+}
+.bahar_color {
+  background-color: lightgreen;
+}
+
+.andar_bahar {
+  img {
+    width: 35px;
+    margin: auto;
+    height: 50px;
+    @media screen and (max-width: "800px") {
+      width: 30px;
+      height: auto;
+    }
+  }
+}
+.andar_bahar_t2_card_container {
+  display: flex;
+  margin: auto;
+  gap: 1rem 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+/* .andar_bahar_row:first-child{
+} */
+.andar_bahar_label {
+  display: flex;
+  align-items: center;
+  width: 10%;
+  justify-content: center;
+  @media screen and (min-width: "800px") {
+    border-right: 1px solid;
+  }
+}
+.andar_bahar_row {
+  display: flex;
+  flex: 1;
+  border: 1px solid black;
+  border-top-width: 0px;
+}
+.andar_bahar_row > * {
+  padding: 1rem;
+  text-align: center;
+  @media screen and (min-width: "800px") {
+    padding: 2rem 1rem;
+  }
+}
+.mb-n1 {
+  margin-bottom: -1rem;
+}
+.d-sm-none {
+  display: none;
+  @media screen and (max-width: "800px") {
+    display: block;
+  }
+}
+@media (max-width: 800px) {
+  .andar_bahar_row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .andar_bahar_label {
+    width: 100%;
+    border-bottom: 1px solid #000;
+  }
+  .mb-n1 {
+    margin-bottom: 0rem;
+  }
+  .andar_bahar img {
+    width: 70%;
+  }
+  .andar_bahar_row .slick-prev:before,
+  .andar_bahar_row .slick-next:before {
+    color: #000;
+  }
+  .andar_bahar_row .slick-prev {
+    left: -8px;
+  }
+  .andar_bahar_row .slick-next {
+    right: -6px;
+  }
+  .andar_bahar_t2_card_container {
+    display: none;
+  }
+  .andar_bahar_row > * {
+    padding: 4px;
+    box-sizing: border-box;
+  }
+}
+.app_container {
+  box-sizing: border-box;
+}
+
+.mySwiper {
+  .swiper-button-next {
+    // height: 15px;
+    // width: 15px;
+    // background: #fff;
+    // border-radius: 50%;
+    // padding: 10px;
+    // color: #000;
+    // right: -2px;
+    // top: 30px;
+    display: none;
+    &::after {
+      font-size: 9px;
+      font-weight: 900;
+    }
+  }
+  .swiper-button-prev {
+    // height: 15px;
+    // width: 15px;
+    // background: #fff;
+    // border-radius: 50%;
+    // padding: 10px;
+    // color: #000;
+    // left: -2px;
+    // top: 30px;
+    display: none;
+    &::after {
+      font-size: 9px;
+      font-weight: 900;
+    }
+  }
+  .swiper-slide {
+    width: 42px !important;
+    &:first-child {
+      margin-left: 17px;
+    }
+    &:last-child {
+      margin-right: 17px !important;
+    }
+  }
+}
+
+.countdown_container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
+.card_shown_on_top {
+  position: absolute !important;
+  top: 50px;
+  left: 10px;
+}
+
+.winner_shown_on_top {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.cards_container {
+  display: flex;
+  gap: 5px;
+}
+.card_shown_on_top_andar_bahar {
+  width: 170px;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0 10px;
+  color: white;
+}
+.player_name {
+  margin: 0px 0px;
+  font-weight: 600;
+  color: #fff;
+  font-size: 15px;
+}
+
+@media screen and (max-width: 800px) {
+  // .player_name{
+  //     font-size: 10px;
+  //     margin: 0px;
+  // }
+  .card_shown_on_top_andar_bahar {
+    width: 140px;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0;
+  }
+  .video_iframe_container {
+    height: unset;
+  }
+  .video_block_container {
+    height: 100%;
+    min-height: 100%;
+  }
+  .cards_container {
+    gap: 0px;
+  }
+}
+
+.my-bet-table {
+  @media screen and (min-width: 800px) {
+    margin-top: 10px;
+    margin-right: 8px
+  }
+}
+
+.sell-all-res {
+  @media screen and (min-width: 800px) {
+    margin-top: 15px;
+  }
+}
+
+
+.change-password-table td {
+  border: none !important;
+}
+
+.input-style.change-password, .btn-style.change-password {
+  padding: 6px 10px !important;
+}
+
+.container-old {
+  display: flex
+;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+
+
+
+.casino-iframe-card-area{
+  position: absolute;
+  top: 2%;
+  left: 5%;
+  display: flex;
+  .left-col-1{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    img{
+      width: 25px;
+    }
+  }
+  .right-col-2{
+    height: auto;
+    width: 250px; // Fixed width to show exactly 6 cards (6 * 30px + 5 * 5px gap)
+    overflow: hidden;
+    position: relative;
+    background-color: white;
+    padding-left: 40px;
+    .cards-container {
+      display: flex;
+      gap: 5px;
+      width: max-content;
+      transition: transform 0.3s ease-in-out;
+      
+      .card-item {
+        flex-shrink: 0;
+        width: 30px; // Fixed width for consistent layout
+        height: auto;
+        animation: slideInFromTop 0.5s ease-out;
+        
+        img {
+          width: 100%;
+          height: auto;
+          border-radius: 3px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

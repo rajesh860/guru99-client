@@ -1,0 +1,21 @@
+.menu_marqueee {
+  background: #222222;
+}
+.menu_marqueee li.active a {
+  border: 1px solid #2f5c94;
+  font-family: Tahoma, Geneva, sans-serif;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 10px;
+  display: block;
+}
+
+ol,
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*# sourceMappingURL=menu.css.map */

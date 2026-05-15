@@ -1,0 +1,67 @@
+.casino-bets-wrapper {
+    // margin: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  
+    .table-header {
+      background-color: #35344d;
+      color: white;
+      padding: 10px 20px;
+      color: #FFF;
+      font-family: Verdana, Geneva, sans-serif;
+      font-size: 13px;
+      font-weight: bold;
+   text-align: center;
+    }
+  .table-container{
+    overflow-x: scroll;
+    width: 100%;
+
+    .casino-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+  
+      th, td {
+        padding: 16px 16px;
+        text-align: left;
+        border-bottom: 1px solid #e0e0e0;
+      }
+  
+      th {
+        // background-color: #f7f7f7;
+        color: #333;
+        font-weight: 400;
+        font-size: 14px;
+        &:first-child{
+            border-right: 1px solid #e0e0e0;
+            position: sticky;
+            left: 0%;
+            background-color: white;
+        }
+      }
+  
+      td {
+        color: #333;
+        font-size: 14px;
+        font-weight: 400;
+        &:first-child{
+            border-right: 1px solid #e0e0e0;
+            position: sticky;
+            left: 0%;
+            background-color: white;
+        }
+      }
+  
+      .loss {
+        color: #ff007f;
+        font-weight: 600;
+      }
+  
+      .profit {
+        color: #00b300;
+        font-weight: 600;
+      }
+    }
+  }
+  }
+  

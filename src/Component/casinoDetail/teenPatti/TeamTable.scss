@@ -1,0 +1,31 @@
+.table-wrapper {
+//   padding: 10px;
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 8px;
+background-color: transparent;
+button{
+  border: none;
+  outline: none;
+  padding-block:10px ;
+  border-radius: 5px;
+  background-color: #252a3d;
+  color: white;
+  &:nth-child(1) {
+   opacity: 0;
+  }
+  &:nth-child(2) {
+  background-color: #4083f8;
+  }
+}
+}
+
+/* Hide POSITION column on small screens */
+@media (max-width: 600px) {
+  .team-table {
+    th:nth-child(4),
+    td:nth-child(4) {
+      display: none;
+    }
+  }
+}

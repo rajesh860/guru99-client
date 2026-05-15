@@ -1,0 +1,110 @@
+.game-wrapper {
+  font-family: Arial, sans-serif;
+  .top-bar {
+    background: #525252;
+    color: #fff;
+    padding: 5px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+    font-weight: 600;
+    font-size: 10px;
+  }
+
+  .grid {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #d8dde3;
+    td {
+      border: 1px solid #d8dde3;
+    }
+  }
+
+  .grid tbody tr:nth-of-type(odd) {
+    background-color: #f2f2f2 !important;
+  }
+
+  .grid tbody tr:nth-of-type(odd) td {
+    background-color: #f2f2f2 !important;
+  }
+  .grid tbody tr:nth-of-type(even) td {
+    background-color: white !important;
+  }
+
+  .cell,
+  .center-cell {
+    padding: 14px;
+
+    .center-card {
+      width: 36px;
+      img {
+        width: 100%;
+      }
+    }
+  }
+  .center-cell {
+    vertical-align: middle;
+    text-align: center;
+    padding: 14px;
+  }
+
+  .center-card {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .value {
+    text-align: center;
+    color: red;
+    font-size: 16px;
+    margin-bottom: 3px;
+  }
+
+  .bet-btn {
+    width: 100%;
+    background: #090600;
+    color: #fff;
+    border: none;
+    font-size: 1rem;
+    font-weight: 300;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 36px;
+    border-radius: 0.25rem;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card {
+    width: 70px;
+    height: 90px;
+    border: 2px solid #ffd400;
+    border-radius: 6px;
+    background: #fff;
+    text-align: center;
+    padding-top: 6px;
+  }
+
+  .rank {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .suits {
+    font-size: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .spade {
+    color: #000;
+  }
+
+  .heart {
+    color: red;
+  }
+}

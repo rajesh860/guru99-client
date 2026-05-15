@@ -1,0 +1,181 @@
+.complete-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 10px;
+  min-height: 100vh;
+  background: var(--color-background);
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--color-textSecondary);
+  font-size: 16px;
+}
+
+.complete-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.complete-card {
+  background: var(--color-surface);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border);
+}
+
+.card-header {
+  background: var(--color-gradient);
+  color: white;
+  padding: 12px 15px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.card-body {
+  padding: 0;
+  background: var(--color-cardBg);
+  .card-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 15px;
+    gap: 15px;
+    flex-direction: row;
+  }
+}
+
+
+.team-logo {
+  width: 80px;
+  height: 80px;
+  background: var(--color-surface);
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
+
+.team-logo-left {
+  background: var(--color-surface);
+}
+
+.team-logo-right {
+  background: var(--color-surface);
+}
+
+.match-details {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.match-time {
+  font-size: 15px;
+  color: var(--color-text);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.bet-info {
+  font-size: 14px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.winner-text {
+  font-size: 14px;
+  color: var(--color-text);
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.coin-amount {
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 6px;
+  
+  &.won {
+    color: var(--color-success);
+  }
+  
+  &.lost {
+    color: var(--color-error);
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px;
+
+  .pagination-btn {
+    padding: 10px 20px;
+    background: var(--color-cardBg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: white;
+    }
+
+    &:disabled {
+      background: var(--color-surface);
+      color: var(--color-textSecondary);
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  .pagination-info {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--color-text);
+  }
+}
+
+@media (max-width: 768px) {
+  .complete-page {
+    padding: 15px 8px;
+  }
+  
+  .card-content {
+    padding: 7px 10px;
+    gap: 10px;
+  }
+  
+  .team-logo {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .match-time {
+    font-size: 13px;
+  }
+  
+  .bet-info,
+  .winner-text {
+    font-size: 12px;
+  }
+  
+  .coin-amount {
+    font-size: 14px;
+  }
+}

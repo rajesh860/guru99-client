@@ -1,0 +1,264 @@
+.login-wrapper {
+  flex-direction: row;
+  box-sizing: border-box;
+  display: flex;
+  place-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fff;
+}
+.login-wrapper #client-code {
+  padding: 0%;
+  margin: 16.5px 14px;
+}
+.login-wrapper .head_name {
+  font-size: 4.5rem;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  color: #e91e63;
+  line-height: 1.167;
+  font-weight: 700;
+  letter-spacing: -0.000162em;
+  text-align: center;
+  text-transform: capitalize;
+}
+@media screen and (max-width: 768px) {
+  .login-wrapper .head_name {
+    font-size: 5.2rem;
+  }
+}
+.login-wrapper .title_name {
+  margin-bottom: 25px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.334;
+  color: #3f51b5;
+  letter-spacing: 0;
+  text-align: center;
+}
+.login-wrapper .loginButton {
+  background-color: #e91e63;
+  color: #fff;
+  border: unset;
+}
+.login-wrapper .copyRight {
+  font-size: 0.875rem;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  color: rgba(0, 0, 0, 0.5411764706);
+  margin-top: 80px;
+  text-align: center;
+}
+
+.sub_c {
+  position: absolute;
+  left: 15px;
+  top: 16.6px;
+  font-size: 15px;
+}
+
+.login-page-section_ {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #2a2a72, #009ffd);
+  overflow: hidden;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ {
+    width: 100vw;
+    height: 100vh;
+  }
+}
+.login-page-section_ .login-page-container_ {
+  width: 100%;
+  height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.login-page-section_ .login-page-container_ .login-box_ {
+  width: 350px;
+  height: 500px;
+  background-image: url(/img/loginPageBanner.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ {
+    width: 96%;
+    margin: auto 7px auto auto;
+    height: 550px;
+  }
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ {
+  width: 230px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ .login-form_ {
+    width: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ .login-heading_ {
+  font-size: 24px;
+  text-transform: uppercase;
+  color: #000;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 15px;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ .login-form_ .login-heading_ {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ .login-input-group_ {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ .login-form_ .login-input-group_ {
+    width: 50%;
+    margin: auto auto 10px;
+    display: flex;
+    align-items: center;
+  }
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ .input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ .input-addon {
+  height: 40px;
+  padding: 0 15px;
+  background: linear-gradient(#2a2a72, #009ffd);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px 0 0 12px;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ .login-form_ .input-addon {
+    font-size: 14px;
+    padding: 0 12px;
+  }
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ .login-input-field_ {
+  width: 100%;
+  height: 40px;
+  border-radius: 0 12px 12px 0;
+  border: none;
+  outline: none;
+  padding: 0 15px;
+  text-align: left;
+  font-size: 16px;
+  background: linear-gradient(#bebc12, #c97e2b);
+  color: #000;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ .login-form_ .login-input-field_ {
+    height: 40px;
+  }
+}
+.login-page-section_ .login-page-container_ .login-box_ .login-form_ .password-input-field_ {
+  width: 100%;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  text-align: center;
+  font-size: 14px;
+  background: linear-gradient(#bebc12, #c97e2b);
+  color: #000;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-box_ .login-form_ .password-input-field_ {
+    height: 40px;
+  }
+}
+.login-page-section_ .login-page-container_ .login-action-btn_ {
+  width: 120px;
+  height: 40px;
+  border-radius: 12px;
+  margin: 5px auto auto;
+}
+@media screen and (min-width: 800px) {
+  .login-page-section_ .login-page-container_ .login-action-btn_ {
+    margin-bottom: 8px;
+  }
+}
+.login-page-section_ .login-page-container_ .login-action-btn_ .sign-me-btn_ {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(#bebc12, #c97e2b);
+  color: #000;
+  font-weight: 700;
+  border: none;
+  font-size: 14px;
+  text-transform: uppercase;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .login-page-container_ .login-action-btn_ .sign-me-btn_ {
+    width: 100%;
+    height: 100%;
+    font-size: 14px;
+  }
+}
+.login-page-section_ .copyRight {
+  text-align: center;
+  font-size: 13px;
+  margin-top: 10px;
+  color: #fff;
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+}
+@media screen and (max-width: 768px) {
+  .login-page-section_ .copyRight {
+    font-size: 12px;
+    position: relative;
+    bottom: auto;
+    margin-top: 20px;
+  }
+}
+
+.loader_login {
+  width: 15px;
+  height: 15px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/*# sourceMappingURL=login.css.map */

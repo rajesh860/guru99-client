@@ -1,0 +1,118 @@
+.profile_main * {
+  line-height: normal;
+}
+
+.profile-page {
+  background: #e9e9e9;
+  padding: 10px 0 0;
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 0 0px 14px;
+}
+
+.profile_main {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #dcdcdc;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
+}
+
+.profile-section-title {
+  background: #cfe3a3;
+}
+
+.profile-section-title p {
+  color: #000 !important;
+}
+
+.profile_main table {
+  width: 100%;
+}
+
+.profile_main td {
+  font-family: Verdana, Geneva, sans-serif;
+  border: 1px solid #e3e3e3;
+  padding: 7px 8px;
+}
+
+.profile_main > tbody > tr {
+  display: block;
+  margin: 10px 0;
+}
+
+.profile_main > tbody > tr > td {
+  display: block;
+  border: 0;
+  padding: 0;
+}
+
+.profile_main table {
+  background: #fff;
+}
+
+.profile_main table {
+  border-collapse: collapse;
+}
+
+.profile_main .FontTextBlue {
+  color: #000;
+}
+
+.profile_main select {
+  width: 42px;
+  height: 18px;
+  border: 1px solid #777;
+  background: #fff;
+}
+
+.profile-section-title {
+  height: 28px;
+}
+
+.profile-section-title p {
+  font-size: 12px !important;
+  letter-spacing: 0.2px;
+}
+
+.profile_main #menu {
+  width: 100%;
+}
+
+.profile_main .navMain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.profile_main .activeRate {
+  background: #0b6a7a;
+  border: 1px solid #07525e;
+  padding: 0;
+  width: 100%;
+  cursor: pointer;
+}
+
+.profile_main .activeRate a {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  display: block;
+  padding: 6px 0;
+  text-align: center;
+}
+
+@media screen and (max-width: 520px) {
+  .profile-container {
+    padding: 0 0px;
+  }
+
+  .profile_main td {
+    font-size: 12px;
+  }
+}
+
+/*# sourceMappingURL=Profile.css.map */
