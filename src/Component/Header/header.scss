@@ -43,9 +43,40 @@
 .main-header {
   background: var(--color-headerBg) !important;
   transition: background 0.3s ease;
+
+  tbody tr,
+  thead tr,
+  tr,
+  td {
+    background: transparent !important;
+  }
 }
 
 .hedaer_main {
-  background: var(--color-headerBg);
+  background: var(--color-headerBg) !important;
   transition: background 0.3s ease;
+}
+
+[data-theme="light"] {
+  .main-header {
+    background: #000000 !important;
+
+    tbody tr,
+    thead tr,
+    tr,
+    td {
+      background: #000000 !important;
+    }
+  }
+
+  .hedaer_main {
+    background: #000000 !important;
+  }
+}
+
+.hedaer_main .main-header {
+  h1, h2, h3, h4, h5, h6,
+  p, span, label, td {
+    color: #ffffff !important;
+  }
 }

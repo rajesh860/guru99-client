@@ -96,7 +96,8 @@ const TeenPattiGame = () => {
   useEffect(() => {
     console.log("🚀 Connecting to WebSocket...");
     
-    // const ws = new WebSocket("ws://13.204.103.2:3001/ws/casino");
+    // const ws = new WebSocket("ws://13.235.184.38:3001/ws/casino");
+    // const ws = new WebSocket("ws://192.168.31.235:3001/ws/casino");
     const ws = new WebSocket("wss://guru99.co/ws/casino");
     
     ws.onopen = () => {

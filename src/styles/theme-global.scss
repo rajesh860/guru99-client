@@ -381,30 +381,9 @@ hr {
 
 // Light theme overrides for components with hardcoded secondary colors
 [data-theme="light"] {
-  // CricketScoreCard secondary text
+  // CricketScoreCard — always dark, block global text color from bleeding in
   .cscard, .cscard-upcoming {
-    .upcoming-ename,
-    .upcoming-team-name,
-    .cscard-ename { color: #374151 !important; }
-
-    .upcoming-vs { color: #374151 !important; background: rgba(0,0,0,0.05) !important; }
-    .upcoming-date { color: #6b7280 !important; }
-
-    .upcoming-badge-row,
-    .cscard-header {
-      background: rgba(0, 0, 0, 0.05) !important;
-    }
-
-    .upcoming-team-abbr {
-      background: rgba(255,255,255,0.8) !important;
-      border-color: var(--color-border) !important;
-    }
-
-    // Score text — white in dark theme, dark in light theme
-    .cs-score strong { color: var(--color-text) !important; }
-    .pship-runs { color: var(--color-text) !important; }
-    .player-score { color: var(--color-text) !important; }
-    .cs-team-key { color: #374151 !important; }
+    p, span, label { color: inherit; }
   }
 
   // InPlay match cards

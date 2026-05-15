@@ -1,6 +1,6 @@
 // ── Upcoming Match Card ──────────────────────────────────────────────
 .cscard-upcoming {
-  background: var(--color-cardBg);
+  background: #000000;
   border-left: 3px solid #f6ad55;
   font-family: 'Segoe UI', sans-serif;
   overflow: hidden;
@@ -123,9 +123,9 @@ margin-bottom: 5px;
 
 // ── Live Match Card ──────────────────────────────────────────────────
 .cscard {
-  background: var(--color-cardBg);
+  background: #000000;
   border-left: 3px solid #4facfe;
-  color: var(--color-text);
+  color: #e2e8f0;
   font-family: 'Segoe UI', sans-serif;
   overflow: hidden;
   margin-bottom: 5px;

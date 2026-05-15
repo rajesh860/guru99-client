@@ -269,14 +269,35 @@
 }
 
 [data-theme="light"] {
+  .match-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f0f6ff 100%);
+    border: 1.5px solid #c8ddf8;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1), 0 1px 4px rgba(0,0,0,0.06);
+
+    &::before {
+      background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+      opacity: 0.04;
+    }
+
+    &:hover {
+      border-color: #1976d2;
+      box-shadow: 0 8px 28px rgba(25, 118, 210, 0.2), 0 2px 8px rgba(0,0,0,0.08);
+    }
+  }
+
   .league-name-wrapper {
-    background: rgba(0, 0, 0, 0.06);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: rgba(25, 118, 210, 0.07);
+    box-shadow: none;
+    border: 1px solid rgba(25, 118, 210, 0.12);
   }
 
   .match-time {
     color: #1565c0;
     text-shadow: none;
+  }
+
+  .league-name {
+    color: #374151;
   }
 
   .no-matches {

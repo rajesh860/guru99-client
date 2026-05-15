@@ -86,16 +86,19 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
           gridTemplateColumns: "2fr 1fr",
           marginBottom: "4px",
           gap: "6px",
+          background: "var(--color-primary)",
+          borderRadius: "6px 6px 0 0",
+          padding: "6px 8px",
         }}
       >
         <div
           style={{
-            background: "var(--bg-panel)",
-            color: "var(--color-text)",
-            padding: "10px",
+            color: "#fff",
+            padding: "4px 2px",
             fontSize: "16px",
             fontWeight: "bold",
-            borderRadius: "4px",
+            display: "flex",
+            alignItems: "center",
           }}
         >
           Session
@@ -111,7 +114,7 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
            
           <div
             style={{
-              background: "rgb(251 153 171)",
+              background: "rgb(240 121 143)",
               color: "white",
               padding: "10px",
               fontSize: "14px",
@@ -125,7 +128,7 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
           </div>
           <div
             style={{
-              background: "rgb(77 136 232)",
+              background: "rgb(64 135 251)",
               color: "white",
               padding: "10px",
               fontSize: "14px",

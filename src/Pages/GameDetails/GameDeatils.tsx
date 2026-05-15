@@ -17,7 +17,6 @@ import { useEffect, useRef, useState } from "react"
 import moment from "moment"
 import snackbarUtil from "../../utils/Snackbar"
 import { MdTv } from "react-icons/md"
-import ScoreCard from "./ScoreCard/ScoreCard"
 // Removed useGetUserCoinMutation import
 import BackBtn from "../../Component/BackBtn/BackBtn"
 import CommonLodding from "../../Component/CommonLodding"
@@ -60,7 +59,7 @@ const GameDeatils = () => {
     pollingInterval: 2000,
   })
 
-  const amountInputRef = useRef<HTMLInputElement>(null)
+const amountInputRef = useRef<HTMLInputElement>(null)
 
   const focusAmountInput = () => {
     if (amountInputRef.current) {
@@ -110,7 +109,10 @@ const GameDeatils = () => {
         marketId: Number(marketId),
         sid: Number(selectionId),
         selection: name,
-        stake: 0, // Will be set in betslip
+        team: name,
+        backOrLay: isBack ? "back" : "lay",
+        odds: odds,
+        stake: 0,
         matchName: oddsData?.ename || "",
       }
     } else if (isFancy) {
@@ -177,7 +179,7 @@ const GameDeatils = () => {
       // WebSocket URL
       const wsUrl = 'wss://guru99.co/ws/odds'
       // const wsUrl = 'ws://13.235.184.38:3001/ws/odds'
-      // const wsUrl = 'ws://192.168.31.201:3001/ws/odds'
+      // const wsUrl = 'ws://192.168.31.235:3001/ws/odds'
       
       const ws = new WebSocket(wsUrl)
       
@@ -345,6 +347,13 @@ const GameDeatils = () => {
       (team: any) => team?.sid === sid.toString()
     ) || null
   }
+
+  // Get P/L for toss runners by sid
+  const getTossPL = (sid: number) => {
+    const runners = teamPLData?.data?.toss?.runners
+    if (!runners) return null
+    return runners.find((r: any) => r.sid === sid) || null
+  }
   
   // Map to old structure for compatibility
   const team1 = team1Section ? {
@@ -448,9 +457,9 @@ const GameDeatils = () => {
       
       {/* Match Header */}
       <div style={{
-        background: "var(--color-cardBg)",
+        background: "rgb(37, 37, 37)",
         padding: "8px",
-        color: "var(--color-text)",
+        color: "#ffffff",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center"
@@ -462,9 +471,9 @@ const GameDeatils = () => {
           <button
             onClick={() => setShowTV(!showTV)}
             style={{
-              background: showTV ? "var(--color-border)" : "transparent",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
+              background: showTV ? "rgba(255,255,255,0.2)" : "transparent",
+              border: "1px solid rgba(255,255,255,0.4)",
+              color: "#ffffff",
               padding: "4px 8px",
               borderRadius: "4px",
               cursor: "pointer",
@@ -478,9 +487,9 @@ const GameDeatils = () => {
               setScorecardState(scorecardState === 'hidden' ? 'compact' : 'hidden')
             }}
             style={{
-              background: scorecardState !== 'hidden' ? "var(--color-border)" : "transparent",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
+              background: scorecardState !== 'hidden' ? "rgba(255,255,255,0.2)" : "transparent",
+              border: "1px solid rgba(255,255,255,0.4)",
+              color: "#ffffff",
               padding: "4px 8px",
               borderRadius: "4px",
               cursor: "pointer",
@@ -536,14 +545,9 @@ const GameDeatils = () => {
       )} */}
 
       {/* Scorecard */}
-     {scorecardState !== 'hidden' && id && (
-      <CricketScoreCard scoreData={liveScoreResponse} />
-        // <ScoreCard 
-        //   eventId={id} 
-        //   expanded={scorecardState === 'expanded'} 
-        //   // onToggle={() => setScorecardState(scorecardState === 'expanded' ? 'compact' : 'expanded')}
-        // />
-      )} 
+      {scorecardState !== 'hidden' && id && (
+        <CricketScoreCard scoreData={liveScoreResponse?.data ?? liveScoreResponse} />
+      )}
 
      
 
@@ -560,15 +564,18 @@ const GameDeatils = () => {
             display: "grid",
             gridTemplateColumns: "2fr 1fr",
             marginBottom: "4px",
-            gap: "8px"
+            gap: "8px",
+            background: "var(--color-primary)",
+            borderRadius: "6px 6px 0 0",
+            padding: "6px 8px"
           }}>
             <div style={{
               display: "flex",
               alignItems: "center",
               gap: "8px"
             }}>
-              <span style={{ color: "var(--color-text)", fontSize: "16px", fontWeight: "bold",paddingLeft:"10px" }}>Bookmaker</span>
-              <span style={{ color: "var(--color-textSecondary)", fontSize: "14px" }}>Min: 100 Max: {maxBet}</span>
+              <span style={{ color: "#fff", fontSize: "16px", fontWeight: "bold" }}>Bookmaker</span>
+              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>Min: 100 Max: {maxBet}</span>
             </div>
             <div style={{
               display: "grid",
@@ -876,14 +883,22 @@ const GameDeatils = () => {
         {oddsData?.toss?.runners?.length > 0 && (
           <div style={{ background: "var(--color-cardBg)", borderRadius: "8px", padding: "2px", marginBottom: "12px" }}>
             {/* Header */}
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", marginBottom: "4px", gap: "8px" }}>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr",
+              marginBottom: "4px",
+              gap: "6px",
+              background: "var(--color-primary)",
+              borderRadius: "6px 6px 0 0",
+              padding: "6px 8px",
+            }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: "var(--color-text)", fontSize: "16px", fontWeight: "bold", paddingLeft: "10px" }}>Toss</span>
+                <span style={{ color: "#fff", fontSize: "16px", fontWeight: "bold" }}>Toss</span>
                 {(() => {
                   const minVal = oddsData.toss.runners[0]?.min || 0
                   const maxVal = oddsData.toss.runners[0]?.max || 0
                   return (minVal > 0 || maxVal > 0) ? (
-                    <span style={{ color: "var(--color-textSecondary)", fontSize: "14px" }}>Min: {minVal} Max: {maxVal}</span>
+                    <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>Min: {minVal} Max: {maxVal}</span>
                   ) : null
                 })()}
               </div>
@@ -891,7 +906,7 @@ const GameDeatils = () => {
                 <div style={{ background: "rgb(64 135 251)", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
                   BACK
                 </div>
-                <div style={{ background: "rgb(251 153 171)", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
+                <div style={{ background: "rgb(240 121 143)", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
                   LAY
                 </div>
               </div>
@@ -905,10 +920,17 @@ const GameDeatils = () => {
               const fancyId = `${oddsData.toss.marketId}_${runner.sid}`
               const isSuspended = runner.gstatus === "SUSPENDED" || b1 === 0 || oddsData.toss.status !== "OPEN" || oddsData.toss.betLock
 
+              const tossPL = getTossPL(sid)
+
               return (
                 <div key={fancyId} style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "6px", marginBottom: "4px" }}>
-                  <div style={{ background: "var(--bg-panel)", color: "var(--color-text)", padding: "8px 12px", borderRadius: "4px", display: "flex", alignItems: "center" }}>
+                  <div style={{ background: "var(--bg-panel)", color: "var(--color-text)", padding: "8px 12px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <span style={{ fontWeight: "bold", fontSize: "13px" }}>{name}</span>
+                    {tossPL && (
+                      <span style={{ fontSize: "12px", fontWeight: "bold", color: tossPL.pl >= 0 ? "#4CAF50" : "#f44336" }}>
+                        {tossPL.display}
+                      </span>
+                    )}
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", position: "relative" }}>
                     {isSuspended && (

@@ -9,10 +9,8 @@ import {
 } from "../../../store/service/userServices/userServices"
 import snackbarUtil from "../../utils/Snackbar"
 import { useSelector } from "react-redux"
-import { useTheme } from "../../context/ThemeContext"
 
 const Header = () => {
-  const { themeName } = useTheme()
   const [showExposureModal, setShowExposureModal] = useState(false)
   const [showSidebar, setShowSidebar] = useState(false)
   const [logOut, { data }] = useLogOutMutation()
@@ -47,7 +45,7 @@ const Header = () => {
           <tr>
             <td width={90} >
               <Link to="/main">
-                <img src={themeName === "light" ? "/logo/login6.png" : "/logo/login.png"} alt="" className="profile_img" />
+                <img src="/logo/login.png" alt="" className="profile_img" />
               </Link>
             </td>
             {/**/}
@@ -383,24 +381,36 @@ const Header = () => {
                 <span style={{ fontSize: "16px", fontWeight: "500" }}>In Play</span>
               </Link>
 
-              <Link 
-                to="/satta-matka" 
-                onClick={() => setShowSidebar(false)}
+              <div
+                onClick={() => snackbarUtil.info("Coming Soon!")}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   padding: "15px 20px",
                   color: "var(--color-text)",
-                  textDecoration: "none",
                   borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
+                  transition: "background 0.2s",
+                  position: "relative",
+                  cursor: "pointer"
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
                 onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
               >
                 <img src="/img/matka.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
                 <span style={{ fontSize: "16px", fontWeight: "500" }}>Matka</span>
-              </Link>
+                <span style={{
+                  marginLeft: "auto",
+                  background: "linear-gradient(135deg, #ff6b6b, #ee5a24)",
+                  color: "white",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  padding: "3px 8px",
+                  borderRadius: "20px",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  boxShadow: "0 2px 8px rgba(238,90,36,0.5)"
+                }}>Coming Soon</span>
+              </div>
 
               <Link 
                 to="/statement" 

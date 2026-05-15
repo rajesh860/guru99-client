@@ -471,9 +471,6 @@ const CricketScoreCard = ({ scoreData }: Props) => {
     else bat2LiveStats = sLive
   }
 
-  const partnershipRuns = bat1LiveStats.runs + bat2LiveStats.runs
-  const bat1Pct = partnershipRuns > 0 ? Math.round((bat1LiveStats.runs / partnershipRuns) * 100) : 50
-  const showPartnership = !!(batsman1?.name && batsman2?.name && partnershipRuns > 0)
 
   const breakStatus = !lastBall ? (status?.trim() || breakLabel || null) : (breakLabel || null)
 
@@ -681,24 +678,6 @@ const CricketScoreCard = ({ scoreData }: Props) => {
             </div>
           )} */}
 
-          {/* Partnership */}
-          {showPartnership && (
-            <div className="cscard-partnership">
-              <div className="pship-title">Partnership</div>
-              <div className="pship-runs">{partnershipRuns} runs</div>
-              <div className="pship-bar-wrap">
-                <span className="pship-bat-name pship-bat-left">{batsman1?.name?.split(' ').pop()}</span>
-                <div className="pship-bar">
-                  <div className="pship-bar-fill" style={{ width: `${bat1Pct}%` }} />
-                </div>
-                <span className="pship-bat-name pship-bat-right">{batsman2?.name?.split(' ').pop()}</span>
-              </div>
-              <div className="pship-scores">
-                <span className="pship-score-left">{bat1LiveStats.runs}</span>
-                <span className="pship-score-right">{bat2LiveStats.runs}</span>
-              </div>
-            </div>
-          )}
         </>
       )}
 

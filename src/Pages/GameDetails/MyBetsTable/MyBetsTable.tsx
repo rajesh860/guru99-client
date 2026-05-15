@@ -72,8 +72,8 @@ const MyBetsTable = ({ beventId }: Props) => {
                       {modeText}
                     </span>
                   </td>
-                  <td>{bet.run || bet.score || "-"}</td>
-                  <td className="odds-cell">{bet.odds || bet.rate || "-"}</td>
+                  <td>{bet.runs ?? bet.run ?? bet.score ?? "-"}</td>
+                  <td className="odds-cell">{bet.size ?? bet.odds ?? bet.rate ?? "-"}</td>
                   <td className="stake-cell">{bet.stake || bet.amount || 0}</td>
                   <td className="status-cell">
                     <span className="status-badge open">Open</span>
