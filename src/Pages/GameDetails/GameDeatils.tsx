@@ -176,10 +176,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     const connectWebSocket = () => {
       if (!isComponentMounted.current || !id) return
       
-      // WebSocket URL
-      const wsUrl = 'wss://guru99.co/ws/odds'
-      // const wsUrl = 'ws://13.235.184.38:3001/ws/odds'
-      // const wsUrl = 'ws://192.168.31.235:3001/ws/odds'
+      const wsUrl = `${import.meta.env.VITE_WS_BASE_URL}/ws/odds`
       
       const ws = new WebSocket(wsUrl)
       
@@ -341,11 +338,17 @@ const amountInputRef = useRef<HTMLInputElement>(null)
   const drawSection = bookmakerSections[2] || null
   
   // Get P/L for teams based on sid matching
-  const getTeamPL = (sid: number) => {
-    if (!teamPLData?.data?.bookmaker) return null
-    return (Object.values(teamPLData.data.bookmaker) as any[]).find(
-      (team: any) => team?.sid === sid.toString()
-    ) || null
+  const getTeamPL = (sid: number, name?: string) => {
+    const teams: any[] = teamPLData?.data?.bookmaker?.teams || []
+    if (!teams.length) return null
+    if (sid) {
+      const bySid = teams.find((t: any) => t?.sid && t.sid === sid.toString())
+      if (bySid) return bySid
+    }
+    if (name) {
+      return teams.find((t: any) => t?.name?.toLowerCase() === name.toLowerCase()) || null
+    }
+    return null
   }
 
   // Get P/L for toss runners by sid
@@ -367,7 +370,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     l1: team1Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.odds || 0,
     ls1: team1Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.size || 0,
     rem: team1Section.rem || "",
-    pl: getTeamPL(team1Section.sid),
+    pl: getTeamPL(team1Section.sid, team1Section.nat),
   } : null
   
   const team2 = team2Section ? {
@@ -381,7 +384,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     l1: team2Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.odds || 0,
     ls1: team2Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.size || 0,
     rem: team2Section.rem || "",
-    pl: getTeamPL(team2Section.sid),
+    pl: getTeamPL(team2Section.sid, team2Section.nat),
   } : null
   
   const draw = drawSection ? {
@@ -395,7 +398,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     l1: drawSection.odds?.find((o: any) => o.otype === "lay" && o.oname === "lay1")?.odds || 0,
     ls1: drawSection.odds?.find((o: any) => o.otype === "lay" && o.oname === "lay1")?.size || 0,
     rem: drawSection.rem || "",
-    pl: getTeamPL(drawSection.sid),
+    pl: getTeamPL(drawSection.sid, drawSection.nat),
   } : null
 
   const maxBet = mainBookmaker?.maxBet || mainBookmaker?.max || 100000
@@ -565,7 +568,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
             gridTemplateColumns: "2fr 1fr",
             marginBottom: "4px",
             gap: "8px",
-            background: "var(--color-primary)",
+            background: "#2c3548",
             borderRadius: "6px 6px 0 0",
             padding: "6px 8px"
           }}>
@@ -888,7 +891,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
               gridTemplateColumns: "2fr 1fr",
               marginBottom: "4px",
               gap: "6px",
-              background: "var(--color-primary)",
+              background: "#2c3548",
               borderRadius: "6px 6px 0 0",
               padding: "6px 8px",
             }}>

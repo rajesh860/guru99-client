@@ -50,7 +50,7 @@ interface ScoreData {
     innings3?: Innings | null
     innings4?: Innings | null
     startTime?: number
-    raw?: { j?: string }
+    raw?: { j?: string; ac?: string; a?: string }
   }
   innings?: {
     innings1?: InningsInfo | null
@@ -87,6 +87,7 @@ function fmtTime(epoch: number): string {
   if (!epoch) return ''
   return new Date(epoch).toLocaleTimeString('en-IN', {
     hour: '2-digit', minute: '2-digit', hour12: true,
+    timeZone: 'Asia/Kolkata',
   })
 }
 
@@ -94,6 +95,7 @@ function fmtDate(epoch: number): string {
   if (!epoch) return ''
   return new Date(epoch).toLocaleDateString('en-IN', {
     weekday: 'short', day: 'numeric', month: 'short',
+    timeZone: 'Asia/Kolkata',
   })
 }
 
@@ -352,6 +354,11 @@ const CricketScoreCard = ({ scoreData }: Props) => {
 
   // Upcoming match view
   if (!innings1 && !innings2) {
+    const extraCondition = raw.ac ? String(raw.ac).replace(/[()]/g, '').trim() : ''
+    const matchStatus = status && status.toLowerCase() !== 'scheduled'
+      ? (extraCondition ? `${status} • ${extraCondition}` : status)
+      : null
+
     return (
       <div className="cscard-upcoming">
         <div className="upcoming-badge-row">
@@ -377,6 +384,12 @@ const CricketScoreCard = ({ scoreData }: Props) => {
             <div className="upcoming-team-name">{team2Name}</div>
           </div>
         </div>
+        {matchStatus && (
+          <div className="upcoming-status">
+            <span className="upcoming-status-dot" />
+            {matchStatus}
+          </div>
+        )}
       </div>
     )
   }

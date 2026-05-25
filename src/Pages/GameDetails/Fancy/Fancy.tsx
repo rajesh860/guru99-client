@@ -86,7 +86,7 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
           gridTemplateColumns: "2fr 1fr",
           marginBottom: "4px",
           gap: "6px",
-          background: "var(--color-primary)",
+          background: "#2c3548",
           borderRadius: "6px 6px 0 0",
           padding: "6px 8px",
         }}
@@ -146,8 +146,11 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
       {[...(fancyData || [])]
         .filter((fancy) => {
           const name = getFancyValue(fancy, "name")
-          // Block items ending with a trailing number (with or without dot)
-          if (/\s+\d+\.?$/.test(name?.trim() || '')) return false
+          // Block items ending with a trailing number, but allow those ending with 2
+          if (/\s+\d+\.?$/.test(name?.trim() || '')) {
+            const match = name?.trim().match(/\s+(\d+)\.?$/)
+            if (match && Number(match[1]) !== 2) return false
+          }
           
           // Block items like "Only 16-17 over run DC" (any number-number pattern)
           if (/Only\s+\d+-\d+\s+over\s+run/i.test(name)) return false
@@ -202,17 +205,24 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
               
                 </div>
                 {(() => {
-                  const fancyArray = Array.isArray(teamPLData?.data?.fancy) ? teamPLData.data.fancy : []
+                  const rawFancy = teamPLData?.data?.fancy
+                  const fancyArray: any[] = Array.isArray(rawFancy)
+                    ? rawFancy
+                    : rawFancy && typeof rawFancy === "object"
+                    ? [rawFancy]
+                    : []
                   const matchingFancy = fancyArray.find((f: any) => f.fancyId === mid)
-                  return matchingFancy ? (
-                    <span style={{ 
-                      fontSize: "12px", 
+                  if (!matchingFancy) return null
+                  const val = matchingFancy.worstCase
+                  return (
+                    <span style={{
+                      fontSize: "12px",
                       fontWeight: "600",
-                      color: matchingFancy.worstCase >= 0 ? "#4CAF50" : "#f44336"
+                      color: val >= 0 ? "#4CAF50" : "#f44336"
                     }}>
-                      {matchingFancy.worstCase >= 0 ? '+' : ''}{matchingFancy.worstCase?.toFixed(2)}
+                      {val >= 0 ? '+' : ''}{val?.toFixed(2)}
                     </span>
-                  ) : null
+                  )
                 })()}
                     {/* Leaderboard Icon */}
                   <button

@@ -95,6 +95,7 @@ textarea {
   background: var(--color-surface) !important;
   color: var(--color-text) !important;
   border-color: var(--color-border) !important;
+  font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
   
   &:focus {
     border-color: var(--color-primary) !important;
@@ -388,12 +389,15 @@ hr {
 
   // InPlay match cards
   .match-card {
-    .team-name { color: var(--color-text) !important; }
-    .bookmaker-title { color: var(--color-text) !important; }
-    .league-name { color: var(--color-text) !important; }
+    background: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.25), 0 1px 4px rgba(25, 118, 210, 0.15) !important;
+    .team-name { color: #1a1a2e !important; }
+    .bookmaker-title { color: #1a1a2e !important; }
+    .league-name { color: #546e7a !important; }
     .league-name-wrapper {
-      background: rgba(0, 0, 0, 0.06) !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+      background: #f0f4f8 !important;
+      box-shadow: none !important;
     }
     .match-time { color: #1565c0 !important; text-shadow: none !important; }
   }

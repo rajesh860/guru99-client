@@ -168,7 +168,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [themeName, setThemeName] = useState<string>(() => {
-    return localStorage.getItem('app-theme') || 'light'
+    return localStorage.getItem('app-theme') || 'dark'
   })
 
   const currentTheme = themes[themeName] || themes.dark

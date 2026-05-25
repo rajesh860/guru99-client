@@ -119,6 +119,30 @@ margin-bottom: 5px;
       }
     }
   }
+
+  .upcoming-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 5px 10px;
+    background: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffc107;
+    letter-spacing: 0.3px;
+
+    .upcoming-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ffc107;
+      flex-shrink: 0;
+      animation: livePulse 1.6s ease-in-out infinite;
+    }
+  }
 }
 
 // ── Live Match Card ──────────────────────────────────────────────────

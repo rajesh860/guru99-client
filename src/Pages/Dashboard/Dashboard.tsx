@@ -167,7 +167,7 @@ const Dashboard = () => {
       {/* Dashboard Grid */}
       <div className="dashboard-grid-modern">
         {dashboardItems.map((item, index) => (
-          item.comingSoon ? (
+          (item as any).comingSoon ? (
             <button
               key={index}
               onClick={handleComingSoon}

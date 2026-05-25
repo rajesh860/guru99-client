@@ -32,7 +32,6 @@
   color: var(--color-text);
   overflow: hidden;
 
-  /* staggered slide-up entrance */
   animation: cardSlideUp 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -172,7 +171,6 @@
   font-weight: 600;
   color: var(--color-text);
   text-align: center;
-  // margin-bottom: 15px;
   line-height: 1.4;
 }
 
@@ -268,36 +266,90 @@
   display: inline-block;
 }
 
+/* ── Light theme ── */
 [data-theme="light"] {
+  .inplay-page { background: #f0f4f8; }
+
   .match-card {
-    background: linear-gradient(145deg, #ffffff 0%, #f0f6ff 100%);
-    border: 1.5px solid #c8ddf8;
-    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.1), 0 1px 4px rgba(0,0,0,0.06);
+    background: #ffffff;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.25), 0 1px 4px rgba(25, 118, 210, 0.15);
+    padding-top: 44px;
+    overflow: hidden;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #1976d2, #42a5f5);
+      z-index: 2;
+    }
 
     &::before {
-      background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-      opacity: 0.04;
+      display: none;
     }
 
     &:hover {
-      border-color: #1976d2;
-      box-shadow: 0 8px 28px rgba(25, 118, 210, 0.2), 0 2px 8px rgba(0,0,0,0.08);
+      box-shadow: 0 10px 32px rgba(25, 118, 210, 0.4), 0 4px 10px rgba(25, 118, 210, 0.2);
+      transform: translateY(-4px) scale(1.01);
     }
   }
 
-  .league-name-wrapper {
-    background: rgba(25, 118, 210, 0.07);
-    box-shadow: none;
-    border: 1px solid rgba(25, 118, 210, 0.12);
+  .team-name {
+    color: #1a1a2e;
+    font-size: 17px;
+    font-weight: 700;
+
+    .match-card:hover & { text-shadow: none; }
   }
+
+  .bookmaker-title {
+    color: #1a1a2e;
+  }
+
+  .vs-inner {
+    font-size: 22px;
+    color: #1976d2;
+    text-shadow: none;
+    font-weight: 900;
+    background: #e3f2fd;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    animation: none;
+  }
+
+  .vs-ring { display: none; }
 
   .match-time {
     color: #1565c0;
+    font-weight: 700;
     text-shadow: none;
+    font-size: 14px;
+  }
+
+  .league-name-wrapper {
+    background: #f0f4f8;
+    box-shadow: none;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    margin-top: 10px;
   }
 
   .league-name {
-    color: #374151;
+    color: #546e7a;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .live-badge {
+    box-shadow: 0 2px 8px rgba(0, 200, 83, 0.3);
   }
 
   .no-matches {
