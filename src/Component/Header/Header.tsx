@@ -50,6 +50,7 @@ const Header = () => {
   const handleLogOut = () => {
     logOut()
     localStorage.clear()
+    sessionStorage.removeItem("dicePromoShown")
     navigator("/login")
     snackbarUtil.success("Logout Successful")
   }
