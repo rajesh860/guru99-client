@@ -214,6 +214,8 @@ body {
 }
 
 .menu_back {
+  max-width: 600px;
+  margin: auto;
   .navMain {
     width: calc(100% - 0px);
     max-width: 980px;

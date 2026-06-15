@@ -1,3 +1,27 @@
+@keyframes dicePopIn {
+  from { opacity: 0; transform: scale(0.7) translateY(30px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes diceRoll {
+  0%   { transform: rotate(0deg)   scale(1);    }
+  20%  { transform: rotate(-15deg) scale(1.15); }
+  40%  { transform: rotate(12deg)  scale(1.1);  }
+  60%  { transform: rotate(-8deg)  scale(1.05); }
+  80%  { transform: rotate(5deg)   scale(1.02); }
+  100% { transform: rotate(0deg)   scale(1);    }
+}
+
+@keyframes diceFaceAnim {
+  from { transform: translateY(0)   scale(1);    opacity: 0.7; }
+  to   { transform: translateY(-6px) scale(1.15); opacity: 1;   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .tital_name_dash {
   font-size: 13px;
   font-weight: 700;
@@ -212,6 +236,59 @@
     color: var(--color-textSecondary);
     transition: color 0.3s ease;
   }
+
+  .card-subtitle {
+    margin: 0 !important;
+    font-size: 12px;
+    color: var(--color-textSecondary);
+    height: 1.4em;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+/* ── Word-jump animation ── */
+.word-anim {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px);
+  color: inherit !important;
+}
+
+.word-pos-0 { animation: wordJump-0 4s ease-out infinite; }
+.word-pos-1 { animation: wordJump-1 4s ease-out infinite; }
+.word-pos-2 { animation: wordJump-2 4s ease-out infinite; }
+.word-pos-3 { animation: wordJump-3 4s ease-out infinite; }
+
+@keyframes wordJump-0 {
+  0%        { opacity: 0; transform: translateY(20px); }
+  5%        { opacity: 1; transform: translateY(-3px); }
+  9%        { opacity: 1; transform: translateY(0);    }
+  83%       { opacity: 1; transform: translateY(0);    }
+  88%, 100% { opacity: 0; transform: translateY(20px); }
+}
+@keyframes wordJump-1 {
+  0%, 21%   { opacity: 0; transform: translateY(20px); }
+  26%       { opacity: 1; transform: translateY(-3px); }
+  30%       { opacity: 1; transform: translateY(0);    }
+  83%       { opacity: 1; transform: translateY(0);    }
+  88%, 100% { opacity: 0; transform: translateY(20px); }
+}
+@keyframes wordJump-2 {
+  0%, 42%   { opacity: 0; transform: translateY(20px); }
+  47%       { opacity: 1; transform: translateY(-3px); }
+  51%       { opacity: 1; transform: translateY(0);    }
+  83%       { opacity: 1; transform: translateY(0);    }
+  88%, 100% { opacity: 0; transform: translateY(20px); }
+}
+@keyframes wordJump-3 {
+  0%, 62%   { opacity: 0; transform: translateY(20px); }
+  67%       { opacity: 1; transform: translateY(-3px); }
+  71%       { opacity: 1; transform: translateY(0);    }
+  83%       { opacity: 1; transform: translateY(0);    }
+  88%, 100% { opacity: 0; transform: translateY(20px); }
 }
 
 /* ── Arrow ── */
@@ -337,4 +414,136 @@
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-10px); }
+}
+
+/* ── Live Now Banner ── */
+.live-now-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(120deg, #0f2027 0%, #1a1a3e 50%, #0f2027 100%);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,215,0,0.25);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform 0.15s, box-shadow 0.15s;
+
+  &:active { transform: scale(0.98); }
+
+  /* animated shimmer */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: liveShimmer 2.4s linear infinite;
+  }
+}
+
+@keyframes liveShimmer {
+  from { left: -60%; }
+  to   { left: 120%; }
+}
+
+/* glow blob behind */
+.live-now-glow {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,230,118,0.18) 0%, transparent 70%);
+  top: -30px; left: -20px;
+  pointer-events: none;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.15); }
+}
+
+.live-now-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.live-now-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0,230,118,0.15);
+  border: 1px solid rgba(0,230,118,0.5);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #00e676;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.live-now-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00e676;
+  animation: dotPing 1.2s ease-in-out infinite;
+  box-shadow: 0 0 6px #00e676;
+}
+
+@keyframes dotPing {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.4); }
+}
+
+.live-now-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.live-now-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.live-now-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 400;
+}
+
+.live-now-play {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #00c853, #00e676);
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 9px 16px;
+  border-radius: 24px;
+  white-space: nowrap;
+  position: relative;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0,230,118,0.4);
+}
+
+.live-now-arrow {
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
 }

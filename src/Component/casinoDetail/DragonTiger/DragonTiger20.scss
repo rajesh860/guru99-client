@@ -1,0 +1,571 @@
+// DragonTiger20.scss - 20-20 Dragon Tiger casino component styles
+
+$bg-primary: #1a1a2a;
+$bg-secondary: #2a2a3a;
+$bg-header: #1e2a38;
+$bg-card: #24243e;
+$color-dragon: #c0392b;
+$color-tiger: #d4ac0d;
+$color-tie: #27ae60;
+$color-text: #e0e0e0;
+$color-text-muted: #8888aa;
+$color-border: #3a3a5a;
+$color-lock: rgba(0, 0, 0, 0.72);
+$color-profit: #00e676;
+$color-loss: #ff5252;
+
+.dt20-container {
+  background: $bg-primary;
+  color: $color-text;
+  min-height: 100vh;
+  padding: 0 0 40px;
+  font-family: "Roboto", sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// Header
+.dt20-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $bg-header;
+  padding: 10px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid $color-border;
+
+  .dt20-header-left {
+    font-weight: 600;
+    font-size: 14px;
+    color: $color-text;
+  }
+
+  .dt20-rules-link {
+    color: #5dade2;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .dt20-header-right {
+    font-size: 12px;
+    color: $color-text-muted;
+    text-align: right;
+  }
+}
+
+// Video wrapper — relative container for iframe + card overlay
+.dt20-video-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+// Video area
+.dt20-video-area {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  overflow: hidden;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+}
+
+// Cards overlay — top-left, sibling of video so overflow:hidden doesn't break 3D flip
+.dt20-cards-overlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.dt20-flip-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.dt20-flip-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  &--dragon { background: rgba(192,57,43,0.85); color: #fff; }
+  &--tiger  { background: rgba(212,172,13,0.85); color: #000; }
+}
+
+// Flip card container
+.dt20-flip-card {
+  width: 32px;
+  height: 45px;
+  perspective: 600px;
+  cursor: pointer;
+
+  &--flipped .dt20-flip-inner {
+    transform: rotateY(180deg);
+  }
+}
+
+.dt20-flip-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.45s ease;
+}
+
+.dt20-flip-back,
+.dt20-flip-front {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+.dt20-flip-front {
+  transform: rotateY(180deg);
+}
+
+.dt20-card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.dt20-card-img {
+  width: 32px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.25);
+  display: block;
+}
+
+// Timer
+.dt20-timer {
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  &--open {
+    color: #00e676;
+    background: rgba(0, 230, 118, 0.08);
+  }
+
+  &--closed {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.1);
+  }
+}
+
+// Main bet buttons row
+.dt20-main-bets {
+  display: flex;
+  gap: 6px;
+  padding: 10px 10px 4px;
+}
+
+.dt20-main-bet-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.dt20-pl {
+  font-size: 11px;
+  min-height: 18px;
+  font-weight: 600;
+}
+
+.dt20-main-btn {
+  position: relative;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  overflow: hidden;
+  transition: opacity 0.2s;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  .dt20-btn-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .dt20-btn-rate {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  &--suspended {
+    cursor: not-allowed;
+  }
+}
+
+.dt20-dragon-btn {
+  background: linear-gradient(135deg, #7b1d1d, #c0392b);
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.35);
+}
+
+.dt20-tie-btn {
+  background: linear-gradient(135deg, #145a32, #27ae60);
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.dt20-tiger-btn {
+  background: linear-gradient(135deg, #7d6608, #d4ac0d);
+  box-shadow: 0 2px 8px rgba(212, 172, 13, 0.35);
+}
+
+.dt20-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: $color-lock;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+}
+
+// Card section (Dragon 11 / Tiger 11)
+.dt20-card-section {
+  margin: 12px 10px 0;
+  background: $bg-secondary;
+  border-radius: 8px;
+  padding: 10px 8px 8px;
+  border: 1px solid $color-border;
+}
+
+.dt20-card-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-text;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid $color-border;
+}
+
+.dt20-card-grid-wrapper {
+  overflow: visible;
+}
+
+.dt20-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  padding-bottom: 4px;
+}
+
+.dt20-card-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+        width: 35px;
+        height: 63px;
+  &--suspended {
+    cursor: not-allowed;
+  }
+}
+
+.dt20-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid $color-border;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.15s, transform 0.15s;
+
+  .dt20-card-cell:hover:not(.dt20-card-cell--suspended) & {
+    border-color: #5a5aaa;
+    transform: translateY(-2px);
+  }
+
+  .dt20-card-cell--suspended & {
+    opacity: 0.65;
+  }
+}
+
+.dt20-cell-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.dt20-card-amount {
+  font-size: 9px;
+  color: $color-text-muted;
+  min-height: 12px;
+}
+
+.dt20-card-lock {
+  position: absolute;
+  inset: 0;
+  background: $color-lock;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dt20-min-max {
+  font-size: 11px;
+  color: $color-text-muted;
+  margin-top: 8px;
+  text-align: right;
+}
+
+// History — same structure as TeenPatti last-10-result
+.dt20-last-result {
+  width: 96%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: $color-text;
+  padding-block: 0;
+  padding-bottom: 10px;
+  margin: 10px;
+}
+
+.dt20-result-header {
+  width: 100%;
+  background: $bg-secondary;
+  padding-block: 10px;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dt20-result-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.dt20-result-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:hover { transform: scale(1.1); }
+
+  &.dt20-rc--dragon {
+    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+    box-shadow: 0 4px 12px rgba(192, 57, 43, 0.5);
+  }
+
+  &.dt20-rc--tiger {
+    background: linear-gradient(135deg, #0a84c8 0%, #1fa9e8 100%);
+    box-shadow: 0 4px 12px rgba(26, 142, 215, 0.5);
+  }
+
+  &.dt20-rc--tie {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.5);
+    color: #fff;
+  }
+}
+
+.dt20-no-history {
+  font-size: 12px;
+  color: $color-text-muted;
+}
+
+// Open Bets section
+.dt20-open-bets {
+  margin: 14px 10px 0;
+}
+
+.dt20-open-bets-title {
+  font-size: 13px;
+  font-weight: 700;
+  background: $bg-header;
+  padding: 8px 12px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid $color-border;
+  border-bottom: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: $color-text;
+}
+
+.dt20-open-bets-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid $color-border;
+  border-radius: 0 0 6px 6px;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $bg-secondary;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-border;
+    border-radius: 2px;
+  }
+}
+
+.dt20-open-bets-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  background: $bg-secondary;
+  font-size: 12px;
+
+  thead {
+    background: #1e2a38;
+
+    th {
+      padding: 8px 10px;
+      text-align: left;
+      color: $color-text-muted;
+      font-weight: 600;
+      font-size: 11px;
+      white-space: nowrap;
+      border-bottom: 1px solid $color-border;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid rgba(58, 58, 90, 0.5);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+    }
+
+    td {
+      padding: 7px 10px;
+      color: $color-text;
+      white-space: nowrap;
+    }
+  }
+
+  .dt20-profit {
+    color: $color-profit;
+  }
+
+  .dt20-loss {
+    color: $color-loss;
+  }
+
+  .dt20-no-bets {
+    text-align: center;
+    color: $color-text-muted;
+    padding: 20px;
+    font-size: 13px;
+    white-space: normal;
+  }
+}
+
+.dt20-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.dt20-status-win {
+  background: rgba(0, 230, 118, 0.15);
+  color: $color-profit;
+}
+
+.dt20-status-loss {
+  background: rgba(255, 82, 82, 0.15);
+  color: $color-loss;
+}
+
+.dt20-status-pending {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+// Responsive tweaks
+@media (max-width: 480px) {
+  .dt20-header {
+    padding: 8px 10px;
+  }
+
+  .dt20-main-bets {
+    gap: 5px;
+    padding: 8px 8px 4px;
+  }
+
+  .dt20-main-btn {
+    padding: 9px 4px;
+  }
+
+  .dt20-main-btn .dt20-btn-label {
+    font-size: 12px;
+  }
+
+  .dt20-card-section {
+    margin: 10px 8px 0;
+    padding: 8px 6px;
+  }
+
+  .dt20-open-bets {
+    margin: 12px 8px 0;
+  }
+}

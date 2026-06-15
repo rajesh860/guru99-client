@@ -26,6 +26,11 @@ interface OverSummary {
   bf?: string
   runs?: number
   c1?: string
+  c2?: string
+  c?: string
+  b?: string
+  o?: string | number
+  s?: string
 }
 
 interface LiveData {
@@ -290,6 +295,18 @@ function playWicketAudio(): void {
   } catch { /* audio blocked */ }
 }
 
+function v1BallClass(b: string): string {
+  if (b === '6') return 'ball-six'
+  if (b === '4') return 'ball-four'
+  if (b?.toLowerCase() === 'w') return 'ball-wicket'
+  if (parseInt(b) > 0) return 'ball-run'
+  return 'ball-dot'
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
+}
+
 function ballEventClass(val: string): string {
   if (val === '6') return 'be-six'
   if (val === '4') return 'be-four'
@@ -297,6 +314,18 @@ function ballEventClass(val: string): string {
   if (val.toLowerCase() === 'wd') return 'be-wide'
   if (val.toLowerCase() === 'nb') return 'be-noball'
   if (val.toLowerCase() === 'o') return 'be-over'
+  if (val.toLowerCase() === 'cd') return 'be-catchdrop'
+  if (val.toLowerCase() === 'ruka') return 'be-stop'
+  if (val === '^1') return 'be-wicket'
+  if (val === '^2') return 'be-wicket'
+  if (val === '^4') return 'be-wicket'
+  if (val === '^5') return 'be-wicket'
+  if (val.toLowerCase() === 'no') return 'be-notout'
+  if (val.toLowerCase() === 'ba') return 'be-ballair'
+  if (val === 'B') return 'be-ball'
+  if (val.toLowerCase() === 'e') return 'be-entering'
+  if (val.toLowerCase() === 'f') return 'be-fastbowler'
+  if (val.toLowerCase() === 'fh') return 'be-freehit'
   if (parseInt(val) > 0) return 'be-run'
   return 'be-dot'
 }
@@ -308,14 +337,128 @@ function ballEventLabel(val: string): string {
   if (val.toLowerCase() === 'wd') return 'Wide'
   if (val.toLowerCase() === 'nb') return 'No Ball'
   if (val.toLowerCase() === 'o') return 'Over'
-  if (val === '0') return 'Dot'
+  if (val.toLowerCase() === 'cd') return 'Catch Drop!'
+  if (val.toLowerCase() === 'ruka') return 'Bowler Stop'
+  if (val.toLowerCase() === 'no') return 'Not Out'
+  if (val.toLowerCase() === 'ba') return 'Ball in Air'
+  if (val === '^1') return 'Bowled!'
+  if (val === '^2') return 'Caught Out!'
+  if (val === '^4') return 'Run Out!'
+  if (val === '^5') return 'LBW Out!'
+  if (val === '0') return '0'
   if (val.toLowerCase() === 'b') return 'Ball'
+  if (val.toLowerCase() === 'e') return 'Player Entering'
+  if (val.toLowerCase() === 'f') return 'Fast Bowler'
+  if (val.toLowerCase() === 'fh') return 'Free Hit!'
   const n = parseInt(val)
   if (!isNaN(n) && n > 0) return `${n} Run${n === 1 ? '' : 's'}`
   return 'Ball'
 }
 
-const CricketScoreCard = ({ scoreData }: Props) => {
+function normalizeScoreData(input: any): ScoreData | null {
+  if (!input) return null
+
+  // Unwrap standard API wrapper { data: {...} }
+  const d = input?.data && typeof input.data === 'object' && !Array.isArray(input.data)
+    ? input.data
+    : input
+
+  const v1: OverSummary[] = d.v1 || []
+  const liveDataRaw: any = d.liveData || {}
+  const isRawMatch = (o: any) => !!(o?.rb || o?.speech_names || o?.wp)
+  const rawMatch: any = isRawMatch(liveDataRaw) ? liveDataRaw : isRawMatch(d) ? d : null
+
+  // Determine batting team — check ALL v1 entries, not just over summaries
+  // type "b" balls have bat_team_fkey, type "o" overs have tfkey
+  const latestV1Over: any = v1.find((x: any) => x.type === 'o')
+  const battingTeamKey: string =
+    (v1 as any[]).find(x => x.bat_team_fkey)?.bat_team_fkey ||
+    latestV1Over?.tfkey ||
+    (rawMatch?.wp ? String(rawMatch.wp).split(',')[0] : '') ||
+    ''
+
+  // Data already has score — just fix batting flags and innings team mapping
+  if (d.score !== undefined) {
+    if (!battingTeamKey) return d as ScoreData
+
+    const teams: any = d.teams || {}
+    const score: any = d.score || {}
+    const t1Key: string = teams.team1?.key || score.team1Key || ''
+    const t2Key: string = teams.team2?.key || score.team2Key || ''
+
+    const fixedTeams = {
+      ...teams,
+      team1: { ...teams.team1, batting: !!t1Key && t1Key === battingTeamKey },
+      team2: { ...teams.team2, batting: !!t2Key && t2Key === battingTeamKey },
+    }
+
+    // Fix innings.innings1.team so the component computes t1First correctly
+    const existingInnings: any = d.innings || {}
+    let fixedInnings = existingInnings
+    if (score.innings1 && battingTeamKey) {
+      // innings1 team = batting team if only 1 innings played (they're on their first)
+      // innings1 team = bowling team if 2 innings played (batting team is in 2nd innings)
+      const innings1Team = !score.innings2
+        ? battingTeamKey
+        : (battingTeamKey === t1Key ? t2Key : t1Key)
+      fixedInnings = {
+        ...existingInnings,
+        innings1: { ...(existingInnings.innings1 || {}), team: innings1Team }
+      }
+    }
+
+    return { ...d, teams: fixedTeams, innings: fixedInnings } as ScoreData
+  }
+
+  // Raw cricket API format (no score field) — build from scratch
+  if (!rawMatch) return d as ScoreData
+
+  const speechNames: Record<string, string> = rawMatch.speech_names || {}
+  const teamKeys = Object.keys(speechNames)
+  const [tk1 = '', tk2 = ''] = teamKeys
+  if (!tk1) return d as ScoreData
+
+  const rb: any[] = rawMatch.rb || []
+  const latestRb = rb.length > 0 ? rb[rb.length - 1] : null
+
+  const parseScoreStr = (s: string) => {
+    const m = String(s || '').match(/^(\d+)\/(\d+)/)
+    return m ? { runs: parseInt(m[1]), wickets: parseInt(m[2]) } : null
+  }
+
+  const rbScoreData = latestRb?.ts ? parseScoreStr(latestRb.ts) : null
+  const v1ScoreData = latestV1Over?.s ? parseScoreStr(latestV1Over.s) : null
+  const parsed = rbScoreData || v1ScoreData
+  const parsedOvers = rbScoreData ? (latestRb?.o ?? 0) : (latestV1Over?.o ?? 0)
+
+  return {
+    score: {
+      format: String(rawMatch.fo || d.fo || ''),
+      status: '',
+      team1Key: tk1,
+      team2Key: tk2,
+      innings1: parsed ? { runs: parsed.runs, wickets: parsed.wickets, overs: parsedOvers } : null,
+      innings2: null,
+      innings3: null,
+      innings4: null,
+      startTime: rawMatch.mt || d.mt,
+      raw: {},
+    },
+    v1,
+    liveData: { B: rawMatch.B, s: rawMatch.s, q: rawMatch.q, rb: rawMatch.rb },
+    teams: {
+      team1: { name: speechNames[tk1] || tk1, key: tk1, batting: tk1 === battingTeamKey },
+      team2: { name: speechNames[tk2] || tk2, key: tk2, batting: tk2 === battingTeamKey },
+    },
+    ename: String(rawMatch.fo || d.fo || ''),
+    innings: {
+      innings1: parsed ? { team: battingTeamKey } : null,
+    },
+  }
+}
+
+const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
+  const scoreData = (normalizeScoreData(rawProp as any) ?? undefined) as ScoreData | undefined
   const prevBallRef = useRef<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [voiceOn, setVoiceOn] = useState(false)
@@ -343,6 +486,10 @@ const CricketScoreCard = ({ scoreData }: Props) => {
   const teams = scoreData.teams || {}
   const ename = scoreData.ename || ''
 
+  // Toss info from v1
+  const tossEntry = v1.find((x: any) => x.type === 'to')
+  const tossText = tossEntry?.c || null
+
   if (!score) return null
 
   const { format, status, team1Key, team2Key, innings1, innings2, innings3, innings4, startTime, raw = {} } = score
@@ -352,10 +499,16 @@ const CricketScoreCard = ({ scoreData }: Props) => {
   const t1Key = teams.team1?.key || team1Key || ''
   const t2Key = teams.team2?.key || team2Key || ''
 
+  // bat_team_fkey from type:"b" balls is the most reliable batting team source
+  const v1BatKey = (v1 as any[]).find(x => x.bat_team_fkey)?.bat_team_fkey || ''
+
+
   // Upcoming match view
   if (!innings1 && !innings2) {
     const extraCondition = raw.ac ? String(raw.ac).replace(/[()]/g, '').trim() : ''
-    const matchStatus = status && status.toLowerCase() !== 'scheduled'
+    const isTossRelated = status?.toLowerCase().includes('toss')
+    // Hide toss-related status if toss info is already available
+    const matchStatus = status && status.toLowerCase() !== 'scheduled' && !(isTossRelated && tossText)
       ? (extraCondition ? `${status} • ${extraCondition}` : status)
       : null
 
@@ -385,18 +538,22 @@ const CricketScoreCard = ({ scoreData }: Props) => {
           </div>
         </div>
         {matchStatus && (
-          <div className="upcoming-status">
-            <span className="upcoming-status-dot" />
-            {matchStatus}
+          <div className="cscard-ball-event be-status">
+            <span className="be-label">{matchStatus}</span>
+          </div>
+        )}
+        {tossText && (
+          <div className="cscard-toss">
+            🪙 {tossText}
           </div>
         )}
       </div>
     )
   }
 
-  // Live match view
-  const team1Batting = teams.team1?.batting ?? !!innings1
-  const team2Batting = teams.team2?.batting ?? !!innings2
+  // Live match view — use bat_team_fkey from v1 balls as source of truth
+  const team1Batting = v1BatKey ? v1BatKey === t1Key : (teams.team1?.batting ?? !!innings1)
+  const team2Batting = v1BatKey ? v1BatKey === t2Key : (teams.team2?.batting ?? !!innings2)
 
   const latestSummary = v1.find(x => x.type === 'o')
   const batsman1 = latestSummary ? { name: latestSummary.p1, score: latestSummary.s1 } : null
@@ -407,8 +564,11 @@ const CricketScoreCard = ({ scoreData }: Props) => {
   const lastCommentary = latestBall?.c1 || ''
 
   const rawB = liveData.B && String(liveData.B).trim() !== '' ? String(liveData.B) : null
-  const lastBall = rawB && !isBreakStatus(rawB) ? rawB : null
-  const breakLabel = rawB && isBreakStatus(rawB) ? rawB : null
+  // "B" alone just means a ball was bowled — no banner needed
+  const isKnownBallValue = (b: string) =>
+    /^([0-9]|W|Wd|Nb|wd|nb|w|o|O|cd|CD|ruka|RUKA|\^1|\^2|\^4|\^5|no|NO|ba|BA|B|e|E|f|F|fh|FH)$/.test(b.trim())
+  const lastBall   = rawB && isKnownBallValue(rawB) ? rawB : null
+  const breakLabel = rawB && !isKnownBallValue(rawB) ? rawB : null
 
   const activeInningsNumber = innings4 ? 4 : innings3 ? 3 : innings2 ? 2 : 1
   const activeInnings = innings4 || innings3 || innings2 || innings1
@@ -451,7 +611,7 @@ const CricketScoreCard = ({ scoreData }: Props) => {
     bowlerMap[key].overs++
     bowlerMap[key].runs += (o.runs || 0)
   })
-  const bowlerRows = Object.values(bowlerMap)
+  Object.values(bowlerMap) // bowlerRows reserved for future use
 
   const bat1Stats = parseBatScore(batsman1?.score)
   const bat2Stats = parseBatScore(batsman2?.score)
@@ -485,7 +645,7 @@ const CricketScoreCard = ({ scoreData }: Props) => {
   }
 
 
-  const breakStatus = !lastBall ? (status?.trim() || breakLabel || null) : (breakLabel || null)
+  const breakStatus = !lastBall && !breakLabel ? status?.trim() || null : null
 
   return (
     <div className={`cscard${expanded ? ' cscard-expanded' : ''}`} onClick={() => setExpanded(e => !e)}>
@@ -509,18 +669,32 @@ const CricketScoreCard = ({ scoreData }: Props) => {
         </button>
       </div>
 
+      {/* Toss */}
+      {tossText && (
+        <div className="cscard-toss">
+          🪙 {tossText}
+        </div>
+      )}
+
       {/* Main Score */}
       <div className="cscard-scores">
         {(() => {
-          const inningsTeamMap = scoreData?.innings || {}
-          const inn1Team = inningsTeamMap.innings1?.team
-          const inn2Team = inningsTeamMap.innings2?.team
-
-          // Determine which team batted first using innings team mapping
+          // Determine which team batted first
+          // v1 bat_team_fkey is authoritative; fall back to innings.team mapping
           let t1First: boolean
-          if (inn1Team) t1First = inn1Team === t1Key
-          else if (inn2Team) t1First = inn2Team !== t1Key
-          else t1First = true
+          if (v1BatKey && t1Key) {
+            const battingIsTeam1 = v1BatKey === t1Key
+            // 1st innings only → batting team is playing their first innings (batted first)
+            // 2nd innings → batting team is chasing (batted second), so other team batted first
+            t1First = !innings2 ? battingIsTeam1 : !battingIsTeam1
+          } else {
+            const inningsTeamMap = scoreData?.innings || {}
+            const inn1Team = inningsTeamMap.innings1?.team
+            const inn2Team = inningsTeamMap.innings2?.team
+            if (inn1Team) t1First = inn1Team === t1Key
+            else if (inn2Team) t1First = inn2Team !== t1Key
+            else t1First = true
+          }
 
           const t1InningsList = (t1First
             ? [innings1, innings3]
@@ -532,8 +706,28 @@ const CricketScoreCard = ({ scoreData }: Props) => {
             : [innings1, innings3]
           ).filter((x): x is Innings => !!x)
 
-          const leftName  = team1Batting ? team1Name : team2Name
-          const rightName = team1Batting ? team2Name : team1Name
+          // v1 over summary has the authoritative batting team name
+          const v1OverS = (v1 as any[]).find(x => x.type === 'o')
+          const v1BattingName = v1OverS?.team || ''
+          // Find bowling team name using fuzzy match (handles "Australia W" vs "Australia Women")
+          let bowlTeamName = ''
+          if (v1BattingName) {
+            const batLow = v1BattingName.toLowerCase()
+            const t1Low = (team1Name || '').toLowerCase()
+            const t2Low = (team2Name || '').toLowerCase()
+            const t1Match = t1Low && (t1Low === batLow || batLow.includes(t1Low) || t1Low.includes(batLow))
+            const t2Match = t2Low && (t2Low === batLow || batLow.includes(t2Low) || t2Low.includes(batLow))
+            if (t1Match && !t2Match) bowlTeamName = team2Name
+            else if (t2Match && !t1Match) bowlTeamName = team1Name
+            else {
+              // fallback: exact exclusion
+              const candidates = [team1Name, team2Name].filter(n => n && n.toLowerCase() !== batLow)
+              bowlTeamName = candidates[0] || ''
+            }
+          }
+
+          const leftName  = (v1BatKey && v1BattingName) ? v1BattingName : (team1Batting ? team1Name : team2Name)
+          const rightName = (v1BatKey && v1BattingName && bowlTeamName) ? bowlTeamName : (team1Batting ? team2Name : team1Name)
           const leftList  = team1Batting ? t1InningsList : t2InningsList
           const rightList = team1Batting ? t2InningsList : t1InningsList
 
@@ -587,6 +781,16 @@ const CricketScoreCard = ({ scoreData }: Props) => {
       {lastBall && (
         <div key={lastBall} className={`cscard-ball-event ${ballEventClass(lastBall)}`}>
           <span className="be-label">{ballEventLabel(lastBall)}</span>
+        </div>
+      )}
+      {!lastBall && breakLabel && (
+        <div key={breakLabel} className="cscard-ball-event be-info">
+          <span className="be-label">{breakLabel}</span>
+        </div>
+      )}
+      {!lastBall && !breakLabel && breakStatus && (
+        <div key={breakStatus} className="cscard-ball-event be-status">
+          <span className="be-label">{breakStatus}</span>
         </div>
       )}
 
@@ -663,6 +867,53 @@ const CricketScoreCard = ({ scoreData }: Props) => {
         </div>
       )}
 
+      {/* Commentary Feed */}
+      {/* {(() => {
+        const feed = (v1 as any[]).filter(x => x.type === 'b' || x.type === 't' || x.type === 'o')
+        if (!feed.length) return null
+        const visible = expanded ? feed : feed.slice(0, 4)
+        return (
+          <div className="cscard-commentary" onClick={e => e.stopPropagation()}>
+            <div className="cmnt-header">Ball by Ball</div>
+            {visible.map((item: any, i: number) => {
+              if (item.type === 'o') {
+                return (
+                  <div key={i} className="cmnt-over-end">
+                    <span>End of Over {item.o}</span>
+                    <span className="cmnt-over-meta">{item.bowler} &nbsp;·&nbsp; {item.runs} runs &nbsp;·&nbsp; {item.s}</span>
+                  </div>
+                )
+              }
+              if (item.type === 't') {
+                return (
+                  <div key={i} className="cmnt-text">
+                    {stripHtml(item.c || '')}
+                  </div>
+                )
+              }
+              const b = String(item.b ?? '0')
+              return (
+                <div key={i} className="cmnt-ball">
+                  <span className="cmnt-over-num">{item.o}</span>
+                  <span className={`cmnt-dot ball ${v1BallClass(b)}`}>
+                    {b === '0' ? '•' : b}
+                  </span>
+                  <div className="cmnt-content">
+                    <div className="cmnt-c1">{item.c1}</div>
+                    {item.c2 && (
+                      <div
+                        className="cmnt-c2"
+                        dangerouslySetInnerHTML={{ __html: item.c2 }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()} */}
+
       {/* Expanded-only sections */}
       {expanded && (
         <>
@@ -694,10 +945,6 @@ const CricketScoreCard = ({ scoreData }: Props) => {
         </>
       )}
 
-      {/* Break / Status */}
-      {breakStatus && (
-        <div className="cscard-status">{breakStatus}</div>
-      )}
 
       {/* Expand / Collapse chevron */}
       <div className="cscard-toggle">

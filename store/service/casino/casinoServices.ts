@@ -12,11 +12,12 @@ const baseQueryWithDynamicUrl: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   let rawUrl = typeof args === "string" ? args : args.url
 
-  const isBetPlace =
-    rawUrl.includes("/casino/bet-place")
+  const useMainApi =
+    rawUrl.includes("/casino/bet-place") ||
+    rawUrl.includes("/casino/stream")
 
   const selectedBaseQuery = fetchBaseQuery({
-    baseUrl: isBetPlace
+    baseUrl: useMainApi
       ? import.meta.env.VITE_API_BASE_URL
       : import.meta.env.VITE_ODDS_API,
     prepareHeaders: headers => {
@@ -84,6 +85,12 @@ export const casinoData = createApi({
         body,
       }),
     }),
+    getCasinoStream: build.query<any, { game: string }>({
+      query: ({ game }) => ({
+        url: `/casino/stream?game=${game}`,
+        method: "GET",
+      }),
+    }),
   }),
 })
 
@@ -92,4 +99,5 @@ export const {
   useBetPlaceMutation,
   useTeenPatti20Query,
   useGetCasinoResultByRoundIdMutation,
+  useGetCasinoStreamQuery,
 } = casinoData

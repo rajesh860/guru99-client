@@ -17,7 +17,7 @@ const Menu = () => {
     <div className="menu_marqueee">
       <ul className="navMain">
         <li className="active">
-          <Link to="#" className="mar_head" style={{ height: "40px" }}>
+          <Link to="#" className="mar_head" style={{ height: "30px" }}>
             <Marquee>{marqueeText}</Marquee>
           </Link>
         </li>

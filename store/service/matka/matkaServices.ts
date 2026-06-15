@@ -1,5 +1,5 @@
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import type { BaseQueryFn, FetchBaseQueryError } from "@reduxjs/toolkit/query/react"
+import { createApi } from "@reduxjs/toolkit/query/react"
 import { dynamicBaseQuery } from "../dynamicBaseQuery"
 
 export type MatkaListItem = any
@@ -55,11 +55,17 @@ export const matkaApi = createApi({
         method: "GET",
       }),
     }),
-    getMyMatkaBets: build.query<any, void>({
-      query: () => ({
-        url: "/matka/my-bets",
-        method: "GET",
-      }),
+    getMyMatkaBets: build.query<any, { market?: string; eventId?: string; betType?: string; status?: string; page?: number; limit?: number }>({
+      query: ({ market, eventId, betType, status, page = 1, limit = 20 } = {}) => {
+        const params = new URLSearchParams()
+        if (market)  params.append("market",  market)
+        if (eventId) params.append("eventId", eventId)
+        if (betType) params.append("betType", betType)
+        if (status)  params.append("status",  status)
+        params.append("page",  String(page))
+        params.append("limit", String(limit))
+        return { url: `/matka/my-bets?${params.toString()}`, method: "GET" }
+      },
     }),
     getMyJodiGrid: build.query<any, { market: string; eventId: string | number }>({
       query: ({ market, eventId }) => ({

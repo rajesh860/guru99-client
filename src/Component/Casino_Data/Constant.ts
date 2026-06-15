@@ -1,7 +1,7 @@
 export const titleById = {
   "51": "20-20 Teenpatti",
   "52": "20-20 DRAGON TIGER",
-  "53": "LUCKY 7 - A",
+  "53": "LUCKY 7 - B",
   // "54": "AMAR AKBAR ANTHONY",
   "55": "BOLLYWOOD TABLE",
   "57": "1 DAY TEENPATTI",
@@ -36,12 +36,12 @@ export const videoIdById = {
   "52": "3035",
   "53": "3032",
   // "54": "3056",
-  "55": "3041",
+  "55": "3034",
   "56": "3049",
   "57": "3031",
   "58": "3051",
   "59": "3052",
-  "54": "3053",
+  "54": "3043",
   "61": "3057",
   "62": "3056",
 };
@@ -59,7 +59,7 @@ export const tableIdtoUrl = {
   "54": "ab20",
   "61": "meta-Teen",
   "56": "aaa",
-  "62":"dt202"
+  "62":"aaa"
 };
 export const idFromGtype = {
   "51": "teen20",

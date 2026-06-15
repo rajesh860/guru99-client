@@ -1,0 +1,104 @@
+.ts-page {
+  min-height: 100vh;
+  background: var(--color-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 40px;
+  font-family: Verdana, Geneva, sans-serif;
+}
+
+.ts-heading {
+  text-align: center;
+  margin-bottom: 32px;
+
+  h1 {
+    color: var(--color-text) !important;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+
+  p {
+    color: var(--color-textSecondary) !important;
+    font-size: 12px;
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  width: 100%;
+  text-align: left;
+
+  &:hover {
+    border-color: var(--color-primary);
+    transform: translateX(4px);
+    background: var(--color-cardBg);
+  }
+
+  &.active {
+    border-color: var(--color-primary);
+    background: var(--color-cardBg);
+    box-shadow: 0 0 0 3px rgba(var(--color-primary), 0.15);
+  }
+
+  .theme-preview {
+    width: 64px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    padding: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+
+    .preview-colors {
+      display: flex;
+      gap: 3px;
+      width: 100%;
+
+      span {
+        flex: 1;
+        height: 13px;
+        border-radius: 3px;
+      }
+    }
+  }
+
+  .theme-name {
+    flex: 1;
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+  }
+
+  .check-icon {
+    color: var(--color-primary);
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: auto;
+  }
+}

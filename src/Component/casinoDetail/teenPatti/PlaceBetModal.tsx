@@ -15,18 +15,19 @@ interface Props {
     mid: string
   } | null
   matchId?: string
+  game?: string
 }
 
 const quickAmounts = [100, 500, 1000, 2000, 5000, 10000, 25000, 50000, 100000]
 
-const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId }: Props) => {
+const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen20" }: Props) => {
   const [amount, setAmount] = useState("")
   const [countdown, setCountdown] = useState(20)
   const [userIp, setUserIp] = useState("127.0.0.1")
 
-  const [trigger, { data: betPlaceResponse, isLoading }] = usePlaceCasinoBetMutation()
+  const [trigger, { data: betPlaceResponse, isLoading, error: betError }] = usePlaceCasinoBetMutation()
   const { refetch: refetchMyBets } = useGetCasinoMyBetsQuery(
-    { game: "teen20" },
+    { game },
     { pollingInterval: 3000 }
   )
 
@@ -65,18 +66,26 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId }: Props) => {
     return () => clearInterval(timer)
   }, [isOpen, onClose])
 
-  // Handle bet place response
+  // Handle bet place response (HTTP 200 with success/failure)
   useEffect(() => {
-    if (betPlaceResponse) {
-      if (betPlaceResponse?.status === true) {
-        snackbarUtil.success(betPlaceResponse?.message)
-        refetchMyBets()
-        onClose()
-      } else {
-        snackbarUtil.error(betPlaceResponse?.message)
-      }
+    if (!betPlaceResponse) return
+    if (betPlaceResponse?.success === true || betPlaceResponse?.status === true) {
+      snackbarUtil.success(betPlaceResponse?.message || "Bet placed!")
+      refetchMyBets()
+      onClose()
+    } else {
+      snackbarUtil.error(betPlaceResponse?.message || "Failed to place bet")
     }
   }, [betPlaceResponse])
+
+  // Handle HTTP error responses (4xx/5xx)
+  useEffect(() => {
+    if (!betError) return
+    const msg = (betError as any)?.data?.message
+      || (betError as any)?.error
+      || "Failed to place bet"
+    snackbarUtil.error(msg)
+  }, [betError])
 
   const handlePlaceBet = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -87,7 +96,7 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId }: Props) => {
     const stake = parseFloat(amount)
 
     const betData = {
-      game: "teen20",
+      game,
       roundId: selectedPlayer?.mid || "",
       sid: selectedPlayer?.sid || "",
       stake: stake,
@@ -120,75 +129,69 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId }: Props) => {
   if (!isOpen || !selectedPlayer) return null
 
   return (
-    <div className="place-bet-overlay" onClick={onClose}>
-      <div className="place-bet-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="bet-header">
-          <div className="bet-header-info">
-            <div className={`bet-type-badge ${selectedPlayer.isBack ? 'back' : 'lay'}`}>
-              {selectedPlayer.isBack ? 'BACK' : 'LAY'}
-            </div>
-            <div className="bet-team-name">{selectedPlayer.nat}</div>
-          </div>
-          <div className="bet-countdown">{countdown}s</div>
-        </div>
+    <div className="pbm-overlay" onClick={onClose}>
+      <div className="pbm-sheet" onClick={(e) => e.stopPropagation()}>
 
-        {/* Odds Display */}
-        <div className="bet-odds-section">
-          <div className="odds-label">Odds</div>
-          <div className={`odds-value ${selectedPlayer.isBack ? 'back' : 'lay'}`} style={{color:"white"}}>
+        <div className="pbm-handle" />
+
+        {/* Top row: name | odds | timer */}
+        <div className="pbm-toprow">
+          <div className="pbm-left">
+            <span className={`pbm-type ${selectedPlayer.isBack ? "pbm-type--back" : "pbm-type--lay"}`}>
+              {selectedPlayer.isBack ? "BACK" : "LAY"}
+            </span>
+            <span className="pbm-name">{selectedPlayer.nat}</span>
+          </div>
+          <span className={`pbm-odds ${selectedPlayer.isBack ? "pbm-odds--back" : "pbm-odds--lay"}`}>
             {selectedPlayer.rate}
-          </div>
+          </span>
+          <span className="pbm-timer">{countdown}s</span>
         </div>
 
-        {/* Amount Input */}
-        <div className="bet-amount-section">
-          <label className="amount-label">Stake Amount</label>
-          <div className="amount-input-wrapper">
-            <span className="currency-symbol">₹</span>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="Enter amount"
-              className="amount-input"
-              autoFocus
-            />
-          </div>
+        {/* Amount input */}
+        <div className="pbm-input-row">
+          <span className="pbm-rupee">₹</span>
+          <input
+            type="number"
+            className="pbm-input"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Enter amount"
+          />
+          <button className="pbm-clear" onClick={() => setAmount("")}>C</button>
         </div>
 
-        {/* Quick Amount Buttons */}
-        <div className="quick-amounts">
-          {quickAmounts.map((value) => (
+        {/* Quick chips */}
+        <div className="pbm-chips">
+          {quickAmounts.map((v) => (
             <button
-              key={value}
-              className="quick-amount-btn"
-              onClick={() => handleQuickAmount(value)}
+              key={v}
+              className={`pbm-chip ${amount === v.toString() ? "pbm-chip--active" : ""}`}
+              onClick={() => handleQuickAmount(v)}
             >
-              {value >= 1000 ? `${value / 1000}K` : value}
+              {v >= 1000 ? `${v / 1000}K` : v}
             </button>
           ))}
         </div>
 
-        {/* Potential Win */}
-        <div className="potential-win-section">
-          <div className="potential-label">Potential {selectedPlayer.isBack ? 'Win' : 'Liability'}</div>
-          <div className="potential-value">₹{potentialWin}</div>
+        {/* Potential win */}
+        <div className="pbm-potential">
+          <span>Potential {selectedPlayer.isBack ? "Win" : "Liability"}</span>
+          <span className="pbm-potential-val">₹{potentialWin}</span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="bet-actions">
-          <button className="btn-cancel" onClick={onClose}>
-            Cancel
-          </button>
+        {/* Buttons */}
+        <div className="pbm-actions">
+          <button className="pbm-cancel" onClick={onClose}>Cancel ({countdown}s)</button>
           <button
-            className={`btn-place-bet ${selectedPlayer.isBack ? 'back' : 'lay'}`}
+            className={`pbm-submit ${selectedPlayer.isBack ? "pbm-submit--back" : "pbm-submit--lay"}`}
             onClick={handlePlaceBet}
             disabled={isLoading || !amount}
           >
-            {isLoading ? 'Placing...' : 'Place Bet'}
+            {isLoading ? "Placing..." : "Place Bet"}
           </button>
         </div>
+
       </div>
     </div>
   )

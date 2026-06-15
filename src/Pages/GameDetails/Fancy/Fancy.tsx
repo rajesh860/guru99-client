@@ -264,7 +264,7 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
               }}
             >
               {/* Suspended Overlay */}
-              {(gstatus === "SUSPENDED" || b1 === 0) && (
+              {(gstatus === "SUSPENDED" || b1 === 0 || gstatus === 'Ball Running') && (
                 <div
                   style={{
                     position: "absolute",
@@ -281,9 +281,10 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
                     fontWeight: "bold",
                     zIndex: 10,
                     borderRadius: "4px",
+                    textTransform:"uppercase"
                   }}
                 >
-                  SUSPENDED
+                  {gstatus}
                 </div>
               )}
 

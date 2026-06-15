@@ -10,6 +10,7 @@ import { matkaApi } from "./service/matka/matkaServices"
 import { teenPattiApi } from "./service/teenPattiApi"
 import { scorecardApi } from "./service/scorecard/scorecardService"
 import { cricketScoreApi } from "./service/cricketScore/cricketScoreService"
+import { diceApi } from "./service/dice/diceServices"
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     [teenPattiApi.reducerPath]: teenPattiApi.reducer,
     [scorecardApi.reducerPath]: scorecardApi.reducer,
     [cricketScoreApi.reducerPath]: cricketScoreApi.reducer,
+    [diceApi.reducerPath]: diceApi.reducer,
   },
   middleware: defaultMiddleware =>
     defaultMiddleware()
@@ -35,5 +37,6 @@ export const store = configureStore({
       .concat(matkaApi.middleware)
       .concat(teenPattiApi.middleware)
       .concat(scorecardApi.middleware)
-      .concat(cricketScoreApi.middleware),
+      .concat(cricketScoreApi.middleware)
+      .concat(diceApi.middleware),
 })

@@ -201,6 +201,10 @@
   }
 }
 
+.winner-banner--a { background: linear-gradient(135deg, #7b1a1a, #a02020); border-color: rgba(160,32,32,0.4); }
+.winner-banner--b { background: linear-gradient(135deg, #1a3a5c, #1f5080); border-color: rgba(31,80,128,0.4); }
+.winner-banner--c { background: linear-gradient(135deg, #1a5c1a, #20802a); border-color: rgba(32,128,42,0.4); }
+
 .description-section {
   background: rgba(255, 255, 255, 0.05);
   padding: 16px;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePlaceMatkaBetMutation } from '../../../store/service/matka/matkaServices';
+import snackbarUtil from '../../utils/Snackbar';
 import './styles.scss';
 
 const MatkaBetSlipModal = ({ isOpen, onClose, selectedNumber, gameName, betType = 'single_jodi', eventId }) => {
@@ -83,14 +84,14 @@ const MatkaBetSlipModal = ({ isOpen, onClose, selectedNumber, gameName, betType 
       const response = await placeMatkaBet(betData).unwrap();
       
       if (response.success) {
-        // alert('Bet placed successfully!');
+        snackbarUtil.success(response.message || 'Bet placed successfully!')
         onClose();
-      } else {
-        // alert(response.message || 'Failed to place bet');
-      }
+      } 
+      // else {
+      //   snackbarUtil.error(response.message || 'Failed to place bet')
+      // }
     } catch (error) {
-      console.error('Failed to place bet:', error);
-      // alert(error?.data?.message || 'Failed to place bet. Please try again.');
+      // snackbarUtil.error(error?.data?.message || 'Failed to place bet. Please try again.')
     }
   };
 

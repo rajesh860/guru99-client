@@ -1,0 +1,301 @@
+// ThirtyTwoCard.scss
+
+$bg:      #1a1a2a;
+$bg2:     #2a2a3a;
+$header:  #1e2a38;
+$text:    #e0e0e0;
+$muted:   #8888aa;
+$border:  #3a3a5a;
+$profit:  #00e676;
+$loss:    #ff5252;
+
+.tc32-container {
+  background: $bg;
+  color: $text;
+  min-height: 100vh;
+  padding: 0 0 40px;
+  font-family: "Roboto", sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// ── Header ────────────────────────────────────────────────────
+.tc32-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $header;
+  padding: 10px 14px;
+  border-bottom: 1px solid $border;
+}
+.tc32-title  { font-size: 14px; font-weight: 700; }
+.tc32-rules  { color: #5dade2; font-size: 12px; font-weight: 400; cursor: pointer; }
+.tc32-round  { font-size: 12px; color: $muted; }
+
+// ── Video + overlay wrapper ───────────────────────────────────
+.tc32-video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  overflow: hidden;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+}
+
+// ── Card overlay ON video (left side) ────────────────────────
+.tc32-card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: fit-content;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  // justify-content: space-around;
+  gap: 5px;
+  padding: 6px 4px;
+  // background: linear-gradient(to right, rgba(0,0,0,0.65) 80%, transparent);
+  pointer-events: none; // let clicks pass to iframe
+}
+
+.tc32-overlay-player {
+      display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+}
+
+.tc32-overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tc32-overlay-name {
+  color: green;
+  font-size: 9px;
+  font-weight: 700;
+  // color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.tc32-overlay-score {
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.tc32-overlay-cards {
+  display: flex;
+  gap: 2px;
+}
+
+.tc32-overlay-card {
+  width: 16px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.7);
+}
+
+.tc32-overlay-card-back {
+  width: 18px;
+  height: 26px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.08);
+  border: 1px dashed rgba(255,255,255,0.2);
+}
+
+// ── Timer pill on video ───────────────────────────────────────
+.tc32-timer-pill {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  pointer-events: none;
+
+  &--open   { background: rgba(0,230,118,0.85);  color: #000; }
+  &--closed { background: rgba(255,82,82,0.85);  color: #fff; }
+}
+
+// ── Betting section ───────────────────────────────────────────
+.tc32-bet-section {
+  margin: 0;
+  background: $bg2;
+  border-bottom: 1px solid $border;
+}
+
+.tc32-bet-header {
+  display: grid;
+  grid-template-columns: 1fr 186px;
+  // padding: 0 10px;
+  padding-left: 5px;
+  background: $header;
+  border-bottom: 1px solid $border;
+
+  > :last-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.tc32-bet-hcol {
+  font-size: 11px;
+  font-weight: 700;
+  color: $muted;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 0;
+}
+
+.tc32-bet-hbtn {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  padding: 8px 4px;
+  letter-spacing: 0.5px;
+}
+
+.tc32-bet-row {
+  display: grid;
+  grid-template-columns: 1fr 186px;
+  gap: 6px;
+  // padding: 6px 10px;
+  padding-left: 5px;
+  border-bottom: 1px solid rgba(58,58,90,0.5);
+  align-items: center;
+
+  &:last-of-type { border-bottom: none; }
+}
+
+.tc32-bet-player {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $text;
+}
+
+.tc32-bet-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.tc32-susp-overlay {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(22,33,62,0.92);
+  color: #ff5252;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  height: 46px;
+  border: 1px solid rgba(255,82,82,0.2);
+}
+
+.tc32-btn {
+  flex: 1;
+  height: 46px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  transition: opacity 0.15s;
+
+  &:active:not(:disabled) { opacity: 0.75; }
+  &--back { background: rgba(64,135,251,0.9); }
+  &--lay  { background: rgba(240,121,143,0.9); }
+}
+
+.tc32-min-max {
+  font-size: 11px;
+  color: $muted;
+  text-align: right;
+  padding: 6px 10px 8px;
+}
+
+// ── History ───────────────────────────────────────────────────
+.tc32-history {
+  margin: 10px 10px 0;
+  background: $bg2;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid $border;
+}
+
+.tc32-history-label {
+  font-size: 11px; font-weight: 700; color: $muted;
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+}
+
+.tc32-history-dots {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+
+.tc32-history-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.tc32-no-history { font-size: 12px; color: $muted; }
+
+// ── Open Bets ─────────────────────────────────────────────────
+.tc32-open-bets { margin: 10px 10px 0; }
+
+.tc32-open-bets-title {
+  font-size: 13px; font-weight: 700; background: $header;
+  padding: 8px 12px; border-radius: 6px 6px 0 0;
+  border: 1px solid $border; border-bottom: none;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+
+.tc32-table-wrap {
+  overflow-x: auto; border: 1px solid $border;
+  border-radius: 0 0 6px 6px; -webkit-overflow-scrolling: touch;
+}
+
+.tc32-table {
+  width: 100%; min-width: 460px; border-collapse: collapse;
+  background: $bg2; font-size: 12px;
+
+  thead { background: $header; }
+  th { padding: 7px 10px; text-align: left; color: $muted; font-weight: 600; font-size: 11px; border-bottom: 1px solid $border; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(58,58,90,0.5); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.03); }
+  td { padding: 6px 10px; white-space: nowrap; }
+
+  .tc32-profit { color: $profit; }
+  .tc32-loss   { color: $loss; }
+  .tc32-no-bets { text-align: center; color: $muted; padding: 18px; font-size: 13px; white-space: normal; }
+}
+
+.tc32-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 10px;
+  font-size: 10px; font-weight: 600; text-transform: capitalize;
+  &--win     { background: rgba(0,230,118,0.15); color: $profit; }
+  &--loss    { background: rgba(255,82,82,0.15);  color: $loss; }
+  &--pending { background: rgba(255,193,7,0.15);  color: #ffc107; }
+}

@@ -1,0 +1,438 @@
+// AviatorGame v2 — reference style
+
+.av2-container {
+  background: #1a1c2e;
+  min-height: 100vh;
+  color: #e2e8f0;
+  font-family: "Inter", "Roboto", sans-serif;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  overflow-x: hidden;
+}
+
+// ── Header ────────────────────────────────────────────────────
+.av2-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background: #141527;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.av2-back {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  flex-shrink: 0;
+  &:hover { background: rgba(255,255,255,0.14); }
+}
+
+.av2-hist {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.av2-hpill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.av2-hp-g { background: rgba(16,185,129,0.2); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+.av2-hp-y { background: rgba(245,158,11,0.2); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+.av2-hp-r { background: rgba(239,68,68,0.2);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+
+.av2-mybets-bar {
+  padding: 6px 10px;
+  background: #141527;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.av2-mybets {
+  width: 100%;
+  background: #252740;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+// ── Game area ─────────────────────────────────────────────────
+.av2-game {
+  position: relative;
+  height: 280px;
+  background: #0d0f1e;
+  overflow: hidden;
+}
+
+// Ray/spotlight effect
+.av2-rays {
+  position: absolute;
+  inset: 0;
+  background: conic-gradient(
+    from 200deg at 20% 80%,
+    transparent 0deg,
+    rgba(255,255,255,0.02) 5deg,
+    transparent 10deg,
+    transparent 15deg,
+    rgba(255,255,255,0.015) 20deg,
+    transparent 25deg,
+    transparent 30deg,
+    rgba(255,255,255,0.02) 35deg,
+    transparent 40deg,
+    transparent 80deg
+  );
+}
+
+.av2-svg {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(100% - 10px);
+}
+
+.av2-svg-crash { }
+
+// Exhaust trail — originates from engine (tail = right side of plane image)
+.av2-exhaust {
+  position: absolute;
+  pointer-events: none;
+  z-index: 4;
+  // tail = left side of plane (plane flies right, engine at back)
+  transform: translate(calc(-50% - 10px), calc(-50% + 0px));
+
+  span {
+    position: absolute;
+    top: 0; left: 0;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    animation: av-exhaust 0.6s ease-out infinite;
+
+    &:nth-child(1) { animation-delay: 0s;    }
+    &:nth-child(2) { animation-delay: 0.1s;  }
+    &:nth-child(3) { animation-delay: 0.2s;  }
+    &:nth-child(4) { animation-delay: 0.3s;  }
+    &:nth-child(5) { animation-delay: 0.4s;  }
+    &:nth-child(6) { animation-delay: 0.5s;  }
+  }
+}
+
+@keyframes av-exhaust {
+  0% {
+    opacity: 1;
+    transform: translate(0px, 0px) scale(1);
+    background: radial-gradient(circle, #fff 0%, #fbbf24 40%, #f97316 70%, transparent 100%);
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 0.55;
+    background: radial-gradient(circle, #f97316 0%, #ef4444 50%, transparent 100%);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-40px, 12px) scale(2.8);
+    background: radial-gradient(circle, rgba(120,120,120,0.15) 0%, transparent 70%);
+    filter: blur(5px);
+  }
+}
+
+// Plane — tail aligned with curve tip; no lag transition
+.av2-plane {
+  position: absolute;
+  width: 70px;
+  height: auto;
+  transform: translate(0%, -55%) rotate(-10deg);
+  filter: drop-shadow(0 0 14px rgba(16,185,129,0.7));
+  pointer-events: none;
+  z-index: 5;
+}
+
+// Multiplier
+.av2-mult-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.av2-flew {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ef4444;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.av2-mult {
+  font-size: clamp(36px, 10vw, 60px);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 0 40px currentColor;
+  letter-spacing: -2px;
+}
+
+// Countdown card
+.av2-cd-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.av2-cd-logo {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ef4444;
+  letter-spacing: 1px;
+}
+
+.av2-cd-txt {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+}
+
+.av2-cd-num {
+  font-size: 36px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.av2-cd-bar {
+  width: 160px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.av2-cd-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f59e0b);
+  border-radius: 2px;
+  transition: width 0.9s linear;
+}
+
+.av2-round-id {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.3);
+  font-family: monospace;
+}
+
+// ── Bet panel ─────────────────────────────────────────────────
+.av2-panel {
+  background: #1e2035;
+  margin: 8px 8px 0;
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.av2-panel-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.av2-amt-row {
+  display: flex;
+  align-items: center;
+  background: #252740;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  flex: 1;
+}
+
+.av2-pm {
+  width: 36px;
+  height: 100%;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  &:hover { background: rgba(255,255,255,0.14); }
+  &:active { background: rgba(255,255,255,0.06); }
+}
+
+.av2-amt-val {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.av2-play-btn {
+  flex: 1;
+  min-height: 55px;
+  background: #22c55e;
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1.2;
+  transition: background 0.15s;
+
+  &--wait {
+    background: #16a34a;
+    color: #fff;
+    font-size: 13px;
+    cursor: not-allowed;
+  }
+  &--cashout {
+    background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
+    color: #fff !important;
+    animation: cashPulse2 0.9s ease-in-out infinite alternate;
+    cursor: pointer !important;
+  }
+  &--locked {
+    background: #2a2d45 !important;
+    color: rgba(255,255,255,0.5) !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    cursor: not-allowed !important;
+    opacity: 1 !important;
+    font-size: 13px;
+    gap: 4px;
+  }
+  &:disabled:not(.av2-play-btn--cashout):not(.av2-play-btn--locked) { opacity: 0.6; cursor: not-allowed; }
+}
+
+.av2-co-win  { font-size: 22px; font-weight: 900; line-height: 1.1; }
+.av2-co-mult { font-size: 12px; font-weight: 600; opacity: 0.85; }
+
+@keyframes cashPulse2 {
+  0%   { box-shadow: 0 4px 18px rgba(245,158,11,0.4); }
+  100% { box-shadow: 0 4px 32px rgba(245,158,11,0.8); }
+}
+
+// Quick amounts
+.av2-quick {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.av2-q {
+  height: 32px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  &:hover { background: rgba(255,255,255,0.1); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// Auto row
+.av2-auto-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.av2-autobet {
+  background: #2a2d45;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  &--on { background: rgba(16,185,129,0.2); border-color: #10b981; color: #10b981; }
+}
+
+.av2-co-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  cursor: pointer;
+  white-space: nowrap;
+
+  input[type="checkbox"] { accent-color: #22c55e; width: 14px; height: 14px; cursor: pointer; }
+}
+
+.av2-co-input {
+  width: 56px;
+  background: #252740;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  padding: 5px 4px;
+  outline: none;
+  &::-webkit-inner-spin-button { -webkit-appearance: none; }
+}
+
+// ── Players ───────────────────────────────────────────────────
+.av2-players-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 8px;
+}
+
+.av2-table-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 6px 16px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}

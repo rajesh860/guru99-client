@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import "../oneDayTeenPatti/styles.scss"
 import { FaArrowRight } from "react-icons/fa"
 import BackBtn from "../../BackBtn/BackBtn"
-// Removed useCasinoResultQuery import
+import { useGetCasinoMyBetsQuery } from "../../../../store/service/userServices/userServices"
 import { Link, useParams } from "react-router-dom"
 import { LetterAndColorById } from "../resultCommon"
 import ResultModal from "./ResultModalDt"
@@ -12,33 +12,7 @@ import { tableIdtoUrl, videoIdById } from "../../Casino_Data/Constant"
 import "./styles.scss"
 import TeamTable from "./TeamTable"
 import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
-import cardBack from "../../../../public/casino/cardBack.png"
-const formatTimestamp = (timestamp: number) => {
-  if (!timestamp) return "--:--:--"
-
-  const date = new Date(timestamp)
-
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  })
-}
-
-const getCardImage = (cardCode?: string) => {
-  if (!cardCode || cardCode === "1") {
-    return "https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/1.jpg"
-  }
-  const mapped = cardCode.includes("HH")
-    ? cardCode.replace("HH", "SS")
-    : cardCode.includes("SS")
-      ? cardCode.replace("SS", "DD")
-      : cardCode.includes("DD")
-        ? cardCode.replace("DD", "HH")
-        : cardCode
-  return `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${mapped}.jpg`
-}
+import { getCardImage } from "../../../utils/cardImage"
 
 const OneDayTeenPatti = () => {
   const { id } = useParams()
@@ -67,16 +41,13 @@ const OneDayTeenPatti = () => {
   const slug = tableIdtoUrl[id]
   const { odds: data } = useOdds(slug)
 
-  const { data: betsResponse } = useGetCasinoMyBetQuery(
-    {
-      isGameCompleted: false,
-      sportId: 5015,
-      tableId: id,
-    },
-    { pollingInterval: 1000 },
+  const { data: betsResponse } = useGetCasinoMyBetsQuery(
+    { game: "Teen" },
+    { pollingInterval: 2000 }
   )
 
-  // Removed useCasinoResultQuery
+  const resultReponse: any[] = data?.t3 ?? []
+  const liblity = { data: [] as any[] }
 
   const handleClick = val => {
     setFirst(val)
@@ -133,7 +104,7 @@ const OneDayTeenPatti = () => {
           <div className="game-section">
             <div className="timer">{data?.t1[0]?.autotime}</div>
             <iframe
-              src={`https://casino.loki7exch.com/route/?id=${videoIdById[id] || "3035"}`}
+              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id] || "3035"}`}
               title="DragonTiger Stream"
               allowFullScreen
             ></iframe>

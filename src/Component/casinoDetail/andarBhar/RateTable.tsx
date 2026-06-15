@@ -45,7 +45,7 @@ const RateTable: React.FC<RateTableProps> = ({ splitAll, splitBll }) => {
 
   useEffect(() => {
     if (betPlaceResponse) {
-      if (betPlaceResponse.status) {
+      if (betPlaceResponse?.success ?? betPlaceResponse?.status) {
         snackbarUtil.success(betPlaceResponse.message);
         setModalVisible(false);
       } else {

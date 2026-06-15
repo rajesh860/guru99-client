@@ -1,549 +1,294 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useState } from "react"
-import Menu from "../Menu/Menu"
 import "./header.scss"
 import {
   useGetUserBalanceQuery,
   useLogOutMutation,
+  useGetPendingBetsQuery,
 } from "../../../store/service/userServices/userServices"
 import snackbarUtil from "../../utils/Snackbar"
-import { useSelector } from "react-redux"
+
+const NAV_ITEMS = [
+  { to: "/inplay",    icon: "/img/crick.png",    label: "In Play" },
+  { to: "/statement", icon: "/img/settlmen.png", label: "Statement" },
+  { to: "/ledger",    icon: "/img/CL.png",        label: "My Ledger" },
+  { to: "/complete",  icon: "/img/CG1.jpg",       label: "Complete Games" },
+  { to: "/password",  icon: "/img/CP.png",        label: "Change Password" },
+  { to: "/profile",   icon: "/img/Profile.png",   label: "My Profile" },
+]
 
 const Header = () => {
   const [showExposureModal, setShowExposureModal] = useState(false)
-  const [showSidebar, setShowSidebar] = useState(false)
-  const [logOut, { data }] = useLogOutMutation()
-  const token = localStorage.getItem("client-token")
+  const [showSidebar, setShowSidebar]             = useState(false)
+  const [logOut]                                  = useLogOutMutation()
+  const token  = localStorage.getItem("client-token")
   const userId = localStorage.getItem("userId")
+  const navigator = useNavigate()
+
+  const { data: pendingBetsData } = useGetPendingBetsQuery(undefined, {
+    skip: !showExposureModal,
+    pollingInterval: showExposureModal ? 2000 : 0,
+  })
+  const matchBets:  any[] = pendingBetsData?.matchBets  ?? []
+  const fancyBets:  any[] = pendingBetsData?.fancyBets  ?? []
+  const casinoBets: any[] = pendingBetsData?.casinoBets ?? []
+  const diceBets:   any[] = pendingBetsData?.diceBets   ?? []
+  const matkaBets:  any[] = pendingBetsData?.matkaBets  ?? []
+  const summary           = pendingBetsData?.summary
+
   const { data: userBalance } = useGetUserBalanceQuery(undefined, {
     pollingInterval: 1000,
     refetchOnMountOrArgChange: true,
     skip: !token,
   })
-  const navigator = useNavigate()
+
+  const balance  = userBalance?.data?.balance?.toFixed(2)  ?? "0.00"
+  const exposure = userBalance?.data?.exposure?.toFixed(2) ?? "0.00"
+  const uId      = userBalance?.data?.userId || userId
+
   const handleLogOut = () => {
     logOut()
     localStorage.clear()
     navigator("/login")
-    snackbarUtil.success("Logout Successfull")
+    snackbarUtil.success("Logout Successful")
   }
-  const { pathname } = useLocation()
-  const splitUrl = pathname.split("/")[1]
 
-  const usedCoin = useSelector((state: any) => state?.user)
   return (
-    <div className="hedaer_main">
-      <table
-        width="100%"
-        border={0}
-        cellSpacing={0}
-        cellPadding={0}
-        className="main-header"
-      >
-        <tbody>
-          <tr>
-            <td width={90} >
-              <Link to="/main">
-                <img src="/logo/login.png" alt="" className="profile_img" />
-              </Link>
-            </td>
-            {/**/}
-            <td
-              align="left"
-              className="FontTextWhite ng-star-inserted"
-              style={{ verticalAlign: "center" }}
+    <>
+      {/* ── Main Header Bar ── */}
+      <header className="hdr">
+        {/* Logo */}
+        <Link to="/main" className="hdr__logo">
+          <img src="/logo/login.png" alt="logo" />
+        </Link>
+
+        {/* User info */}
+        <div className="hdr__info">
+          <span className="hdr__user-id">{uId}</span>
+          <div className="hdr__stats">
+            <div className="hdr__stat">
+              <span className="hdr__stat-label">Coins</span>
+              <span className="hdr__stat-value">{balance}</span>
+            </div>
+            <div className="hdr__divider" />
+            <div
+              className="hdr__stat hdr__stat--expo"
+              onClick={() => setShowExposureModal(true)}
+              title="View pending bets"
             >
-              <div className="profile_picture_name">
-                <h1
-                  style={{
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {userBalance?.data?.userId || userId}
-                </h1>
-              </div>
-              <div className="profile_coin">
-                <p>
-                  Coins :{" "}
-                  <label>{userBalance?.data?.balance?.toFixed(2)}</label>
-                </p>
-                <p>
-                  Expo : <label 
-                    onClick={() => setShowExposureModal(true)}
-                    style={{ cursor: "pointer", textDecoration: "underline" }}
-                  >{userBalance?.data?.exposure.toFixed(2)}</label>
-                </p>
-              </div>
-              {splitUrl == "cricket" ? (
-                <>
-                  {/* <div>
-                    <p
-                      style={{
-                        fontSize: "xx-small",
-                        margin: 0,
-                        fontWeight: 700,
-                      }}
-                    >
-                      Used Coin :
-                      <span>
-                        <b>{usedCoin?.usedCoin?.toFixed(2)}</b>
-                      </span>
-                    </p>
-                  </div> */}
-                  {/* <div>
-                    <p
-                      style={{
-                        fontSize: "xx-small",
-                        margin: 0,
-                        fontWeight: 700,
-                      }}
-                    >
-                      Session P/M :
-                      <span style={{color:usedCoin?.sessionPlusMinus>0?"green":"red"}}>
-                        <b>{usedCoin?.sessionPlusMinus?.toFixed(2) ?? 0}</b>
-                      </span>
-                    </p>
-                  </div> */}
-                </>
-              ) : (
-                ""
-              )}
-            </td>
-            {/**/}
-            <td
-              width={55}
-              className="FontTextWhite"
-              onClick={() => setShowSidebar(true)}
-              style={{ padding: "8px", cursor: "pointer" }}
-            >
-              <div>
-                <svg 
-                  width="30" 
-                  height="30" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor"
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <line x1="3" y1="6" x2="21" y2="6"></line>
-                  <line x1="3" y1="12" x2="21" y2="12"></line>
-                  <line x1="3" y1="18" x2="21" y2="18"></line>
-                </svg>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td colSpan={2} />
-          </tr>
-        </tbody>
-      </table>
-      
-      {/* Exposure Modal */}
-      {showExposureModal && (
-        <div 
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.7)",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            zIndex: 1000,
-            paddingTop: "20px"
-          }}
-          onClick={() => setShowExposureModal(false)}
-        >
-          <div 
-            style={{
-              backgroundColor: "white",
-              borderRadius: "8px",
-          padding: "13px",
-    maxWidth: "94%",
-              maxHeight: "90%",
-              overflow: "auto",
-              position: "relative"
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-              borderBottom: "1px solid #ddd",
-              paddingBottom: "10px"
-            }}>
-              <h3 style={{ margin: 0, color: "#333" }}>Pending BETS</h3>
-              <button 
-                onClick={() => setShowExposureModal(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  color: "#666"
-                }}
-              >
-                ×
-              </button>
-            </div>
-            
-            {/* MATCH BETS Table */}
-            <div style={{ marginBottom: "30px" }}>
-              <div style={{
-                backgroundColor: "black",
-                color: "white",
-                padding: "10px",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "14px"
-              }}>
-                MATCH BETS
-              </div>
-              <table style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "12px"
-              }}>
-                <thead>
-                  <tr style={{ backgroundColor: "#4A5568", color: "white" }}>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Team</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Run</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>AMT</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>MODE</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Profit</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Loss</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={7} style={{ padding: "20px", textAlign: "center", color: "#666" }}>No match bets found</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            {/* FANCY BETS Table */}
-            <div>
-              <div style={{
-                backgroundColor: "black",
-                color: "white",
-                padding: "10px",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "14px"
-              }}>
-                FANCY BETS
-              </div>
-              <table style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "12px"
-              }}>
-                <thead>
-                  <tr style={{ backgroundColor: "#4A5568", color: "white" }}>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Team</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Run</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>AMT</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>MODE</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Profit</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Loss</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={7} style={{ padding: "20px", textAlign: "center", color: "#666" }}>No fancy bets found</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            
-            {/* CASINO BETS Table */}
-            <div style={{ marginTop: "30px" }}>
-              <div style={{
-                backgroundColor: "black",
-                color: "white",
-                padding: "10px",
-                textAlign: "center",
-                fontWeight: "bold",
-                fontSize: "14px"
-              }}>
-                CASINO BETS
-              </div>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontSize: "12px",
-                  minWidth: "800px"
-                }}>
-                <thead>
-                  <tr style={{ backgroundColor: "#4A5568", color: "white" }}>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Game</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Selection</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Odds</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>AMT</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>MODE</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Profit</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Loss</th>
-                    <th style={{ padding: "8px", textAlign: "center", border: "1px solid #ddd" }}>Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={8} style={{ padding: "20px", textAlign: "center", color: "#666" }}>No casino bets found</td>
-                  </tr>
-                </tbody>
-              </table>
-              </div>
+              <span className="hdr__stat-label">Expo</span>
+              <span className="hdr__stat-value hdr__stat-value--expo">{exposure}</span>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Sidebar Menu */}
-      {showSidebar && (
-        <>
-          {/* Overlay */}
-          <div 
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "rgba(0,0,0,0.5)",
-              zIndex: 9998,
-              animation: "fadeIn 0.3s ease-out"
-            }}
-            onClick={() => setShowSidebar(false)}
-          />
-          
-          {/* Sidebar */}
-          <div 
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              bottom: 0,
-              width: "230px",
-              backgroundColor: "var(--color-sidebarBg)",
-              zIndex: 9999,
-              boxShadow: "2px 0 10px rgba(0,0,0,0.5)",
-              animation: "slideInLeft 0.3s ease-out",
-              display: "flex",
-              flexDirection: "column"
-            }}
-          >
-            {/* Header with Logo and Username */}
-            <div style={{
-              background: "var(--color-surface)",
-              padding: "12px 20px",
-              color: "var(--color-text)"
-            }}>
-              <div style={{ textAlign: "center", marginBottom: "15px" }}>
-                <img src="/img/user.png" alt="Logo" style={{ width: "80px", height: "80px", borderRadius: "50%", border: "3px solid white" }} />
-              </div>
-              <h3 style={{ margin: 0, textAlign: "center", fontSize: "18px", textTransform: "uppercase" }}>
-                {userBalance?.data?.userId || userId}
-              </h3>
-              <p style={{ margin: "5px 0 0 0", textAlign: "center", fontSize: "14px", opacity: 0.9 }}>
-                Balance: {userBalance?.data?.balance?.toFixed(2)}
-              </p>
+        {/* Hamburger */}
+        <button
+          className="hdr__menu-btn"
+          onClick={() => setShowSidebar(true)}
+          aria-label="Open menu"
+        >
+          <span /><span /><span />
+        </button>
+      </header>
+
+      {/* ── Exposure Modal ── */}
+      {showExposureModal && (
+        <div className="modal-overlay" onClick={() => setShowExposureModal(false)}>
+          <div className="modal-box" onClick={e => e.stopPropagation()}>
+
+            {/* Sticky header */}
+            <div className="modal-header">
+              <span className="modal-title">Pending Bets</span>
+              <button className="modal-close" onClick={() => setShowExposureModal(false)}>✕</button>
             </div>
 
-            {/* Menu Items */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "10px 0" }}>
-              <Link 
-                to="/inplay" 
-                onClick={() => setShowSidebar(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <img src="/img/crick.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>In Play</span>
-              </Link>
+            {/* Sticky summary */}
+            {summary && (
+              <div className="modal-summary">
+                <span>Match <b>{summary.matchBetsCount}</b></span>
+                <span>Fancy <b>{summary.fancyBetsCount}</b></span>
+                <span>Casino <b>{summary.casinoBetsCount}</b></span>
+                <span>Dice <b>{summary.diceBetsCount}</b></span>
+                <span>Matka <b>{summary.matkaBetsCount}</b></span>
+                <span className="modal-summary__total">Total <b>{summary.totalPending}</b></span>
+              </div>
+            )}
 
-              <div
-                onClick={() => snackbarUtil.info("Coming Soon!")}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s",
-                  position: "relative",
-                  cursor: "pointer"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <img src="/img/matka.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>Matka</span>
-                <span style={{
-                  marginLeft: "auto",
-                  background: "linear-gradient(135deg, #ff6b6b, #ee5a24)",
-                  color: "white",
-                  fontSize: "10px",
-                  fontWeight: "700",
-                  padding: "3px 8px",
-                  borderRadius: "20px",
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                  boxShadow: "0 2px 8px rgba(238,90,36,0.5)"
-                }}>Coming Soon</span>
+            {/* Scrollable sections */}
+            <div className="modal-body">
+
+              {/* Match Bets */}
+              <div className="modal-section">
+                <div className="modal-section-title">MATCH BETS ({matchBets.length})</div>
+                <div className="modal-table-wrap">
+                  <table className="modal-table">
+                    <thead><tr>{["Team","Run","Amt","Mode","Profit","Loss","Date"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {matchBets.length > 0 ? matchBets.map((b:any, i:number) => (
+                        <tr key={b._id ?? i}>
+                          <td>{b.team}</td><td>{b.run}</td><td>{b.amt}</td>
+                          <td className={`modal-mode modal-mode--${b.mode}`}>{b.mode}</td>
+                          <td className="td-green">{b.profit}</td>
+                          <td className="td-red">{b.loss}</td>
+                          <td>{b.date}</td>
+                        </tr>
+                      )) : <tr><td colSpan={7} className="modal-empty">No match bets</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
-              <Link 
-                to="/statement" 
-                onClick={() => setShowSidebar(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <img src="/img/settlmen.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>Statement</span>
-              </Link>
+              {/* Fancy Bets */}
+              <div className="modal-section">
+                <div className="modal-section-title">FANCY BETS ({fancyBets.length})</div>
+                <div className="modal-table-wrap">
+                  <table className="modal-table">
+                    <thead><tr>{["Team","Run","Size","Amt","Mode","Profit","Loss","Date"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {fancyBets.length > 0 ? fancyBets.map((b:any, i:number) => (
+                        <tr key={b._id ?? i}>
+                          <td>{b.team}</td><td>{b.run}</td><td>{b.size}</td><td>{b.amt}</td>
+                          <td className={`modal-mode modal-mode--${b.mode}`}>{b.mode}</td>
+                          <td className="td-green">{b.profit}</td>
+                          <td className="td-red">{b.loss}</td>
+                          <td>{b.date}</td>
+                        </tr>
+                      )) : <tr><td colSpan={8} className="modal-empty">No fancy bets</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              <Link 
-                to="/ledger" 
-                onClick={() => setShowSidebar(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <img src="/img/CL.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>My Ledger</span>
-              </Link>
+              {/* Casino Bets */}
+              <div className="modal-section">
+                <div className="modal-section-title">CASINO BETS ({casinoBets.length})</div>
+                <div className="modal-table-wrap">
+                  <table className="modal-table">
+                    <thead><tr>{["Game","Selection","Odds","Stake","Pot.Win","Type","Date"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {casinoBets.length > 0 ? casinoBets.map((b:any, i:number) => (
+                        <tr key={b._id ?? i}>
+                          <td>{b.game ?? "—"}</td>
+                          <td>{b.selection ?? b.team ?? "—"}</td>
+                          <td>{b.odds ?? "—"}</td>
+                          <td>{b.stake ?? b.amt ?? "—"}</td>
+                          <td className="td-green">{b.potentialWin ?? b.profit ?? "—"}</td>
+                          <td className={`modal-mode modal-mode--${b.betType ?? b.mode}`}>{b.betType ?? b.mode ?? "—"}</td>
+                          <td>{b.date}</td>
+                        </tr>
+                      )) : <tr><td colSpan={7} className="modal-empty">No casino bets</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              <Link 
-                to="/complete" 
-                onClick={() => setShowSidebar(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <img src="/img/CG1.jpg" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>Complete Games</span>
-              </Link>
+              {/* Dice Bets */}
+              <div className="modal-section">
+                <div className="modal-section-title">DICE BETS ({diceBets.length})</div>
+                <div className="modal-table-wrap">
+                  <table className="modal-table">
+                    <thead><tr>{["Bet On","Type","Odds","Stake","Pot.Win","Profit","Loss","Date"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {diceBets.length > 0 ? diceBets.map((b:any, i:number) => (
+                        <tr key={b._id ?? i}>
+                          <td><b>{b.betOn}</b></td>
+                          <td style={{textTransform:"capitalize"}}>{b.betType}</td>
+                          <td>{b.odds}</td><td>{b.stake}</td>
+                          <td className="td-green">{b.potentialWin}</td>
+                          <td className="td-green">{b.profit}</td>
+                          <td className="td-red">{b.loss}</td>
+                          <td>{b.date}</td>
+                        </tr>
+                      )) : <tr><td colSpan={8} className="modal-empty">No dice bets</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              <Link 
-                to="/password" 
-                onClick={() => setShowSidebar(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-              >
-                <img src="/img/CP.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>Change Password</span>
-              </Link>
+              {/* Matka Bets */}
+              <div className="modal-section">
+                <div className="modal-section-title">MATKA BETS ({matkaBets.length})</div>
+                <div className="modal-table-wrap">
+                  <table className="modal-table">
+                    <thead><tr>{["Market","Number","Type","Rate","Stake","Pot.Win","Date"].map(h=><th key={h}>{h}</th>)}</tr></thead>
+                    <tbody>
+                      {matkaBets.length > 0 ? matkaBets.map((b:any, i:number) => (
+                        <tr key={b._id ?? i}>
+                          <td style={{textTransform:"capitalize"}}>{b.market}</td>
+                          <td><b>{b.number}</b></td>
+                          <td style={{textTransform:"capitalize"}}>{b.betType?.replace(/_/g," ")}</td>
+                          <td>{b.rate}</td><td>{b.stake}</td>
+                          <td className="td-green">{b.potentialWin}</td>
+                          <td>{b.date}</td>
+                        </tr>
+                      )) : <tr><td colSpan={7} className="modal-empty">No matka bets</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
-              <Link 
-                to="/profile" 
+            </div>{/* end modal-body */}
+          </div>{/* end modal-box */}
+        </div>
+      )}
+
+      {/* ── Sidebar ── */}
+      {showSidebar && (
+        <>
+          <div className="sidebar-overlay" onClick={() => setShowSidebar(false)} />
+          <aside className="sidebar">
+            {/* Sidebar header */}
+            <div className="sidebar__head">
+              <img src="/img/user.png" alt="avatar" className="sidebar__avatar" />
+              <span className="sidebar__name">{uId}</span>
+              <span className="sidebar__balance">₹ {balance}</span>
+            </div>
+
+            {/* Nav links */}
+            <nav className="sidebar__nav">
+              {NAV_ITEMS.map(item => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="sidebar__item"
+                  onClick={() => setShowSidebar(false)}
+                >
+                  <img src={item.icon} alt="" className="sidebar__icon" />
+                  <span>{item.label}</span>
+                  <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
+              ))}
+
+              {/* Matka */}
+              <Link
+                to="/satta-matka"
+                className="sidebar__item"
                 onClick={() => setShowSidebar(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-text)",
-                  textDecoration: "none",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
               >
-                <img src="/img/Profile.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>My Profile</span>
+                <img src="/img/matka.png" alt="" className="sidebar__icon" />
+                <span>Matka</span>
+                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
               </Link>
 
               {/* Logout */}
-              <div 
-                onClick={() => {
-                  setShowSidebar(false)
-                  handleLogOut()
-                }}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "15px 20px",
-                  color: "var(--color-error)",
-                  cursor: "pointer",
-                  borderBottom: "1px solid var(--color-border)",
-                  transition: "background 0.2s"
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = "var(--color-surface)"}
-                onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+              <button
+                className="sidebar__item sidebar__item--logout"
+                onClick={() => { setShowSidebar(false); handleLogOut() }}
               >
-                <img src="/img/LGTop.png" alt="" style={{ width: "30px", height: "30px", marginRight: "15px" }} />
-                <span style={{ fontSize: "16px", fontWeight: "500" }}>Logout</span>
-              </div>
-            </div>
-          </div>
-
-          <style>{`
-            @keyframes fadeIn {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
-            @keyframes slideInLeft {
-              from { transform: translateX(-100%); }
-              to { transform: translateX(0); }
-            }
-          `}</style>
+                <img src="/img/LGTop.png" alt="" className="sidebar__icon" />
+                <span>Logout</span>
+              </button>
+            </nav>
+          </aside>
         </>
       )}
-    </div>
+    </>
   )
 }
 

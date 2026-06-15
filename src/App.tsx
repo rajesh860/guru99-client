@@ -1,17 +1,12 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, Navigate } from "react-router-dom"
 import { Suspense, lazy, useEffect } from "react"
 import "./App.scss"
 import CommonLodding from "./Component/CommonLodding"
 import ProtectedRoute from "./Component/ProtectedRoute"
 import NewLoginPage from "./Pages/Login/NewLoginPage"
-import TeenPattiGame from "./Component/casinoDetail/teenPatti"
-import CasinoBets from "./Pages/casinoBets"
-import AndarBhar from "./Component/casinoDetail/andarBhar"
 import "slick-carousel/slick/slick.css"
 import "slick-carousel/slick/slick-theme.css"
 import LayoutOld from "./Component/LayoutOld"
-import Lucky7 from "./Component/casinoDetail/Lucky7/Lucky7"
-import CasinoDetail from "./Pages/Casino/CasinoDetail"
 import { ThemeProvider } from "./context/ThemeContext"
 
 const Dashboard = lazy(() => import("./Pages/Dashboard/Dashboard"))
@@ -31,7 +26,10 @@ const ChangePassword = lazy(
   () => import("./Pages/ChangePassword/ChangePassword"),
 )
 const Casino = lazy(() => import("./Pages/Casino/Casino"))
+const CasinoDetail = lazy(() => import("./Pages/Casino/CasinoDetail"))
 const Matka = lazy(() => import("./Pages/matka"))
+const DicePage    = lazy(() => import("./Pages/Dice/DicePage"))
+const AviatorGame = lazy(() => import("./Pages/Aviator/AviatorGame"))
 const MatkaDetail = lazy(() => import("./Pages/matkaDetail"))
 const AllCasinoResults = lazy(() => import("./Pages/AllCasinoResults/AllCasinoResults"))
 
@@ -58,17 +56,20 @@ const App = () => {
               <Route path="/" element={<Layout />}>
                 <Route path="/main" element={<Dashboard />} />
                 <Route path="/satta-matka" element={<Matka />} />
+                <Route path="/dice" element={<DicePage />} />
+                <Route path="/aviator" element={<AviatorGame />} />
                 <Route path="/satta-matka/:gameName" element={<MatkaDetail />} />
+                {/* Casino routes — list + detail active, others blocked */}
+                <Route path="/casino-list"       element={<Casino />} />
                 <Route path="/casino/detail/:id" element={<CasinoDetail />} />
-                <Route path="/casino/:id" element={<AndarBhar />} />
-                <Route path="/lucky7/:id" element={<Lucky7 />} />
+                <Route path="/casino/:id"        element={<Navigate to="/main" replace />} />
+                <Route path="/lucky7/:id"        element={<Navigate to="/main" replace />} />
+                <Route path="/casino-bets"       element={<Navigate to="/main" replace />} />
                 <Route path="/inplay" element={<Inpaly />} />
-                <Route path="/casino-bets" element={<CasinoBets />} />
                 <Route path="/complete" element={<Complete />} />
                 <Route path="/ledger" element={<Ledger />} />
                 <Route path="/casino-ledger/:game/:date" element={<CasinoLedger />} />
                 <Route path="/statement" element={<Statement />} />
-                <Route path="/casino-list" element={<Casino />} />
                 <Route path="/all-casino-result/:gameType" element={<AllCasinoResults />} />
                 <Route path="/cricket/:id" element={<GameDeatils />} />
                 <Route path="/cricketResult/:id" element={<CricketResult />} />

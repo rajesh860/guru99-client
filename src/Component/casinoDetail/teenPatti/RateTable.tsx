@@ -26,7 +26,7 @@ const RateTable = ({ data, datat1, timer, lability }) => {
 
   useEffect(() => {
     if (betPlaceResponse) {
-      if (betPlaceResponse?.status) {
+      if (betPlaceResponse?.success ?? betPlaceResponse?.status) {
         snackbarUtil.success(betPlaceResponse?.message)
         setModalVisible(false)
       } else {

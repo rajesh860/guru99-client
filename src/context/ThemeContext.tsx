@@ -68,28 +68,6 @@ export const themes: Record<string, Theme> = {
       bgPanel: '#2a3a50',
     },
   },
-  green: {
-    name: 'Forest Green',
-    colors: {
-      primary: '#10b981',
-      secondary: '#059669',
-      accent: '#34d399',
-      background: '#0a1810',
-      surface: '#1a2f23',
-      text: '#f0fdf4',
-      textSecondary: '#86efac',
-      border: '#2d4a3a',
-      success: '#10b981',
-      error: '#ef4444',
-      warning: '#f59e0b',
-      info: '#3b82f6',
-      cardBg: '#1a2f23',
-      headerBg: '#0f1f17',
-      sidebarBg: '#1a2f23',
-      gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      bgPanel: '#243d2d',
-    },
-  },
   purple: {
     name: 'Royal Purple',
     colors: {

@@ -1,0 +1,125 @@
+// Casino Game Buttons Bar
+
+.casino-btn-bar {
+  display: flex;
+  gap: 8px;
+  padding: 5px 7px;
+  background: var(--color-surface, #131a26);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+
+  // Mobile — infinite horizontal scroll
+  &--mobile {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  // Desktop — normal wrap layout
+  &--desktop {
+    overflow-x: visible;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 8px 16px;
+    gap: 10px;
+  }
+}
+
+// ── Base button ───────────────────────────────────────────────
+.casino-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "Roboto", sans-serif;
+  white-space: nowrap;
+  transition: transform 0.15s, opacity 0.15s;
+
+  &:active { transform: scale(0.96); }
+}
+
+// ── Coming Soon / Off ─────────────────────────────────────────
+.casino-btn--off {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.45);
+  border: 1px solid rgba(255,255,255,0.1);
+
+  &:hover { background: rgba(255,255,255,0.11); color: rgba(255,255,255,0.65); }
+}
+
+// ── Live / Active ─────────────────────────────────────────────
+.casino-btn--live {
+  background: linear-gradient(135deg, #1a3a2a 0%, #0d2018 100%);
+  color: #00e676;
+  border: 1px solid rgba(0,230,118,0.45);
+  box-shadow: 0 0 12px rgba(0,230,118,0.15), inset 0 1px 0 rgba(0,230,118,0.08);
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 35%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0,230,118,0.12), transparent);
+    animation: btnShimmer 2s linear infinite;
+  }
+
+  &:hover { box-shadow: 0 0 18px rgba(0,230,118,0.3); }
+}
+
+@keyframes btnShimmer {
+  from { left: -60%; }
+  to   { left: 120%; }
+}
+
+// ── Live dot ──────────────────────────────────────────────────
+.casino-btn-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e676;
+  flex-shrink: 0;
+  animation: dotPing 1.3s ease-in-out infinite;
+  box-shadow: 0 0 5px #00e676;
+}
+
+@keyframes dotPing {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.5); }
+}
+
+// ── LIVE tag ──────────────────────────────────────────────────
+.casino-btn-live-tag {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #00e676;
+  background: rgba(0,230,118,0.12);
+  border: 1px solid rgba(0,230,118,0.3);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.casino-btn-label {
+  position: relative;
+}
+
+.casino-btn-soon-tag {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 1px 5px;
+  border-radius: 4px;
+}

@@ -27,8 +27,8 @@ const CardCompAB = ({ sid, br, t2BySid, liblity }: any) => {
   useEffect(() => {
     if (!betPlaceResponse) return
 
-    const { status, message } = betPlaceResponse
-    if (status) {
+    const { status, success, message } = betPlaceResponse
+    if (success ?? status) {
       snackbarUtil.success(message)
       setModalVisible(false)
     } else {

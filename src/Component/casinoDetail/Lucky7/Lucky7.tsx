@@ -1,383 +1,341 @@
-import { useEffect, useState } from "react"
-import { FaArrowRight } from "react-icons/fa"
+import { useEffect, useRef, useState } from "react"
+import { useParams } from "react-router-dom"
+import { FaLock } from "react-icons/fa"
 import BackBtn from "../../BackBtn/BackBtn"
-import {
-  useBetPlaceMutation,
-  useCasinoResultQuery,
-} from "../../../../store/service/casino/casinoServices"
-import { Link, useParams } from "react-router-dom"
-import { LetterAndColorById } from "../resultCommon"
-import ResultModal from "./ResultModalDt"
-import "../teenPatti/styles.scss"
-import { useOdds } from "../../Casino_Data/UseOdds"
-import { tableIdtoUrl } from "../../Casino_Data/Constant"
-import snackbarUtil from "../../../utils/Snackbar"
-import BetModal from "../../betPlaceModal2/BetModal"
-import CardGameBoard from "./CardgameBoard"
-import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
-// Utility function to format time
-const formatTimestamp = (timestamp: number) => {
-  if (!timestamp) return "--:--:--"
+import { useGetCasinoMyBetsQuery, useGetCasinoCompletedBetsQuery } from "../../../../store/service/userServices/userServices"
+import { videoIdById } from "../../Casino_Data/Constant"
+import PlaceBetModal from "../teenPatti/PlaceBetModal"
+import Lucky7RoundDetailModal from "./Lucky7RoundDetailModal"
+import { getCardImage } from "../../../utils/cardImage"
+import "./Lucky7.scss"
 
-  const date = new Date(timestamp)
 
-  return date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  })
-}
-
-const getCardImage = (cardCode?: string) => {
-  if (!cardCode || cardCode === "1") {
-    return "https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/1.jpg"
-  }
-  const mapped = cardCode.includes("HH")
-    ? cardCode.replace("HH", "SS")
-    : cardCode.includes("SS")
-      ? cardCode.replace("SS", "DD")
-      : cardCode.includes("DD")
-        ? cardCode.replace("DD", "HH")
-        : cardCode
-  return `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${mapped}.jpg`
-}
-const Lucky7 = () => {
-  const { id } = useParams()
-  const [first, setFirst] = useState("")
-  const [openMod, setOpenMod] = useState(false)
-
-  // Transform bet data for BetHistoryTable
-  const transformBetHistory = (betsData: any[]) => {
-    return (
-      betsData?.map((bet: any) => ({
-        team: bet.selectionName || "N/A",
-        mode: bet.back ? "BACK" : "LAY",
-        rate: bet.odds ? parseFloat(bet.odds).toFixed(2) : "0.00",
-        amount: bet.stake ? parseFloat(bet.stake).toFixed(2) : "0.00",
-        result: bet.pnl > 0 ? "Win" : bet.pnl < 0 ? "Loss" : "Not Declare",
-        dateTime: bet.timeStamp
-          ? new Date(bet.timeStamp).toLocaleString()
-          : "N/A",
-      })) || []
-    )
-  }
-  const [countdown, setCountdown] = useState("00:00")
-
-  const { odds } = useOdds(tableIdtoUrl[id])
-
-  const { data: betsResponse } = useGetCasinoMyBetQuery(
-    {
-      isGameCompleted: false,
-      sportId: 5015,
-      tableId: id,
-    },
-    { pollingInterval: 1000 },
-  )
-
-  const c1 = odds?.t1?.[0]?.C1
-
-  // Removed useCasinoResultQuery
-
-  const handleClick = val => {
-    setFirst(val)
-    if (val) {
-      setOpenMod(true)
-    }
-  }
-
-  const t2 = odds?.t2 || []
-
-  const [modalVisible, setModalVisible] = useState(false)
+const Lucky7: React.FC = () => {
+  const { id } = useParams<{ id: string }>()
+  const [betModalVisible, setBetModalVisible] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
-
-  const [trigger, { data: betPlaceResponse, isLoading }] = useBetPlaceMutation()
-  const handleModalClose = () => {
-    setModalVisible(false)
-  }
-
-  const handleModalSubmit = (data: any) => {
-    trigger(data)
-  }
-
-  const handleRateClick = (item: any) => {
-    setSelectedPlayer({ ...item, isBack: true })
-    setModalVisible(true)
-  }
+  const [countdown, setCountdown] = useState("00:00")
+  const [wsData, setWsData] = useState<any>(null)
+  const [cardFlipping, setCardFlipping] = useState(false)
+  const [betsTab, setBetsTab] = useState<"open" | "completed">("open")
+  const [roundDetailOpen, setRoundDetailOpen] = useState(false)
+  const [selectedRoundId, setSelectedRoundId] = useState("")
+  const [selectedT3Item, setSelectedT3Item] = useState<any>(null)
+  const wsRef = useRef<WebSocket | null>(null)
 
   useEffect(() => {
-    if (betPlaceResponse) {
-      if (betPlaceResponse?.status) {
-        snackbarUtil.success(betPlaceResponse?.message)
-        setModalVisible(false)
-      } else {
-        snackbarUtil.error(betPlaceResponse?.message)
+    const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/casino`)
+    wsRef.current = ws
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ type: "subscribe", game: "lucky7eu" }))
+    }
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data)
+        if (msg.type === "gameData" && msg.game === "lucky7eu") {
+          setWsData(msg)
+        }
+      } catch {
+        // ignore parse errors
       }
     }
-  }, [betPlaceResponse])
 
-  // Autotime-based countdown
+    ws.onerror = () => {}
+    ws.onclose = () => {}
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) ws.close()
+    }
+  }, [])
+
+  const { data: myBetsResponse } = useGetCasinoMyBetsQuery(
+    { game: "lucky7eu" },
+    { pollingInterval: 2000 }
+  )
+  const { data: completedBetsRes } = useGetCasinoCompletedBetsQuery(
+    { game: "lucky7eu" },
+    { skip: betsTab !== "completed", pollingInterval: 5000 }
+  )
+
+  const openBets: any[] = myBetsResponse?.data ?? []
+  const completedBets: any[] = completedBetsRes?.data ?? completedBetsRes?.bets ?? []
+
   useEffect(() => {
-    if (!odds?.t1?.[0]?.autotime) {
+    const autotime = wsData?.t1?.autotime ?? wsData?.autotime
+    if (!autotime) {
       setCountdown("00:00")
       return
     }
 
-    const autoTimeSeconds = parseInt(odds.t1[0].autotime)
+    const autoTimeSeconds = parseInt(autotime)
     if (autoTimeSeconds <= 0) {
       setCountdown("00:00")
       return
     }
 
-    let remainingTime = autoTimeSeconds
-    setCountdown(
-      `${Math.floor(remainingTime / 60)
-        .toString()
-        .padStart(2, "0")}:${(remainingTime % 60).toString().padStart(2, "0")}`,
-    )
+    let remaining = autoTimeSeconds
+    const fmt = (s: number) =>
+      `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`
 
+    setCountdown(fmt(remaining))
     const timer = setInterval(() => {
-      remainingTime -= 1
-      if (remainingTime <= 0) {
+      remaining -= 1
+      if (remaining <= 0) {
         setCountdown("00:00")
         clearInterval(timer)
       } else {
-        setCountdown(
-          `${Math.floor(remainingTime / 60)
-            .toString()
-            .padStart(
-              2,
-              "0",
-            )}:${(remainingTime % 60).toString().padStart(2, "0")}`,
-        )
+        setCountdown(fmt(remaining))
       }
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [odds?.t1?.[0]?.autotime])
+  }, [wsData?.t1?.autotime, wsData?.autotime])
+
+  const t2: any[] = wsData?.t2 ?? []
+
+  const getOption = (nat: string) => t2.find((o: any) => o.nat === nat)
+
+  const lowOption   = getOption("LOW Card")
+  const highOption  = getOption("HIGH Card")
+  const card7Option = getOption("Card 7")
+
+const isSuspended = (item: any) => !item || item.gstatus !== "1"
+
+  const handleRateClick = (item: any) => {
+    if (isSuspended(item)) return
+    setSelectedPlayer({ ...item, isBack: true })
+    setBetModalVisible(true)
+  }
+
+  const resultHistory: any[] = wsData?.t3 ?? []
+  const roundId = wsData?.t1?.mid ?? wsData?.roundId ?? ""
+  const videoId = videoIdById[id ?? ""] ?? "3032"
+  const c1 = wsData?.t1?.C1
+
+  useEffect(() => {
+    if (!c1) return
+    setCardFlipping(true)
+    const t = setTimeout(() => setCardFlipping(false), 600)
+    return () => clearTimeout(t)
+  }, [c1])
 
   return (
     <>
       <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
 
-      <div className="teenpatti-container">
-        <div className="left-col">
-          <div className="round-id-header">
-            <div className="left">
-              Round: {odds?.t1?.[0]?.mid || "Loading..."}
-            </div>
-            <div className="right">
-              <button>Live Tv</button>
-            </div>
+      <div className="l7n-container">
+        <div className="l7n-header">
+          <div className="l7n-header-left">
+            Lucky 7 - B
+            <span className="l7n-rules-link"> | Rules</span>
           </div>
-
-          <div className="game-section">
-            <div
-              className="timer"
-              style={{
-                // background: countdown === "00:00" ? "#dc3545" : "#28a745",
-                transition: "background-color 0.3s ease",
-                color: "white",
-                padding: "8px 16px",
-                borderRadius: "20px",
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              {countdown === "00:00" ? "BETTING CLOSED" : `Time: ${countdown}`}
-            </div>
-            <iframe
-              src="https://casino.loki7exch.com/route/?id=3058"
-              title="TeenPatti Stream"
-              allowFullScreen
-            ></iframe>
-
-            <div className="card-area">
-              <div className="top">
-                <div className="card-col">
-                  <img src={getCardImage(c1)} alt={c1 || "Card"} />
-                </div>
-              </div>
-            </div>
+          <div className="l7n-header-right">
+            Round Id: {roundId || "---"}
           </div>
-          {/* <div className="lucky7-odds-section_">
-            <div className="lucky7-odds-container_ low-high-cards-container_">
-              <div
-                className="lucky7-odds-box_ high-low-card"
-                onClick={() => handleRateClick(t2?.[0])}
-              >
-                <div className="odds-price_">
-                  {t2?.[0]?.gstatus ? t2[0]?.rate : "0.00"}
-                </div>
-                <div className="odds-label_ suspended">{t2[0]?.nation}</div>
-                <div
-                  className="odds-position_  plus"
-                  style={{
-                    color:
-                      liblity?.data?.find(item => item?.sid === t2?.[0]?.sid)
-                        ?.liability > 0
-                        ? "green"
-                        : "red",
-                  }}
-                >
-                  {
-                    liblity?.data?.find(item => item?.sid === t2?.[0]?.sid)
-                      ?.liability
-                  }
-                </div>
-              </div>
-              <div>
-                <div
-                  className="low-high-card-image_"
-                  onClick={() => handleRateClick(t2?.[2])}
-                >
-                  <img
-                    src="https://betguru365.in/img/card7.jpg"
-                    alt=""
-                    className="card-image_"
-                  />
-                </div>
-                <div
-                  className="odds-position_  plus"
-                  style={{
-                    textAlign: "center",
-                    color:
-                      liblity?.data?.find(item => item?.sid === t2?.[1]?.sid)
-                        ?.liability > 0
-                        ? "green"
-                        : "red",
-                  }}
-                >
-                  {
-                    liblity?.data?.find(item => item?.sid === t2?.[1]?.sid)
-                      ?.liability
-                  }
-                </div>
-              </div>
-
-              <div
-                className="lucky7-odds-box_ high-low-card"
-                onClick={() => handleRateClick(t2?.[1])}
-              >
-                <div className="odds-price_">
-                  {t2?.[2]?.gstatus ? t2[1]?.rate : "0.00"}
-                </div>
-                <div className="odds-label_ suspended">{t2?.[1]?.nation}</div>
-                <div
-                  className="odds-position_  plus"
-                  style={{
-                    color:
-                      liblity?.data?.find(item => item?.sid === t2?.[1]?.sid)
-                        ?.liability > 0
-                        ? "green"
-                        : "red",
-                  }}
-                >
-                  {
-                    liblity?.data?.find(item => item?.sid === t2?.[1]?.sid)
-                      ?.liability
-                  }
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          <div className="last-result">
-            <div className="left">Last Result</div>
-            <div className="right">View All</div>
-          </div>
-
-          <div className="result-circles">
-            {resultReponse?.map((r: any, i) => (
-              <div
-                key={i}
-                className="circle"
-                style={{
-                  background: LetterAndColorById?.[id]?.[r?.result]?.color,
-                }}
-                onClick={() => handleClick(r?.mid)}
-              >
-                {LetterAndColorById?.[id]?.[r?.result]?.label}
-              </div>
-            ))}
-          </div>
-          <CardGameBoard
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
-            t2Data={t2}
-            liabilityData={liblity?.data}
-            onRateClick={handleRateClick}
-          />
-
-          {/* Bet History Table */}
-          <BetHistoryTable
-            data={transformBetHistory(betsResponse?.data)}
-            roundId={id}
-          />
         </div>
 
-        <div className="right-col">
-          <div className="my-bet h-0">
-            <div className="title my-bet-title">MY BET</div>
-            <table className="bet-table personal-info-content">
+        <div className="l7n-video-wrapper">
+          <div className="l7n-current-card">
+            <div className={`l7n-card-flip-wrap ${cardFlipping ? "l7n-card-flipping" : ""}`}>
+              <img src={getCardImage(c1)} alt="card" className="l7n-card-img" />
+            </div>
+            <div className="l7n-card-label-text">Card</div>
+          </div>
+          <div className="l7n-video-area">
+            <iframe
+              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoId}`}
+              title="Lucky 7 Stream"
+              allowFullScreen
+            />
+          </div>
+        </div>
+
+        <div className={`l7n-timer ${countdown === "00:00" ? "l7n-timer--closed" : "l7n-timer--open"}`}>
+          {countdown === "00:00" ? "BETTING CLOSED" : countdown}
+        </div>
+
+        <div className="l7n-main-bets">
+          <div className="l7n-main-bet-col">
+            <div className="l7n-rate-label">{lowOption?.rate ?? "0.95"}</div>
+            <button
+              className={`l7n-main-btn l7n-low-btn ${isSuspended(lowOption) ? "l7n-main-btn--suspended" : ""}`}
+              onClick={() => handleRateClick(lowOption)}
+            >
+              <span className="l7n-btn-label">LOW</span>
+              {isSuspended(lowOption) && (
+                <div className="l7n-lock-overlay">
+                  <FaLock size={16} color="#fff" />
+                </div>
+              )}
+            </button>
+            <div className="l7n-pl">
+              {lowOption?.pnl !== undefined && lowOption.pnl !== 0 ? (
+                <span style={{ color: lowOption.pnl > 0 ? "#00e676" : "#ff5252" }}>
+                  {lowOption.pnl}
+                </span>
+              ) : <span>0</span>}
+            </div>
+          </div>
+
+          <div className="l7n-main-center">
+            <button
+              className={`l7n-seven-wrap ${isSuspended(card7Option) ? "l7n-seven-wrap--suspended" : ""}`}
+              // onClick={() => handleRateClick(card7Option)}
+              disabled={isSuspended(card7Option)}
+            >
+              <img src="/casino/CARD%207.png" alt="7" className="l7n-seven-img" />
+              {isSuspended(card7Option) && (
+                <div className="l7n-lock-overlay">
+                  <FaLock size={16} color="#fff" />
+                </div>
+              )}
+            </button>
+            <div className="l7n-pl">
+              {card7Option?.pnl !== undefined && card7Option.pnl !== 0 ? (
+                <span style={{ color: card7Option.pnl > 0 ? "#00e676" : "#ff5252" }}>
+                  {card7Option.pnl}
+                </span>
+              ) : <span>0</span>}
+            </div>
+          </div>
+
+          <div className="l7n-main-bet-col">
+            <div className="l7n-rate-label">{highOption?.rate ?? "0.95"}</div>
+            <button
+              className={`l7n-main-btn l7n-high-btn ${isSuspended(highOption) ? "l7n-main-btn--suspended" : ""}`}
+              onClick={() => handleRateClick(highOption)}
+            >
+              <span className="l7n-btn-label">HIGH</span>
+              {isSuspended(highOption) && (
+                <div className="l7n-lock-overlay">
+                  <FaLock size={16} color="#fff" />
+                </div>
+              )}
+            </button>
+            <div className="l7n-pl">
+              {highOption?.pnl !== undefined && highOption.pnl !== 0 ? (
+                <span style={{ color: highOption.pnl > 0 ? "#00e676" : "#ff5252" }}>
+                  {highOption.pnl}
+                </span>
+              ) : <span>0</span>}
+            </div>
+          </div>
+        </div>
+
+
+        <div className="l7n-history-section">
+          <div className="l7n-result-header">Last 10 Results</div>
+          <div className="l7n-result-list">
+            {resultHistory.length === 0 ? (
+              <span className="l7n-no-history">No history yet</span>
+            ) : (
+              resultHistory.slice(0, 10).map((r: any, i: number) => {
+                const winner = r?.winner ?? ""
+                const label = winner === "High" ? "H" : winner === "Low" ? "L" : "T"
+                const bg = label === "H" ? "linear-gradient(135deg, #b8860b 0%, #d4ac0d 100%)"
+                         : label === "L" ? "linear-gradient(135deg, #2c3e50 0%, #3d5166 100%)"
+                         :                 "linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)"
+                const shadow = label === "H" ? "0 4px 12px rgba(212,172,13,0.5)"
+                             : label === "L" ? "0 4px 12px rgba(44,62,80,0.5)"
+                             :                 "0 4px 12px rgba(46,204,113,0.5)"
+                return (
+                  <div
+                    key={r?.mid || i}
+                    className="l7n-result-circle"
+                    style={{ background: bg, boxShadow: shadow }}
+                    title={r?.winner}
+                    onClick={() => {
+                      setSelectedRoundId(r?.mid ?? "")
+                      setSelectedT3Item(r)
+                      setRoundDetailOpen(true)
+                    }}
+                  >
+                    {label}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+
+        <div className="tp-open-bets">
+          <div className="dice-bets-tabs">
+            <button
+              className={`dbt ${betsTab === "open" ? "dbt--active" : ""}`}
+              onClick={() => setBetsTab("open")}
+            >Open Bets</button>
+            <button
+              className={`dbt ${betsTab === "completed" ? "dbt--active" : ""}`}
+              onClick={() => setBetsTab("completed")}
+            >Completed</button>
+          </div>
+          <div className="tp-bets-wrapper">
+            <table className="tp-bets-table">
               <thead>
                 <tr>
-                  <th>Matched Bet</th>
-                  <th>Market</th>
+                  <th>Round ID</th>
+                  <th>Runner</th>
                   <th>Odds</th>
                   <th>Stake</th>
+                  <th>P/L</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {betsResponse?.data?.map((item: any) => {
-                  return (
-                    <tr
-                      key={item?.gameName}
-                      className={`${item?.back ? "back" : "lay"}`}
-                    >
-                      <td>
-                        {" "}
-                        {item?.selectionName}({item?.roundId})
+                {(() => {
+                  const bets = betsTab === "open" ? openBets : completedBets
+                  if (!bets.length) return (
+                    <tr>
+                      <td colSpan={6} className="tp-bets-empty">
+                        {betsTab === "open" ? "No open bets" : "No completed bets"}
                       </td>
-                      <td>{item?.gameName}</td>
-                      <td>{item?.odds}</td>
-                      <td>{item?.stake}</td>
                     </tr>
                   )
-                })}
+                  return bets.map((bet: any, idx: number) => {
+                    const status = bet.status ?? "pending"
+                    const pnl    = bet.pnl ?? 0
+                    const pl     = betsTab === "completed" ? (bet.profitLoss ?? 0) : (bet.potentialWin ?? pnl)
+                    return (
+                      <tr key={idx}>
+                        <td className="td-round-id">{bet.roundId ?? "—"}</td>
+                        <td className="td-runner">{bet.betOn ?? bet.selectionName ?? bet.nat ?? "—"}</td>
+                        <td>{bet.odds ?? "—"}</td>
+                        <td>{bet.stake ?? "—"}</td>
+                        <td className={pl > 0 ? "td-win" : pl < 0 ? "td-loss" : ""}>
+                          {pl !== 0 ? pl : "—"}
+                        </td>
+                        <td>
+                          <span className={`tp-bet-badge ${
+                            status === "won"  || status === "win"  ? "tp-bet-win"  :
+                            status === "lost" || status === "loss" ? "tp-bet-loss" : "tp-bet-pending"
+                          }`}>{status}</span>
+                        </td>
+                      </tr>
+                    )
+                  })
+                })()}
               </tbody>
             </table>
-            <div className="see-btn" style={{ paddingBottom: "15px" }}>
-              <Link to={"/casino-bets"}>
-                <button
-                  className="see-all"
-                  style={{
-                    background: "#212529",
-                    borderColor: "#212529",
-                    fontWeight: 400,
-                  }}
-                >
-                  See All Complete Bets
-                </button>
-              </Link>
-            </div>
           </div>
         </div>
       </div>
-      <ResultModal
-        setOpen={setOpenMod}
-        open={openMod}
-        tableId={id}
-        mid={first}
+
+      <PlaceBetModal
+        isOpen={betModalVisible && !!selectedPlayer}
+        onClose={() => setBetModalVisible(false)}
+        selectedPlayer={selectedPlayer}
+        matchId={id}
+        game="lucky7eu"
       />
 
-      {modalVisible && selectedPlayer && (
-        <BetModal
-          onClose={handleModalClose}
-          selectedPlayer={selectedPlayer}
-          matchId={id}
-        />
-      )}
+      <Lucky7RoundDetailModal
+        isOpen={roundDetailOpen}
+        onClose={() => setRoundDetailOpen(false)}
+        roundId={selectedRoundId}
+        t3Item={selectedT3Item}
+      />
     </>
   )
 }

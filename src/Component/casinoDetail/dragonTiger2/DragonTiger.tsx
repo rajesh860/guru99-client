@@ -6,7 +6,7 @@ import {
   useBetPlaceMutation,
   useCasinoResultQuery,
 } from "../../../../store/service/casino/casinoServices"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useNavigate } from "react-router-dom"
 import { LetterAndColorById } from "../resultCommon"
 import ResultModal from "./ResultModalDt"
 import BetModal from "../../betPlaceModal2/BetModal"
@@ -42,19 +42,7 @@ const formatTimestamp = (timestamp: number) => {
   })
 }
 
-const getCardImage = (cardCode?: string) => {
-  if (!cardCode || cardCode === "1") {
-    return "https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/1.jpg"
-  }
-  const mapped = cardCode.includes("HH")
-    ? cardCode.replace("HH", "SS")
-    : cardCode.includes("SS")
-      ? cardCode.replace("SS", "DD")
-      : cardCode.includes("DD")
-        ? cardCode.replace("DD", "HH")
-        : cardCode
-  return `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${mapped}.jpg`
-}
+import { getCardImage } from "../../../utils/cardImage"
 
 const DragonTiger2 = () => {
   const { id } = useParams()
@@ -115,7 +103,7 @@ const DragonTiger2 = () => {
   // Bet place response handler
   useEffect(() => {
     if (betPlaceResponse) {
-      if (betPlaceResponse?.status) {
+      if (betPlaceResponse?.success ?? betPlaceResponse?.status) {
         snackbarUtil.success(betPlaceResponse?.message)
         setBetModalVisible(false)
       } else {
@@ -207,7 +195,7 @@ const DragonTiger2 = () => {
               {countdown === "00:00" ? "BETTING CLOSED" : `Time: ${countdown}`}
             </div>
             <iframe
-              src={`https://casino.loki7exch.com/route/?id=${videoIdById[id] || "3035"}`}
+              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id] || "3035"}`}
               title="DragonTiger Stream"
               allowFullScreen
             ></iframe>

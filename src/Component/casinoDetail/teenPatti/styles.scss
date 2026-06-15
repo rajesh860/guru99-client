@@ -4,12 +4,15 @@
   background: var(--color-background);
   min-height: 100vh;
   padding: 0;
-  margin: 0;
+  margin: 0 auto;
+  max-width: 600px;
 
   .left-col {
     width: 100%;
     max-width: 100%;
-
+   .betting-section {
+        padding-block: 10px;
+   }
     // Top header with user info
     .round-id-header {
       background: var(--color-surface);
@@ -55,7 +58,7 @@
       position: relative;
       background: var(--color-cardBg);
       border-radius: 0;
-      overflow: hidden;
+      overflow: visible;
 
       iframe {
         width: 100%;
@@ -68,29 +71,22 @@
         }
       }
 
-      .countdown-timer {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        background: rgba(0, 0, 0, 0.85);
-        color: var(--color-warning);
-        padding: 12px 20px;
-        border-radius: 8px;
-        font-size: 32px;
-        font-weight: 700;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-        z-index: 10;
-        min-width: 80px;
-        text-align: center;
-        border: 2px solid var(--color-warning);
+      .countdown-timer { display: none; }
 
-        @media screen and (max-width: 768px) {
-          bottom: 15px;
-          right: 15px;
-          font-size: 24px;
-          padding: 8px 16px;
-          min-width: 60px;
-        }
+      .tp-timer {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        z-index: 10;
+
+        &--open   { background: rgba(0,230,118,0.85); color: #000; }
+        &--closed { background: rgba(255,82,82,0.85);  color: #fff; }
       }
 
       .timer {
@@ -109,50 +105,52 @@
 
       .card-area-box-teenpatti {
         position: absolute;
-        top: 20px;
-        left: 20px;
-        right: 20px;
+        top: 5px;
+        left: 8px;
+        right: 8px;
+        width: calc(100% - 16px);
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         z-index: 5;
-
-        @media screen and (max-width: 768px) {
-          top: 10px;
-          left: 10px;
-          right: 10px;
-        }
+        pointer-events: none;
 
         .card-area-left-col,
         .card-area-right-col {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+
           .top-card {
             display: flex;
-            gap: 4px;
-            margin-bottom: 6px;
+            gap: 3px;
 
             img {
-              width: 35px;
-              height: 50px;
-              border-radius: 4px;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+              width: 30px;
+              height: 42px;
+              border-radius: 3px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+              border: 1px solid rgba(255,255,255,0.15);
 
-              @media screen and (max-width: 768px) {
-                width: 28px;
-                height: 40px;
+              @media screen and (max-width: 480px) {
+                width: 22px;
+                height: 32px;
               }
             }
           }
 
           .bottom-label {
-            background: rgba(0, 0, 0, 0.85);
-            color: var(--color-text);
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
             text-align: center;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
           }
         }
       }
@@ -373,4 +371,116 @@ padding-bottom: 8px;
       padding: 10px 8px;
     }
   }
+}
+
+/* ── Open Bets inline table ── */
+.dice-bets-tabs {
+  display: flex;
+  gap: 0;
+  // margin: 12px 10px 0;
+  .dbt {
+    flex: 1;
+    padding: 9px 12px;
+    background: #1e2a38;
+    border: 1px solid #3a3a5a;
+    color: #8888aa;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: background 0.15s, color 0.15s;
+    &:first-child { border-radius: 6px 0 0 0; border-right: none; }
+    &:last-child  { border-radius: 0 6px 0 0; }
+    &--active {
+      background: #252740;
+      color: #fff;
+      border-bottom-color: #252740;
+    }
+    &:not(.dbt--active):hover { background: #222435; color: #ccc; }
+  }
+}
+
+.tp-open-bets {
+    margin: 7px 6px 5px;
+}
+
+.tp-bets-wrapper {
+  border: 1px solid #3a3a5a;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: #1a1c2e;
+}
+
+.tp-bets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+
+  thead tr { background: #1e2a3a; }
+
+  th {
+    padding: 9px 10px;
+    text-align: left;
+    color: #7a7a9a;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #3a3a5a;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(58,58,90,0.4);
+    &:last-child  { border-bottom: none; }
+    &:nth-child(even) { background: rgba(255,255,255,0.02); }
+    &:hover { background: rgba(255,255,255,0.04); }
+  }
+
+  td {
+    padding: 9px 10px;
+    color: #c8c8e0;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .td-runner {
+    color: #e0e0f0;
+    font-weight: 600;
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .td-win  { color: #00e676; font-weight: 600; }
+  .td-loss { color: #ff5252; font-weight: 600; }
+
+  .tp-bets-empty {
+    text-align: center;
+    padding: 24px;
+    color: #5a5a7a;
+    font-size: 13px;
+  }
+}
+
+.tp-bet-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.tp-bet-win     { background: rgba(0,230,118,0.15); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+.tp-bet-loss    { background: rgba(255,82,82,0.15);  color: #ff5252; border: 1px solid rgba(255,82,82,0.3); }
+.tp-bet-pending { background: rgba(255,193,7,0.15);  color: #ffc107; border: 1px solid rgba(255,193,7,0.3); }
+
+.td-round-id {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  font-family: monospace;
+  white-space: nowrap;
 }

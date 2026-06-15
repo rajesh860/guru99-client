@@ -289,6 +289,20 @@ export const userList = createApi({
         method: "GET",
       }),
     }),
+    getPendingBets: build.query<any, void>({
+      query: () => ({ url: "/pending-bets", method: "GET" }),
+    }),
+    getCasinoGameData: build.query<any, { game: string }>({
+      query: ({ game }) => ({ url: `/casino/data/${game}`, method: "GET" }),
+    }),
+    getCasinoCompletedBets: build.query<any, { game: string; fromDate?: string; toDate?: string; page?: number; limit?: number }>({
+      query: ({ game, fromDate, toDate, page = 1, limit = 20 }) => {
+        const params = new URLSearchParams({ game, page: String(page), limit: String(limit) })
+        if (fromDate) params.set("fromDate", fromDate)
+        if (toDate) params.set("toDate", toDate)
+        return { url: `/casino/completed-bets?${params.toString()}`, method: "GET" }
+      },
+    }),
 
     getAccStatement: build.mutation<any, { page?: number; limit?: number }>({
       query: ({ page = 1, limit = 10 }) => ({
@@ -314,6 +328,24 @@ export const userList = createApi({
         method: "POST",
         body,
       }),
+    }),
+    aviatorPlaceBet: build.mutation<any, { stake: number; roundId: string; autoCashout?: number }>({
+      query: body => ({ url: "/aviator/bet", method: "POST", body }),
+    }),
+    aviatorCashout: build.mutation<any, { betId: string; roundId?: string }>({
+      query: body => ({ url: "/aviator/cashout", method: "POST", body }),
+    }),
+    aviatorPendingBets: build.query<any, void>({
+      query: () => ({ url: "/aviator/pending-bets", method: "GET" }),
+    }),
+    aviatorCompletedBets: build.query<any, void>({
+      query: () => ({ url: "/aviator/completed-bets", method: "GET" }),
+    }),
+    aviatorCurrentRound: build.query<any, void>({
+      query: () => ({ url: "/aviator/current-round", method: "GET" }),
+    }),
+    aviatorResults: build.query<any, void>({
+      query: () => ({ url: "/aviator/results", method: "GET" }),
     }),
   }),
 })
@@ -358,4 +390,13 @@ export const {
   useGetAccountStatementQuery,
   useCompletedMatchQuery,
   useTossBetPlacedMutation,
+  useGetPendingBetsQuery,
+  useGetCasinoCompletedBetsQuery,
+  useGetCasinoGameDataQuery,
+  useAviatorPlaceBetMutation,
+  useAviatorCashoutMutation,
+  useAviatorPendingBetsQuery,
+  useAviatorCompletedBetsQuery,
+  useAviatorCurrentRoundQuery,
+  useAviatorResultsQuery,
 } = userList

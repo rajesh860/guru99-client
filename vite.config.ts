@@ -20,6 +20,21 @@ export default defineConfig({
           })
         },
       },
+      "/socket2": {
+        target: "https://socket2.bet99expro.com",
+        changeOrigin: true,
+        ws: true,
+        secure: true,
+        rewrite: path => path.replace(/^\/socket2/, ""),
+        configure: (proxy) => {
+          proxy.on("proxyReq", (proxyReq) => {
+            proxyReq.setHeader("origin", "https://bet99expro.com")
+          })
+          proxy.on("proxyReqWs", (proxyReq) => {
+            proxyReq.setHeader("origin", "https://bet99expro.com")
+          })
+        },
+      },
     },
   },
   build: {

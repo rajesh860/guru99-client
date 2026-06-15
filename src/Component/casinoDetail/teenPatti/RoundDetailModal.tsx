@@ -1,35 +1,42 @@
 import React from "react"
 import "./RoundDetailModal.scss"
 import { useGetRoundDetailQuery } from "../../../../store/service/teenPattiApi"
+import { getCardImage } from "../../../utils/cardImage"
 
 interface Props {
   isOpen: boolean
   onClose: () => void
   roundId: string
   game: string
+  t3Item?: any // fallback data from casinoGameData t3
 }
 
-const getCardImage = (cardCode: string) => {
-  if (!cardCode || cardCode === "1") {
-    return "https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/1.jpg"
+// Parse t3 item → modal-compatible shape
+const parseT3 = (item: any) => {
+  if (!item) return null
+  const allCards = (item.cards as string)?.split(",").map(c => c.trim()) ?? []
+  const playerA  = allCards.slice(0, 3)
+  const playerB  = allCards.slice(3, 6)
+  const descArr  = (item.desc as string)?.split("#").filter(Boolean) ?? []
+  return {
+    roundId: item.mid,
+    winner:  item.winner,
+    cards:   { "Player A": playerA, "Player B": playerB },
+    desc:    descArr,
+    time:    item.time,
   }
-  const mapped = cardCode.includes("HH")
-    ? cardCode.replace("HH", "SS")
-    : cardCode.includes("SS")
-      ? cardCode.replace("SS", "DD")
-      : cardCode.includes("DD")
-        ? cardCode.replace("DD", "HH")
-        : cardCode
-  return `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${mapped}.jpg`
 }
 
-const RoundDetailModal = ({ isOpen, onClose, roundId, game }: Props) => {
-  const { data, isLoading } = useGetRoundDetailQuery(
+const RoundDetailModal = ({ isOpen, onClose, roundId, game, t3Item }: Props) => {
+  const { data: apiData, isLoading } = useGetRoundDetailQuery(
     { game, roundId },
     { skip: !isOpen || !roundId }
   )
 
   if (!isOpen) return null
+
+  // API data first, t3 fallback second
+  const data = apiData ?? parseT3(t3Item)
 
   return (
     <div className="round-detail-overlay" onClick={onClose}>
@@ -37,83 +44,60 @@ const RoundDetailModal = ({ isOpen, onClose, roundId, game }: Props) => {
         {/* Header */}
         <div className="modal-header">
           <h3>20-20 Teenpatti Result</h3>
-          <button className="close-btn" onClick={onClose}>
-            ×
-          </button>
+          <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
-        {isLoading ? (
+        {isLoading && !data ? (
           <div className="loading-state">Loading...</div>
         ) : data ? (
           <>
             {/* Round ID */}
             <div className="round-id-section">
-              Round Id: {data.roundId}
+              Round ID: <strong>{data.roundId}</strong>
             </div>
 
             {/* Cards Section */}
             <div className="cards-section">
-              <div className="player-cards">
-                <div className="player-header">
-                  <div className="player-label">Player A</div>
-                  {data.winner === "Player A" && (
-                    <div className="trophy-icon">🏆</div>
-                  )}
+              {(["Player A", "Player B"] as const).map(player => (
+                <div key={player} className="player-cards">
+                  <div className="player-header">
+                    <div className={`player-label ${data.winner === player ? "player-label--winner" : ""}`}>
+                      {player}
+                    </div>
+                    {data.winner === player && <div className="trophy-icon">🏆</div>}
+                  </div>
+                  <div className="cards-row">
+                    {(data.cards[player] ?? []).map((card: string, idx: number) => (
+                      <img
+                        key={idx}
+                        src={getCardImage(card)}
+                        alt={`${player} card ${idx + 1}`}
+                        className="card-image"
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="cards-row">
-                  {data.cards["Player A"]?.map((card, index) => (
-                    <img
-                      key={index}
-                      src={getCardImage(card)}
-                      alt={`Player A card ${index + 1}`}
-                      className="card-image"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="player-cards">
-                <div className="player-header">
-                  <div className="player-label">Player B</div>
-                  {data.winner === "Player B" && (
-                    <div className="trophy-icon">🏆</div>
-                  )}
-                </div>
-                <div className="cards-row">
-                  {data.cards["Player B"]?.map((card, index) => (
-                    <img
-                      key={index}
-                      src={getCardImage(card)}
-                      alt={`Player B card ${index + 1}`}
-                      className="card-image"
-                    />
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Winner Banner */}
-            <div className="winner-banner">
-              Winner: {data.winner}
+            <div className={`winner-banner ${data.winner === "Player A" ? "winner-banner--a" : "winner-banner--b"}`}>
+              🏆 Winner: {data.winner}
             </div>
 
             {/* Description */}
             {data.desc && data.desc.length > 0 && (
               <div className="description-section">
                 <div className="desc-list">
-                  {data.desc.map((item, index) => (
-                    <div key={index} className="desc-item">
-                      {item}
-                    </div>
+                  {data.desc.map((item: string, idx: number) => (
+                    <div key={idx} className="desc-item">{item}</div>
                   ))}
                 </div>
               </div>
             )}
-
-          
           </>
         ) : (
-          <div className="error-state">Failed to load round details</div>
+          <div className="error-state">No data available for this round</div>
         )}
       </div>
     </div>

@@ -28,7 +28,7 @@ import {
 import { j } from "vitest/dist/reporters-w_64AS5f.js"
 import OddsButton from "./OddsButton"
 import CricketScoreCard from "../../Component/CricketScoreCard"
-import { useGetLiveCricketScoreQuery } from "../../../store/service/cricketScore/cricketScoreService"
+import { useGetLiveCricketScoreQuery, useGetBallFeedsQuery } from "../../../store/service/cricketScore/cricketScoreService"
 
 const GameDeatils = () => {
   const [placeBetData, setPlaceBetData] = useState<any>(null)
@@ -58,6 +58,26 @@ const GameDeatils = () => {
     skip: !id,
     pollingInterval: 2000,
   })
+
+  // Extract matchKey from live score response (from v1 mfkey or direct matchKey field)
+  const _scoreBase: any = liveScoreResponse?.data ?? liveScoreResponse
+  const _matchKey: string =
+    _scoreBase?.matchKey ||
+    _scoreBase?.v1?.[0]?.mfkey ||
+    _scoreBase?.liveData?.matchKey ||
+    id ||
+    ''
+
+  // Ball-by-ball feeds from external cricket API
+  const { data: ballFeedsData } = useGetBallFeedsQuery(
+    { matchKey: _matchKey },
+    { skip: !_matchKey, pollingInterval: 2000 }
+  )
+
+  // Merge ball feeds as v1 into score data
+  const enrichedScoreData: any = _scoreBase
+    ? { ..._scoreBase, v1: ballFeedsData?.length ? ballFeedsData : (_scoreBase?.v1 || []) }
+    : null
 
 const amountInputRef = useRef<HTMLInputElement>(null)
 
@@ -175,8 +195,8 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     
     const connectWebSocket = () => {
       if (!isComponentMounted.current || !id) return
-      
-      const wsUrl = `${import.meta.env.VITE_WS_BASE_URL}/ws/odds`
+
+      const wsUrl = `${import.meta.env.VITE_WS_BASE_URL}/ws/odds?beventId=${id}`
       
       const ws = new WebSocket(wsUrl)
       
@@ -468,7 +488,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
         alignItems: "center"
       }}>
         <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-          {team1?.matchName || "RWP V/s KRK - T20"}
+          {team1?.matchName || ""}
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
           <button
@@ -549,7 +569,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
 
       {/* Scorecard */}
       {scorecardState !== 'hidden' && id && (
-        <CricketScoreCard scoreData={liveScoreResponse?.data ?? liveScoreResponse} />
+        <CricketScoreCard scoreData={enrichedScoreData} />
       )}
 
      

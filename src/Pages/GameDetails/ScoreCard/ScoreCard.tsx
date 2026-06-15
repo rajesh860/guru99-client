@@ -45,7 +45,7 @@ const ScoreCard = ({ eventId, expanded, onToggle }: Props) => {
   })
 
   const { data: liveScoreData } = useGetLiveCricketScoreQuery(eventId, {
-    pollingInterval: 2000,
+    pollingInterval: 1000,
     skip: !eventId,
   })
 

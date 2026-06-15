@@ -1,0 +1,635 @@
+// Lucky7New.scss — Lucky 7 casino component styles
+
+$bg-primary: #1a1a2a;
+$bg-secondary: #2a2a3a;
+$bg-header: #2c3548;
+$bg-card: #24243e;
+$color-low: #3a1a1a;
+$color-low-grad: #5a2020;
+$color-high: #1a3a1a;
+$color-high-grad: #205a20;
+$color-text: #e0e0e0;
+$color-text-muted: #8888aa;
+$color-border: #3a3a5a;
+$color-lock: rgba(0, 0, 0, 0.7);
+$color-profit: #00e676;
+$color-loss: #ff5252;
+$color-history-l: #2d5016;
+$color-history-h: #7a6010;
+
+.l7n-container {
+  background: $bg-primary;
+  color: $color-text;
+  min-height: 100vh;
+  padding: 0 0 40px;
+  font-family: "Roboto", sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+// Header
+.l7n-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $bg-header;
+  padding: 10px 14px;
+  border-bottom: 1px solid $color-border;
+
+  .l7n-header-left {
+    font-weight: 600;
+    font-size: 14px;
+    color: $color-text;
+  }
+
+  .l7n-rules-link {
+    color: #5dade2;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 400;
+  }
+
+  .l7n-header-right {
+    font-size: 12px;
+    color: $color-text-muted;
+    text-align: right;
+  }
+}
+
+// Video wrapper — relative container for card overlay
+.l7n-video-wrapper {
+  position: relative;
+  width: 100%;
+  background: #000;
+}
+
+@keyframes cardFlip {
+  0%   { transform: rotateY(0deg); }
+  40%  { transform: rotateY(90deg); }
+  60%  { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+// Card overlay — top-left corner of video
+.l7n-current-card {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+
+  @media (min-width: 481px) {
+    top: 10px;
+    left: 10px;
+    gap: 4px;
+  }
+}
+
+.l7n-card-flip-wrap {
+  perspective: 600px;
+
+  .l7n-card-img {
+    width: 32px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #c8a200;
+    display: block;
+    backface-visibility: hidden;
+
+    @media (min-width: 481px) {
+      width: 58px;
+      height: 80px;
+      border-radius: 5px;
+    }
+  }
+
+  &.l7n-card-flipping {
+    animation: cardFlip 0.6s ease-in-out;
+  }
+}
+
+.l7n-card-label-text {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 1px 5px;
+  border-radius: 3px;
+
+  @media (min-width: 481px) {
+    font-size: 12px;
+    padding: 2px 7px;
+  }
+}
+
+// Video iframe
+.l7n-video-area {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  overflow: hidden;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+}
+
+// Timer — full-width bar below video (same as DT20)
+.l7n-timer {
+  text-align: center;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+
+  &--open {
+    color: #00e676;
+    background: rgba(0, 230, 118, 0.08);
+  }
+
+  &--closed {
+    color: #ff5252;
+    background: rgba(255, 82, 82, 0.1);
+  }
+}
+
+// Main betting row
+.l7n-main-bets {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px 12px 6px;
+  gap: 8px;
+}
+
+.l7n-main-bet-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  max-width: 120px;
+}
+
+.l7n-rate-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: $color-text;
+  text-align: center;
+}
+
+.l7n-main-btn {
+  position: relative;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  overflow: hidden;
+  transition: opacity 0.2s;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  .l7n-btn-label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  &--suspended {
+    cursor: not-allowed;
+  }
+}
+
+.l7n-low-btn {
+  background: linear-gradient(135deg, $color-low, $color-low-grad);
+  box-shadow: 0 2px 8px rgba(90, 32, 32, 0.45);
+}
+
+.l7n-high-btn {
+  background: linear-gradient(135deg, $color-high, $color-high-grad);
+  box-shadow: 0 2px 8px rgba(32, 90, 32, 0.45);
+}
+
+.l7n-lock-overlay {
+  position: absolute;
+  inset: 0;
+  background: $color-lock;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // border-radius: inherit;
+}
+
+.l7n-pl {
+  font-size: 11px;
+  font-weight: 600;
+  min-height: 16px;
+  text-align: center;
+  color: $color-text-muted;
+}
+
+// Center 7 section
+.l7n-main-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.l7n-seven-wrap {
+  position: relative;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 172, 13, 0.5);
+  box-shadow: 0 2px 12px rgba(212, 172, 13, 0.3);
+  padding: 0%;
+.l7n-seven-img {
+        width: 40px;
+        height: 58px;
+    }
+  &--suspended {
+    cursor: not-allowed;
+    opacity: 0.75;
+  }
+}
+
+.l7n-seven-css-card {
+  position: relative;
+  width: 60px;
+  height: 80px;
+  background: #ffffff;
+  border-radius: 7px;
+  border: 2px solid #c8a200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+
+  .l7n-card-center-val { font-size: 30px; font-weight: 900; color: #111; }
+  .l7n-card-val        { font-size: 12px; font-weight: 900; color: #111; }
+  .l7n-suit-spade      { color: #111; font-size: 10px; }
+  .l7n-suit-heart      { color: #cc0000; font-size: 10px; }
+  .l7n-suit-diamond    { color: #cc0000; font-size: 10px; }
+}
+
+// Extra bets row: Even / Odd / Red / Black
+.l7n-extra-bets {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px 0;
+}
+
+.l7n-extra-btn {
+  flex: 1;
+  position: relative;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  transition: opacity 0.2s;
+
+  &:active { opacity: 0.8; }
+}
+
+.l7n-btn-rate {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+// Card grid section
+.l7n-card-section {
+  margin: 8px 10px 0;
+  background: $bg-secondary;
+  border-radius: 8px;
+  padding: 8px 6px;
+  border: 1px solid $color-border;
+}
+
+.l7n-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.l7n-card-cell {
+  width: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+
+  &--suspended { cursor: not-allowed; }
+}
+
+.l7n-img-wrap {
+  position: relative;
+  width: 100%;
+  height: 66px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #c8a200;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  transition: border-color 0.15s, transform 0.15s;
+
+  .l7n-card-cell:hover:not(.l7n-card-cell--suspended) & {
+    border-color: #f0c040;
+    transform: translateY(-2px);
+  }
+
+  .l7n-card-cell--suspended & { opacity: 0.65; }
+}
+
+.l7n-cell-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.l7n-card-lock {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Line bets row: Line 1 – Line 4
+.l7n-line-bets {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px 0;
+}
+
+.l7n-line-btn {
+  flex: 1;
+  position: relative;
+  background: linear-gradient(135deg, #1a2a3a, #1f3449);
+  border: 1px solid rgba(100,150,200,0.25);
+  border-radius: 6px;
+  padding: 10px 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  overflow: hidden;
+  transition: opacity 0.2s;
+
+  &:active { opacity: 0.8; }
+
+  .l7n-btn-rate { color: #7ec8e3; }
+  .l7n-btn-label { color: rgba(255,255,255,0.8); }
+}
+
+.l7n-cell-amount {
+  font-size: 12px;
+  font-weight: 700;
+  color: #c0c8d8;
+  text-align: center;
+  line-height: 1;
+  min-height: 14px;
+}
+
+.l7n-min-max {
+  font-size: 11px;
+  color: $color-text-muted;
+  margin-top: 8px;
+  text-align: right;
+}
+
+// History section
+// History — same flow as TeenPatti last-10-result
+.l7n-history-section {
+    width: 96%;
+    margin: auto;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 10px;
+}
+
+.l7n-result-header {
+  width: 100%;
+  background: $bg-secondary;
+  padding: 10px 0;
+  border-radius: 5px;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $color-text;
+}
+
+.l7n-result-list {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.l7n-result-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  &:hover { transform: scale(1.1); }
+}
+
+.l7n-no-history {
+  font-size: 12px;
+  color: $color-text-muted;
+}
+
+// Open Bets section
+.l7n-open-bets {
+  margin: 14px 10px 0;
+}
+
+.l7n-open-bets-title {
+  font-size: 13px;
+  font-weight: 700;
+  background: $bg-header;
+  padding: 8px 12px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid $color-border;
+  border-bottom: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: $color-text;
+}
+
+.l7n-open-bets-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid $color-border;
+  border-radius: 0 0 6px 6px;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $bg-secondary;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-border;
+    border-radius: 2px;
+  }
+}
+
+.l7n-open-bets-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  background: $bg-secondary;
+  font-size: 12px;
+
+  thead {
+    background: $bg-header;
+
+    th {
+      padding: 8px 10px;
+      text-align: left;
+      color: $color-text-muted;
+      font-weight: 600;
+      font-size: 11px;
+      white-space: nowrap;
+      border-bottom: 1px solid $color-border;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid rgba(58, 58, 90, 0.5);
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+    }
+
+    td {
+      padding: 7px 10px;
+      color: $color-text;
+      white-space: nowrap;
+    }
+  }
+
+  .l7n-profit {
+    color: $color-profit;
+  }
+
+  .l7n-loss {
+    color: $color-loss;
+  }
+
+  .l7n-no-bets {
+    text-align: center;
+    color: $color-text-muted;
+    padding: 20px;
+    font-size: 13px;
+    white-space: normal;
+  }
+}
+
+.l7n-status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.l7n-status-win {
+  background: rgba(0, 230, 118, 0.15);
+  color: $color-profit;
+}
+
+.l7n-status-loss {
+  background: rgba(255, 82, 82, 0.15);
+  color: $color-loss;
+}
+
+.l7n-status-pending {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+// Responsive tweaks
+@media (max-width: 480px) {
+  .l7n-header {
+    padding: 8px 10px;
+  }
+
+  .l7n-main-bets {
+    padding: 10px 8px 4px;
+    gap: 6px;
+  }
+
+  .l7n-main-btn {
+    padding: 10px 4px;
+  }
+
+  .l7n-seven-img {
+    width: 50px;
+    height: 68px;
+  }
+
+  .l7n-card-section {
+    margin: 8px 8px 0;
+    padding: 8px 6px;
+  }
+
+  .l7n-card-cell {
+    width: 35px;
+    height: 63px;
+  }
+
+  .l7n-open-bets {
+    margin: 12px 8px 0;
+  }
+}

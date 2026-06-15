@@ -51,7 +51,7 @@ const AndarBhar = () => {
   // Bet place response handler
   useEffect(() => {
     if (betPlaceResponse) {
-      if (betPlaceResponse?.status) {
+      if (betPlaceResponse?.success ?? betPlaceResponse?.status) {
         snackbarUtil.success(betPlaceResponse?.message)
         setModalVisible(false)
       } else {
@@ -125,7 +125,7 @@ const AndarBhar = () => {
           <div className="game-section">
             <div style={{ position: "relative" }}>
               <iframe
-                src="https://casino.loki7exch.com/route/?id=3053"
+                src="https://alpha-g.qnsports.live/route/rih2.php?id=3053"
                 title="TeenPatti Stream"
                 allowFullScreen
               ></iframe>

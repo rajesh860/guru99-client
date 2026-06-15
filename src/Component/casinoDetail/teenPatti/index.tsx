@@ -5,8 +5,7 @@ import BackBtn from "../../BackBtn/BackBtn"
 import {
   useBetPlaceMutation,
 } from "../../../../store/service/casino/casinoServices"
-import { useGetCasinoMyBetsQuery } from "../../../../store/service/userServices/userServices"
-import { useGetTeenPattiResultsQuery } from "../../../../store/service/teenPattiApi"
+import { useGetCasinoMyBetsQuery, useGetCasinoCompletedBetsQuery } from "../../../../store/service/userServices/userServices"
 import { Link, useParams } from "react-router-dom"
 import { LetterAndColorById } from "../resultCommon"
 import ResultModal from "../ResultModal"
@@ -17,9 +16,9 @@ import snackbarUtil from "../../../utils/Snackbar"
 import "./styles.scss"
 import TeamTable from "./TeamTable"
 import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
-import MyBetsModal from "./MyBetsModal"
 import RoundDetailModal from "./RoundDetailModal"
 import cardBack from "../../../../public/casino/cardBack.png"
+import { getCardImage } from "../../../utils/cardImage"
 
 interface SelectedPlayerType {
   gstatus: boolean
@@ -46,51 +45,41 @@ const formatTimestamp = (timestamp: number) => {
   })
 }
 
-const getCardImage = (cardCode?: string) => {
-  if (!cardCode || cardCode === "1") {
-    return "https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/1.jpg"
-  }
-  const mapped = cardCode.includes("HH")
-    ? cardCode.replace("HH", "SS")
-    : cardCode.includes("SS")
-      ? cardCode.replace("SS", "DD")
-      : cardCode.includes("DD")
-        ? cardCode.replace("DD", "HH")
-        : cardCode
-  return `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${mapped}.jpg`
-}
-
 const TeenPattiGame = () => {
   const { id } = useParams()
+  const today = new Date().toISOString().split("T")[0]
   const [first, setFirst] = useState("")
   const [openMod, setOpenMod] = useState(false)
   const [betModalVisible, setBetModalVisible] = useState(false)
-  const [myBetsModalOpen, setMyBetsModalOpen] = useState(false)
+  const [betsTab, setBetsTab] = useState<"open" | "completed">("open")
   const [roundDetailModalOpen, setRoundDetailModalOpen] = useState(false)
   const [selectedRoundId, setSelectedRoundId] = useState("")
+  const [selectedT3Item, setSelectedT3Item] = useState<any>(null)
   const [selectedPlayer, setSelectedPlayer] =
     useState<SelectedPlayerType | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [wsData, setWsData] = useState<any>(null)
+  const [countdown, setCountdown] = useState("00:00")
 
   const slug = tableIdtoUrl[id]
-  // const { odds: data } = useOdds(slug)
 
   const [trigger, { data: betPlaceResponse, isLoading }] = useBetPlaceMutation()
-  
-  // Fetch my bets
-  const { data: myBetsData, isLoading: myBetsLoading } = useGetCasinoMyBetsQuery(
+
+  // Always fetch open bets (no button needed)
+  const { data: myBetsData } = useGetCasinoMyBetsQuery(
     { game: "teen20" },
-    { skip: !myBetsModalOpen, pollingInterval: 3000 }
+    { skip: !id, pollingInterval: 3000 }
   )
 
-  // Fetch teen20 results
-  const { data: resultsData } = useGetTeenPattiResultsQuery(undefined, {
-    pollingInterval: 5000
-  })
+  const { data: completedBetsRes } = useGetCasinoCompletedBetsQuery(
+    { game: "teen20", fromDate: today, toDate: today, page: 1, limit: 20 },
+    { skip: betsTab !== "completed", pollingInterval: 5000 }
+  )
+  const openBets: any[]      = myBetsData?.bets ?? myBetsData?.data ?? []
+  const completedBets: any[] = completedBetsRes?.data ?? completedBetsRes?.bets ?? []
 
-  // Use WebSocket data as primary data source
-  const data = wsData || null
+  // WS only — no API fallback
+  const data = wsData
 
   // WebSocket connection
   useEffect(() => {
@@ -154,19 +143,35 @@ const TeenPattiGame = () => {
   // Handle bet place response
   useEffect(() => {
     if (betPlaceResponse) {
-      if (betPlaceResponse?.status) {
+      if (betPlaceResponse?.success ?? betPlaceResponse?.status) {
         snackbarUtil.success(
           betPlaceResponse?.message,
         )
         setBetModalVisible(false)
       } 
-      // else {
-      //   snackbarUtil.error(betPlaceResponse?.message)
-      // }
+      else {
+        snackbarUtil.error(betPlaceResponse?.message)
+      }
     }
   }, [betPlaceResponse])
 
-  // Removed useCasinoResultQuery - not needed with WebSocket
+  // Countdown — same as DT20
+  useEffect(() => {
+    const autotime = wsData?.t1?.autotime ?? wsData?.autotime
+    if (!autotime) { setCountdown("00:00"); return }
+    const secs = parseInt(autotime)
+    if (secs <= 0) { setCountdown("00:00"); return }
+    const fmt = (s: number) =>
+      `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`
+    let remaining = secs
+    setCountdown(fmt(remaining))
+    const timer = setInterval(() => {
+      remaining -= 1
+      if (remaining <= 0) { clearInterval(timer); setCountdown("00:00") }
+      else setCountdown(fmt(remaining))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [wsData?.t1?.autotime, wsData?.autotime])
 
   const handleClick = val => {
     setFirst(val)
@@ -204,14 +209,14 @@ const TeenPattiGame = () => {
 
           <div className="game-section">
             <iframe
-              src={`https://casino.loki7exch.com/route/?id=${videoIdById[id] || "3035"}`}
-              title="DragonTiger Stream"
+              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id ?? ""] ?? "3030"}`}
+              title="Teen Patti Stream"
               allowFullScreen
             ></iframe>
 
             {/* Countdown Timer */}
-            <div className="countdown-timer">
-              {wsData?.autotime || 0}
+            <div className={`tp-timer ${countdown === "00:00" ? "tp-timer--closed" : "tp-timer--open"}`}>
+              {countdown === "00:00" ? "BETTING CLOSED" : countdown}
             </div>
 
             {/* Minimal layout; expand with card visuals if needed */}
@@ -268,28 +273,93 @@ const TeenPattiGame = () => {
          <div className="last-10-result">
             <div className="result-header">Last 10 Results</div>
             <div className="result-list">
-              {resultsData?.result?.data?.map((item, index) => (
-                <div 
-                  key={item.mid} 
-                  className={`result-circle ${item.result === "1" ? "player-a" : "player-b"}`}
-                  onClick={() => {
-                    setSelectedRoundId(item.mid)
-                    setRoundDetailModalOpen(true)
-                  }}
-                >
-                  {item.result === "1" ? "A" : "B"}
-                </div>
-              ))}
+              {(() => {
+                // WS t3 first, then API t3 (exact path: data.data.data.data.t3)
+                const list: any[] = wsData?.t3 || []
+                return list.slice(0, 10).map((item: any, i: number) => {
+                  const isA = item.winner === "Player A" || item.result === "1" || item.result === "A"
+                  return (
+                    <div
+                      key={item.mid || i}
+                      className={`result-circle ${isA ? "player-a" : "player-b"}`}
+                      onClick={() => {
+                        if (item.mid) {
+                          setSelectedRoundId(item.mid)
+                          setSelectedT3Item(item)
+                          setRoundDetailModalOpen(true)
+                        }
+                      }}
+                      title={item.winner ?? (isA ? "Player A" : "Player B")}
+                    >
+                      {isA ? "A" : "B"}
+                    </div>
+                  )
+                })
+              })()}
             </div>
          </div>
-          {/* Show Bets Button */}
-          <div className="show-bets-section">
-            <button 
-              className="show-bets-button"
-              onClick={() => setMyBetsModalOpen(true)}
-            >
-              Show Bets
-            </button>
+          {/* Bets Section — Open / Completed tabs */}
+          <div className="tp-open-bets">
+            {/* Tab buttons */}
+            <div className="dice-bets-tabs">
+              <button
+                className={`dbt ${betsTab === "open" ? "dbt--active" : ""}`}
+                onClick={() => setBetsTab("open")}
+              >Open Bets</button>
+              <button
+                className={`dbt ${betsTab === "completed" ? "dbt--active" : ""}`}
+                onClick={() => setBetsTab("completed")}
+              >Completed</button>
+            </div>
+
+            <div className="tp-bets-wrapper">
+              <table className="tp-bets-table">
+                <thead>
+                  <tr>
+                    <th>Round ID</th>
+                    <th>Runner</th>
+                    <th>Odds</th>
+                    <th>Stake</th>
+                    <th>P/L</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const bets = betsTab === "open" ? openBets : completedBets
+                    if (!bets.length) return (
+                      <tr>
+                        <td colSpan={6} className="tp-bets-empty">
+                          {betsTab === "open" ? "No open bets" : "No completed bets"}
+                        </td>
+                      </tr>
+                    )
+                    return bets.map((bet: any, idx: number) => {
+                      const status = bet.status ?? "pending"
+                      const pnl    = bet.pnl ?? 0
+                      const pl     = betsTab === "completed" ? (bet.profitLoss ?? 0) : (bet.potentialWin ?? pnl)
+                      return (
+                        <tr key={idx}>
+                          <td className="td-round-id">{bet.roundId ?? "—"}</td>
+                          <td className="td-runner">{bet.betOn ?? bet.selectionName ?? bet.nat ?? "—"}</td>
+                          <td>{bet.odds ?? "—"}</td>
+                          <td>{bet.stake ?? "—"}</td>
+                          <td className={pl > 0 ? "td-win" : pl < 0 ? "td-loss" : ""}>
+                            {pl !== 0 ? pl : "—"}
+                          </td>
+                          <td>
+                            <span className={`tp-bet-badge ${
+                              status === "won"  || status === "win"  ? "tp-bet-win"  :
+                              status === "lost" || status === "loss" ? "tp-bet-loss" : "tp-bet-pending"
+                            }`}>{status}</span>
+                          </td>
+                        </tr>
+                      )
+                    })
+                  })()}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -302,18 +372,13 @@ const TeenPattiGame = () => {
         />
       )}
       
-      <MyBetsModal
-        isOpen={myBetsModalOpen}
-        onClose={() => setMyBetsModalOpen(false)}
-        bets={myBetsData?.bets || myBetsData?.data || []}
-        isLoading={myBetsLoading}
-      />
       
       <RoundDetailModal
         isOpen={roundDetailModalOpen}
-        onClose={() => setRoundDetailModalOpen(false)}
+        onClose={() => { setRoundDetailModalOpen(false); setSelectedT3Item(null) }}
         roundId={selectedRoundId}
         game="teen20"
+        t3Item={selectedT3Item}
       />
       
       <ResultModal

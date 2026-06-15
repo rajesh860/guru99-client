@@ -12,6 +12,8 @@ const MatkaDetail = () => {
   const [eventId, setEventId] = useState(null);
   const [isBetSlipOpen, setIsBetSlipOpen] = useState(false);
   const [betType, setBetType] = useState('single_jodi');
+  const [betsPage, setBetsPage] = useState(1);
+  const BETS_LIMIT = 20;
 
   // Fetch matka markets to get current eventId
   const { data: marketsData } = useGetMatkaMarketsQuery(undefined, {
@@ -30,10 +32,11 @@ const MatkaDetail = () => {
     }
   }, [marketsData, gameName]);
 
-  // Fetch my matka bets with polling (every 3 seconds)
-  const { data: myBetsData, isLoading: betsLoading, refetch } = useGetMyMatkaBetsQuery(undefined, {
-    pollingInterval: 3000, // Poll every 3 seconds
-  });
+  // Fetch my matka bets filtered by current market & eventId
+  const { data: myBetsData, isLoading: betsLoading, refetch } = useGetMyMatkaBetsQuery(
+    { market: gameName?.toLowerCase(), eventId: eventId || undefined, page: betsPage, limit: BETS_LIMIT },
+    { pollingInterval: 3000, skip: !eventId }
+  );
 
   // Generate numbers 00-99
   const numbers = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, '0'));
@@ -266,6 +269,27 @@ const MatkaDetail = () => {
             </div>
           ) : (
             <div className="no-bets-message">No open bets available</div>
+          )}
+
+          {/* Pagination */}
+          {myBetsData?.data?.length > 0 && (
+            <div className="bets-pagination">
+              <button
+                className="page-btn"
+                disabled={betsPage === 1}
+                onClick={() => { setBetsPage(p => p - 1); refetch(); }}
+              >
+                ‹ Prev
+              </button>
+              <span className="page-info">Page {betsPage}</span>
+              <button
+                className="page-btn"
+                disabled={myBetsData.data.length < BETS_LIMIT}
+                onClick={() => { setBetsPage(p => p + 1); refetch(); }}
+              >
+                Next ›
+              </button>
+            </div>
           )}
         </div>
       )}

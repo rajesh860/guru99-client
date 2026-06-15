@@ -1,6 +1,6 @@
 .teenpatti-container {
   font-family: sans-serif;
-  background: #dddddd;
+  /* background: #dddddd; */
   color: #000;
   padding: 0;
   margin: 0;
@@ -163,7 +163,7 @@
   font-size: 14px;
   background-color: #d7d7d7;
 }
-.teenpatti-container .right-col .my-bet .see-btn {
+ .right-col .my-bet .see-btn {
   width: 100%;
   display: flex;
   justify-content: center;

@@ -15,6 +15,7 @@ import { tableIdtoUrl, videoIdById } from "../../Casino_Data/Constant"
 import snackbarUtil from "../../../utils/Snackbar"
 import "./styles.scss"
 import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
+import { getCardImage } from "../../../utils/cardImage"
 const formatTimestamp = (timestamp: number) => {
   if (!timestamp) return "--:--:--"
 
@@ -26,20 +27,6 @@ const formatTimestamp = (timestamp: number) => {
     second: "2-digit",
     hour12: true,
   })
-}
-
-const getCardImage = (cardCode?: string) => {
-  if (!cardCode || cardCode === "1") {
-    return "https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/1.jpg"
-  }
-  const mapped = cardCode.includes("HH")
-    ? cardCode.replace("HH", "SS")
-    : cardCode.includes("SS")
-      ? cardCode.replace("SS", "DD")
-      : cardCode.includes("DD")
-        ? cardCode.replace("DD", "HH")
-        : cardCode
-  return `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${mapped}.jpg`
 }
 
 const DragonTiger = () => {
@@ -73,6 +60,7 @@ const DragonTiger = () => {
   const [trigger, { data: betPlaceResponse, isLoading }] = useBetPlaceMutation()
 
   const handleRateClick = (item: any) => {
+    if (!item?.gstatus) return
     setSelectedPlayer({ ...item, isBack: true })
     setBetModalVisible(true)
   }
@@ -103,7 +91,7 @@ const DragonTiger = () => {
   // Bet place response handler
   useEffect(() => {
     if (betPlaceResponse) {
-      if (betPlaceResponse?.status) {
+      if (betPlaceResponse?.success ?? betPlaceResponse?.status) {
         snackbarUtil.success(betPlaceResponse?.message)
         setBetModalVisible(false)
       } else {
@@ -197,7 +185,7 @@ const DragonTiger = () => {
               {countdown === "00:00" ? "BETTING CLOSED" : `Time: ${countdown}`}
             </div>
             <iframe
-              src={`https://casino.loki7exch.com/route/?id=${videoIdById[id] || "3035"}`}
+              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id] || "3035"}`}
               title="DragonTiger Stream"
               allowFullScreen
             ></iframe>
