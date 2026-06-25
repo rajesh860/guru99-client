@@ -1,4 +1,4 @@
-import React from "react"
+import type React from "react"
 import BackBtn from "../../Component/BackBtn/BackBtn"
 import { useNavigate } from "react-router-dom"
 import snackbarUtil from "../../utils/Snackbar"
@@ -12,8 +12,8 @@ const Casino = () => {
     { tableId: '52', name: 'Dragon Tiger 20-20' },
     { tableId: '51', name: 'Teen Patti 20-20' },
     { tableId: '53', name: 'Lucky 7 - B' },
-    { tableId: '54', name: 'Andar Bahar' },
     { tableId: '62', name: 'Amar Akbar Anthony' },
+    { tableId: '54', name: 'Andar Bahar' },
     { tableId: '59', name: 'Poker 20-20' },
     { tableId: '55', name: '32 Cards' },
     { tableId: '8',  name: 'Baccarat' },
@@ -32,6 +32,7 @@ const Casino = () => {
     if (nameCheck.includes('32')) return '/img/casino2.png'
     if (nameCheck.includes('baccarat')) return '/img/casino3.png'
     if (nameCheck.includes('dice')) return '/img/casino4.png'
+    if (nameCheck.includes('roulette')) return '/img/casino3.png'
     if (nameCheck.includes('one day')) return '/img/oneDayTeenPatti.jpg'
     
     // Default based on tableId if name doesn't match
@@ -41,7 +42,7 @@ const Casino = () => {
   }
 
   // Active casino games — add tableId here to enable
-  const ACTIVE_IDS = new Set<string>(['51', '99'])
+  const ACTIVE_IDS = new Set<string>(['51', '52', '62', '99'])
 
   const handleCardClick = (e: React.MouseEvent, casino: any) => {
     if (!ACTIVE_IDS.has(casino.tableId)) {
