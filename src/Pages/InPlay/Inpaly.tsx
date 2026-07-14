@@ -75,7 +75,7 @@ const MatchCard = ({ match, index, isLive, parseTeams }: any) => {
   if (isLive) {
     return (
       <Link
-        to={`/cricket/${match?.beventId}`}
+        to={`/cricket/${match?.beventId}/${match?.gmid}/${match?.bid}`}
         className="match-card match-card--live"
         style={{ animationDelay: `${index * 60}ms` }}
       >
@@ -135,7 +135,7 @@ const MatchCard = ({ match, index, isLive, parseTeams }: any) => {
 
   return (
     <Link
-      to={`/cricket/${match?.beventId}`}
+      to={`/cricket/${match?.beventId}/${match?.gmid}/${match?.bid}`}
       className="match-card match-card--upcoming"
       style={{ animationDelay: `${index * 60}ms` }}
     >

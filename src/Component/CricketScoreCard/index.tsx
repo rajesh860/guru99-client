@@ -45,6 +45,7 @@ interface InningsInfo {
 }
 
 interface ScoreData {
+  spnmessage?: string
   score?: {
     format?: string
     status?: string
@@ -111,6 +112,12 @@ function getTeamShort(name: string): string {
   return words.map(w => w[0]).join('').toUpperCase().substring(0, 3)
 }
 
+// Team flag/logo CDN — keyed by the team code (e.g. "1JO") from the score feed.
+const TEAM_FLAG_CDN = 'https://cricketvectors.akamaized.net/Teams'
+const teamFlagUrl = (key: string): string => (key ? `${TEAM_FLAG_CDN}/${key}.png` : '')
+// Hide the <img> if the CDN has no logo for this team, so no broken-image icon shows.
+const hideBrokenImg = (e: { currentTarget: HTMLImageElement }) => { e.currentTarget.style.display = 'none' }
+
 const BREAK_KEYWORDS = ['lunch', 'tea', 'dinner', 'break', 'stumps', 'rain', 'drinks', 'day', 'interval', 'timeout', 'bad light', 'close']
 function isBreakStatus(b: string): boolean {
   if (b.startsWith('^')) return true  // API session/break markers e.g. "^2", "^1PW"
@@ -124,9 +131,13 @@ function rbBallClass(t: number, u: string | number): string {
   if (t === 3) return 'ball-six'
   if (t === 4) return 'ball-wide'
   if (t === 5) return 'ball-noball'
+  if (t === 6) return 'ball-bye'
+  if (t === 7) return 'ball-legbye'
   const str = String(u).toLowerCase()
   if (str === 'wd') return 'ball-wide'
   if (str === 'nb') return 'ball-noball'
+  if (str.startsWith('b') && parseInt(str.slice(1)) > 0) return 'ball-bye'
+  if (str.startsWith('lb') && parseInt(str.slice(2)) > 0) return 'ball-legbye'
   if (parseInt(String(u)) > 0) return 'ball-run'
   return 'ball-dot'
 }
@@ -135,10 +146,14 @@ function rbBallLabel(t: number, u: string | number): string | number {
   if (t === 1) return 'W'
   if (t === 4) return 'Wd'
   if (t === 5) return 'Nb'
+  if (t === 6) return `B${u || 1}`
+  if (t === 7) return `Lb${u || 1}`
   const str = String(u).toLowerCase()
   if (str === 'wd') return 'Wd'
   if (str === 'nb') return 'Nb'
-  return u === '0' || u === 0 ? '•' : u
+  if (str.startsWith('b') && parseInt(str.slice(1)) > 0) return `B${str.slice(1)}`
+  if (str.startsWith('lb') && parseInt(str.slice(2)) > 0) return `Lb${str.slice(2)}`
+  return u === '0' || u === 0 ? '0' : u
 }
 
 function parseBatScore(s?: string): { runs: number; balls: number } {
@@ -363,18 +378,44 @@ function normalizeScoreData(input: any): ScoreData | null {
     ? input.data
     : input
 
+
   const v1: OverSummary[] = d.v1 || []
   const liveDataRaw: any = d.liveData || {}
   const isRawMatch = (o: any) => !!(o?.rb || o?.speech_names || o?.wp)
   const rawMatch: any = isRawMatch(liveDataRaw) ? liveDataRaw : isRawMatch(d) ? d : null
 
-  // Determine batting team — check ALL v1 entries, not just over summaries
-  // type "b" balls have bat_team_fkey, type "o" overs have tfkey
   const latestV1Over: any = v1.find((x: any) => x.type === 'o')
+
+  // 1. innings object — most reliable: directly tells which team is in current innings
+  const inningsObj: any = d.innings || {}
+  const activeInningsData =
+    inningsObj.innings4 || inningsObj.innings3 || inningsObj.innings2 || inningsObj.innings1
+  const battingFromInnings: string = activeInningsData?.team || ''
+
+  // 2. liveData.F field — "^14D" format, strip ^ prefix
+  const fField: string = rawMatch?.F ? String(rawMatch.F).replace(/^\^/, '') : ''
+
+  // 3. liveData.a field — "14D.PF" format, first part is batting team
+  const aField: string = rawMatch?.a ? String(rawMatch.a).split('.')[0] : ''
+
+  // 4. liveData.wp[0] — batting team listed first in wp string
+  const battingFromWp: string = rawMatch?.wp ? String(rawMatch.wp).split(',')[0] : ''
+
+  // 5. over summary tfkey
+  const battingFromOver: string = latestV1Over?.tfkey || ''
+
+  // 6. bowl_tfkey from v1 balls — in some API responses this is actually batting team
+  const battingFromV1Bowl: string = (v1 as any[]).find(x => x.bowl_tfkey)?.bowl_tfkey || ''
+
+  // bat_team_fkey is unreliable — can hold bowling team's key, avoid using
+
   const battingTeamKey: string =
-    (v1 as any[]).find(x => x.bat_team_fkey)?.bat_team_fkey ||
-    latestV1Over?.tfkey ||
-    (rawMatch?.wp ? String(rawMatch.wp).split(',')[0] : '') ||
+    battingFromInnings ||
+    fField ||
+    aField ||
+    battingFromWp ||
+    battingFromOver ||
+    battingFromV1Bowl ||
     ''
 
   // Data already has score — just fix batting flags and innings team mapping
@@ -395,7 +436,8 @@ function normalizeScoreData(input: any): ScoreData | null {
     // Fix innings.innings1.team so the component computes t1First correctly
     const existingInnings: any = d.innings || {}
     let fixedInnings = existingInnings
-    if (score.innings1 && battingTeamKey) {
+    // Only compute innings1.team if raw data doesn't already have it (Test matches provide it)
+    if (score.innings1 && battingTeamKey && !existingInnings.innings1?.team) {
       // innings1 team = batting team if only 1 innings played (they're on their first)
       // innings1 team = bowling team if 2 innings played (batting team is in 2nd innings)
       const innings1Team = !score.innings2
@@ -499,9 +541,8 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const t1Key = teams.team1?.key || team1Key || ''
   const t2Key = teams.team2?.key || team2Key || ''
 
-  // bat_team_fkey from type:"b" balls is the most reliable batting team source
-  const v1BatKey = (v1 as any[]).find(x => x.bat_team_fkey)?.bat_team_fkey || ''
-
+  // Determine batting team key from reliable sources (excluding teams.batting and bat_team_fkey)
+  const inningsRaw: any = scoreData?.innings || {}
 
   // Upcoming match view
   if (!innings1 && !innings2) {
@@ -520,7 +561,9 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
         </div>
         <div className="upcoming-teams">
           <div className="upcoming-team upcoming-team-left">
-            <div className="upcoming-team-abbr">{getTeamShort(team1Name)}</div>
+            {t1Key
+              ? <img className="upcoming-team-flag" src={teamFlagUrl(t1Key)} alt="" onError={hideBrokenImg} />
+              : <div className="upcoming-team-abbr">{getTeamShort(team1Name)}</div>}
             <div className="upcoming-team-name">{team1Name}</div>
           </div>
           <div className="upcoming-vs-block">
@@ -533,7 +576,9 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
             )}
           </div>
           <div className="upcoming-team upcoming-team-right">
-            <div className="upcoming-team-abbr">{getTeamShort(team2Name)}</div>
+            {t2Key
+              ? <img className="upcoming-team-flag" src={teamFlagUrl(t2Key)} alt="" onError={hideBrokenImg} />
+              : <div className="upcoming-team-abbr">{getTeamShort(team2Name)}</div>}
             <div className="upcoming-team-name">{team2Name}</div>
           </div>
         </div>
@@ -551,9 +596,43 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
     )
   }
 
-  // Live match view — use bat_team_fkey from v1 balls as source of truth
-  const team1Batting = v1BatKey ? v1BatKey === t1Key : (teams.team1?.batting ?? !!innings1)
-  const team2Batting = v1BatKey ? v1BatKey === t2Key : (teams.team2?.batting ?? !!innings2)
+  const nameMatch = (a: string, b: string) => !!(a && b && (a === b || a.includes(b) || b.includes(a)))
+  const t1NameL = team1Name.toLowerCase()
+  const activeInnNum = innings4 ? 4 : innings3 ? 3 : innings2 ? 2 : 1
+
+  // v1 feed is NEWEST-FIRST. v1.find() gives the most recent entry — current innings data.
+  // teams.batting from API is unreliable, do not use it.
+  //
+  // Signal 1: v1 over summary team name (most recent over = current innings batting team).
+  // Signal 2: innings structure fallback (innings.team keys from backend).
+  let team1Batting: boolean | undefined
+
+  // crickapi uses 0-indexed inning field (inning:0=inn1, inning:3=inn4)
+  const currInnIdx = activeInnNum - 1
+  const v1OverEntry = (v1 as any[]).find(x =>
+    x.type === 'o' && (x.inning === undefined || x.inning === currInnIdx)
+  )
+  const v1OverTeam = (v1OverEntry?.team || '').trim().toLowerCase()
+  if (v1OverTeam) {
+    const t1M = nameMatch(v1OverTeam, t1NameL)
+    const t2M = nameMatch(v1OverTeam, team2Name.toLowerCase())
+    if (t1M && !t2M) team1Batting = true
+    else if (t2M && !t1M) team1Batting = false
+  }
+
+  if (team1Batting === undefined) {
+    const inn1TName = ((inningsRaw.innings1?.teamName) || '').trim().toLowerCase()
+    const inn1Team  = inningsRaw.innings1?.team
+    const inn2Team  = inningsRaw.innings2?.team
+    const t1Fb = inn1TName
+      ? nameMatch(inn1TName, t1NameL)
+      : inn1Team ? inn1Team === t1Key : inn2Team ? inn2Team !== t1Key : true
+    team1Batting = t1Fb ? (activeInnNum % 2 === 1) : (activeInnNum % 2 === 0)
+  }
+
+  const team1BattingFinal = team1Batting as boolean
+  const team2Batting = !team1BattingFinal
+  const t1First = team1BattingFinal ? (activeInnNum % 2 === 1) : (activeInnNum % 2 === 0)
 
   const latestSummary = v1.find(x => x.type === 'o')
   const batsman1 = latestSummary ? { name: latestSummary.p1, score: latestSummary.s1 } : null
@@ -576,29 +655,40 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
     ? calcCRR(activeInnings.runs, activeInnings.overs)
     : null
 
-  let chaseInfo: { battingName: string; needed: number; ballsLeft: number } | null = null
+  const formatMaxBalls = (() => {
+    const f = (format || '').toLowerCase()
+    if (f.includes('t10')) return 60
+    if (f.includes('hundred')) return 100
+    if (f.includes('t20')) return 120
+    if (f.includes('odi') || f.includes('list a') || f.includes('one day')) return 300
+    return 0 // Test = no fixed limit
+  })()
+
+  let chaseInfo: { battingName: string; needed: number; ballsLeft: number | null } | null = null
   if (innings1 && innings2 && !innings3) {
     const target = innings1.runs + 1
     const needed = target - innings2.runs
     const i2Parts = String(innings2.overs).split('.')
-    const i1Parts = String(innings1.overs).split('.')
     const ballsBowled = parseInt(i2Parts[0]) * 6 + parseInt(i2Parts[1] || '0')
-    const maxBalls    = parseInt(i1Parts[0]) * 6 + parseInt(i1Parts[1] || '0')
-    const ballsLeft   = maxBalls - ballsBowled
+    const ballsLeft   = formatMaxBalls > 0 ? formatMaxBalls - ballsBowled : null
     const battingName = team2Batting ? team2Name : team1Name
-    if (needed > 0 && ballsLeft > 0) {
+    if (needed > 0 && (ballsLeft === null || ballsLeft > 0)) {
       chaseInfo = { battingName, needed, ballsLeft }
     }
   }
 
-  // Recent balls — current innings, current over only
+  // Recent balls — current over only (reset each over)
   const rbOvers = liveData.rb || []
   const currentInningsIdx = activeInningsNumber - 1
-  const currentInningsOvers = rbOvers.filter(o => o.i === currentInningsIdx)
+  const currentInningsOvers = rbOvers.filter((o: any) =>
+    o.i === currentInningsIdx || o.i === String(currentInningsIdx) || o.i === undefined
+  )
+  // Last rb entry = current over in progress
   const currentOver = currentInningsOvers[currentInningsOvers.length - 1]
   const recentBalls: Ball[] = []
   if (currentOver) {
-    ;(currentOver.b || []).forEach((ball, bi) => {
+    // Only this over's balls — max 6 to avoid spill from previous overs
+    ;(currentOver.b || []).slice(-6).forEach((ball: any, bi: number) => {
       recentBalls.push({ ...ball, _key: `${currentOver.o}-${bi}` })
     })
   }
@@ -679,23 +769,7 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
       {/* Main Score */}
       <div className="cscard-scores">
         {(() => {
-          // Determine which team batted first
-          // v1 bat_team_fkey is authoritative; fall back to innings.team mapping
-          let t1First: boolean
-          if (v1BatKey && t1Key) {
-            const battingIsTeam1 = v1BatKey === t1Key
-            // 1st innings only → batting team is playing their first innings (batted first)
-            // 2nd innings → batting team is chasing (batted second), so other team batted first
-            t1First = !innings2 ? battingIsTeam1 : !battingIsTeam1
-          } else {
-            const inningsTeamMap = scoreData?.innings || {}
-            const inn1Team = inningsTeamMap.innings1?.team
-            const inn2Team = inningsTeamMap.innings2?.team
-            if (inn1Team) t1First = inn1Team === t1Key
-            else if (inn2Team) t1First = inn2Team !== t1Key
-            else t1First = true
-          }
-
+          // t1First is computed at component level via innings.teamName matching
           const t1InningsList = (t1First
             ? [innings1, innings3]
             : [innings2, innings4]
@@ -706,62 +780,50 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
             : [innings1, innings3]
           ).filter((x): x is Innings => !!x)
 
-          // v1 over summary has the authoritative batting team name
-          const v1OverS = (v1 as any[]).find(x => x.type === 'o')
-          const v1BattingName = v1OverS?.team || ''
-          // Find bowling team name using fuzzy match (handles "Australia W" vs "Australia Women")
-          let bowlTeamName = ''
-          if (v1BattingName) {
-            const batLow = v1BattingName.toLowerCase()
-            const t1Low = (team1Name || '').toLowerCase()
-            const t2Low = (team2Name || '').toLowerCase()
-            const t1Match = t1Low && (t1Low === batLow || batLow.includes(t1Low) || t1Low.includes(batLow))
-            const t2Match = t2Low && (t2Low === batLow || batLow.includes(t2Low) || t2Low.includes(batLow))
-            if (t1Match && !t2Match) bowlTeamName = team2Name
-            else if (t2Match && !t1Match) bowlTeamName = team1Name
-            else {
-              // fallback: exact exclusion
-              const candidates = [team1Name, team2Name].filter(n => n && n.toLowerCase() !== batLow)
-              bowlTeamName = candidates[0] || ''
-            }
-          }
+          // Names: use backend names — team1BattingFinal tells us who's batting/active on left
+          const leftName  = team1BattingFinal ? team1Name : team2Name
+          const rightName = team1BattingFinal ? team2Name : team1Name
 
-          const leftName  = (v1BatKey && v1BattingName) ? v1BattingName : (team1Batting ? team1Name : team2Name)
-          const rightName = (v1BatKey && v1BattingName && bowlTeamName) ? bowlTeamName : (team1Batting ? team2Name : team1Name)
-          const leftList  = team1Batting ? t1InningsList : t2InningsList
-          const rightList = team1Batting ? t2InningsList : t1InningsList
+          // CDN flag keys: v1 is newest-first, v1.find() returns current-innings keys.
+          // Over summary: tfkey = batting team's CDN key, bowl_tfkey = bowling team's CDN key.
+          const v1Any = v1 as any[]
+          const leftCdnKey  = v1Any.find(x => x.tfkey)?.tfkey || ''
+          const rightCdnKey = v1Any.find(x => x.bowl_tfkey)?.bowl_tfkey ||
+            (leftCdnKey ? v1Any.find(x => x.tfkey && x.tfkey !== leftCdnKey)?.tfkey : '') || ''
+          const leftKey  = leftCdnKey
+          const rightKey = rightCdnKey
+          const leftList  = team1BattingFinal ? t1InningsList : t2InningsList
+          const rightList = team1BattingFinal ? t2InningsList : t1InningsList
 
-          const renderTeamScore = (list: Innings[]) => {
-            if (list.length === 0) return <span className="cs-ytb">Yet to bat</span>
-            if (list.length === 1) {
-              const inn = list[0]
-              return (
-                <span className="cs-score">
-                  <strong>{inn.runs}/{inn.wickets}</strong>
-                  <span className="cs-overs">({inn.overs} ov)</span>
-                </span>
-              )
-            }
-            // Test match: show "413/10 & 48/2 (18 ov)"
-            const prev = list[0]
-            const curr = list[list.length - 1]
+          const renderTeam = (list: Innings[], name: string, key: string, isBatting: boolean) => {
+            const prev = list.length > 1 ? list[0] : null
+            const curr = list.length ? list[list.length - 1] : null
             return (
-              <span className="cs-score">
-                <span className="cs-prev-score">{`${prev.runs}/${prev.wickets} & `}</span>
-                <strong>{curr.runs}/{curr.wickets}</strong>
-                <span className="cs-overs">({curr.overs} ov)</span>
-              </span>
+              <>
+                {key && <img className="cs-team-flag" src={teamFlagUrl(key)} alt="" onError={hideBrokenImg} />}
+                <div className="cs-team-info">
+                  <span className="cs-team-key">
+                    {isBatting && <span className="bat-icon">🏏</span>}
+                    <span className="cs-team-name">{name}</span>
+                  </span>
+                  {prev && <span className="cs-prev-score">{`${prev.runs}/${prev.wickets} (${prev.overs})`}</span>}
+                  {curr
+                    ? (
+                      <span className="cs-score">
+                        <strong>{curr.runs}/{curr.wickets}</strong>
+                        <span className="cs-overs">({curr.overs} ov)</span>
+                      </span>
+                    )
+                    : <span className="cs-ytb">Yet to bat</span>}
+                </div>
+              </>
             )
           }
 
           return (
             <>
               <div className="cs-team batting">
-                <span className="cs-team-key">
-                  <span className="bat-icon">🏏</span>
-                  {leftName}
-                </span>
-                {renderTeamScore(leftList)}
+                {renderTeam(leftList, leftName, leftKey, true)}
               </div>
 
               <div className="cs-lastball">
@@ -769,8 +831,7 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
               </div>
 
               <div className="cs-team team-right">
-                <span className="cs-team-key">{rightName}</span>
-                {renderTeamScore(rightList)}
+                {renderTeam(rightList, rightName, rightKey, false)}
               </div>
             </>
           )
@@ -805,14 +866,22 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
       )}
 
       {/* Chase banner */}
-      {chaseInfo && (
+      {(scoreData?.spnmessage || chaseInfo) && (
         <div className="cscard-chase">
-          <span className="chase-team">{chaseInfo.battingName}</span>
-          <span className="chase-text"> need </span>
-          <strong className="chase-runs">{chaseInfo.needed}</strong>
-          <span className="chase-text"> runs from </span>
-          <strong className="chase-balls">{chaseInfo.ballsLeft}</strong>
-          <span className="chase-text"> balls</span>
+          {scoreData?.spnmessage
+            ? <span className="chase-text">{scoreData.spnmessage}</span>
+            : <>
+                <span className="chase-team">{chaseInfo!.battingName}</span>
+                <span className="chase-text"> need </span>
+                <strong className="chase-runs">{chaseInfo!.needed}</strong>
+                <span className="chase-text"> runs</span>
+                {chaseInfo!.ballsLeft !== null && <>
+                  <span className="chase-text"> in </span>
+                  <strong className="chase-balls">{chaseInfo!.ballsLeft}</strong>
+                  <span className="chase-text"> balls</span>
+                </>}
+              </>
+          }
         </div>
       )}
 

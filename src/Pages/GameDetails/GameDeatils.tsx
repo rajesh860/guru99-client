@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { useGetTeamPLQuery } from "../../../store/service/userServices/userServices"
+import { useMarketLimitsQuery } from "../../../store/service/odds/oddsServices"
 import Betslip from "./Betslip"
 import Fancy from "./Fancy/Fancy"
 import MatchOdds from "./MatchOdds/MatchOdds"
@@ -32,9 +33,9 @@ import { useGetLiveCricketScoreQuery, useGetBallFeedsQuery } from "../../../stor
 
 const GameDeatils = () => {
   const [placeBetData, setPlaceBetData] = useState<any>(null)
-  const { id } = useParams()
+  const { id,bid } = useParams()
   const [timer, setTimer] = useState<number>(null)
-  
+  console.log(bid,"hvjkn")
   // WebSocket state
   const [oddsData, setOddsData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -53,10 +54,16 @@ const GameDeatils = () => {
     { skip: !id, pollingInterval: 2000 }
   )
 
+  // Per-match market limits (min/max) — 5s polling
+  const { data: marketLimitsData } = useMarketLimitsQuery(id || "", {
+    skip: !id,
+    pollingInterval: 5000,
+  })
+
   // Live cricket score API
   const { data: liveScoreResponse } = useGetLiveCricketScoreQuery(id || "", {
     skip: !id,
-    pollingInterval: 2000,
+    pollingInterval: 1000,
   })
 
   // Extract matchKey from live score response (from v1 mfkey or direct matchKey field)
@@ -78,6 +85,8 @@ const GameDeatils = () => {
   const enrichedScoreData: any = _scoreBase
     ? { ..._scoreBase, v1: ballFeedsData?.length ? ballFeedsData : (_scoreBase?.v1 || []) }
     : null
+
+  const finalScoreData: any = enrichedScoreData ?? null
 
 const amountInputRef = useRef<HTMLInputElement>(null)
 
@@ -422,6 +431,8 @@ const amountInputRef = useRef<HTMLInputElement>(null)
   } : null
 
   const maxBet = mainBookmaker?.maxBet || mainBookmaker?.max || 100000
+  // Bookmaker min/max from the market-limits API (replaces socket-derived values)
+  const bmLimit: any = (marketLimitsData?.data ?? marketLimitsData)?.bookmaker
   const liveData = oddsData?.liveData
   const isBall = liveData?.B === "B"
 
@@ -532,7 +543,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
           boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
         }}>
           <iframe
-            src={`https://e765432.diamondcricketid.com/dtv.php?id=${id}`}
+            src={`https://e765432.diamondcricketid.com/dtv.php?id=${bid}`}
             style={{
               width: "100%",
               height: "100%",
@@ -569,7 +580,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
 
       {/* Scorecard */}
       {scorecardState !== 'hidden' && id && (
-        <CricketScoreCard scoreData={enrichedScoreData} />
+        <CricketScoreCard scoreData={finalScoreData} />
       )}
 
      
@@ -598,7 +609,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
               gap: "8px"
             }}>
               <span style={{ color: "#fff", fontSize: "16px", fontWeight: "bold" }}>Bookmaker</span>
-              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>Min: 100 Max: {maxBet}</span>
+              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>Min: {bmLimit?.minBet ?? 100} Max: {bmLimit?.maxBet ?? maxBet}</span>
             </div>
             <div style={{
               display: "grid",
@@ -983,14 +994,19 @@ const amountInputRef = useRef<HTMLInputElement>(null)
           </div>
         )}
 
-        {/* Fancy Section */}
-        <Fancy
-          fancyData={oddsData?.fancy?.flatMap((f: any) => f.section || []) || []}
-          handleBetData={handleBetData}
-          focusAmountInput={focusAmountInput}
-          teamPLData={teamPLData}
-          beventId={id}
-        />
+        {/* Fancy Section — one block per mname group */}
+        {(oddsData?.fancy || []).map((group: any, i: number) => (
+          <Fancy
+            key={group.mid || group.mname || i}
+            groupName={group.mname}
+            fancyData={group.section || []}
+            handleBetData={handleBetData}
+            focusAmountInput={focusAmountInput}
+            teamPLData={teamPLData}
+            beventId={id}
+            marketLimits={marketLimitsData}
+          />
+        ))}
       </div>
 
       {/* Betslip */}
