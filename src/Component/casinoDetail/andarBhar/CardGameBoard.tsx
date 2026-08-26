@@ -10,16 +10,21 @@ type Props = {
   liabilityData?: any[];
   onRateClick?: (item: any) => void;
   countdown?: string;
+  /** Remaining seconds of the round; used to pre-empt the backend suspend. */
+  roundSeconds?: number;
 };
 
-const CardGameBoard: React.FC<Props> = ({ 
-  modalVisible = false, 
-  setModalVisible, 
-  t2Data = [], 
+const CardGameBoard: React.FC<Props> = ({
+  modalVisible = false,
+  setModalVisible,
+  t2Data = [],
   liabilityData = [],
   onRateClick,
-  countdown = "00:00"
+  countdown = "00:00",
+  roundSeconds
 }) => {
+  // Within 2s of the round ending, suspend the whole board (frontend pre-empt).
+  const roundSuspended = roundSeconds != null && roundSeconds <= 2;
   // Helper function to get betting option by nation name
   const getBetOption = (nationName: string) => {
     return t2Data.find(item => item.nation === nationName) || {};
@@ -32,6 +37,7 @@ const CardGameBoard: React.FC<Props> = ({
   };
 
   const handleBetClick = (item: any) => {
+    if (roundSuspended) return;
     if (onRateClick && item.gstatus === "1") {
       onRateClick(item);
     } else {
@@ -40,7 +46,7 @@ const CardGameBoard: React.FC<Props> = ({
   };
 
   return (
-    <div className="game-wrapper">
+    <div className={`game-wrapper ${roundSuspended ? "round-suspended" : ""}`}>
       <div className="top-bar">
         <span>MIN: 100</span>
         <span>MAX: 25000</span>

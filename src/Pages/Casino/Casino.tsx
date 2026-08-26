@@ -42,7 +42,7 @@ const Casino = () => {
   }
 
   // Active casino games — add tableId here to enable
-  const ACTIVE_IDS = new Set<string>(['51', '52', '62', '99'])
+  const ACTIVE_IDS = new Set<string>(['51', '52', '53', '62', '99'])
 
   const handleCardClick = (e: React.MouseEvent, casino: any) => {
     if (!ACTIVE_IDS.has(casino.tableId)) {

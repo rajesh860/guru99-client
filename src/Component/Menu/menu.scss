@@ -16,6 +16,18 @@
   color: #ffffff !important;
 }
 
+[data-theme="light"] {
+  .menu_marqueee,
+  .menu_marqueee li.active a,
+  .menu_marqueee .mar_head {
+    background: #FF7A45 !important;
+  }
+  .menu_marqueee .mar_head,
+  .menu_marqueee .mar_head * {
+    color: #ffffff !important;
+  }
+}
+
 ol,
 ul {
   list-style: none;

@@ -74,6 +74,24 @@
   cursor: pointer;
 }
 
+.av2-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.av2-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.av2-title-round {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-family: monospace;
+}
+
 // ── Game area ─────────────────────────────────────────────────
 .av2-game {
   position: relative;
@@ -254,7 +272,7 @@
 // ── Bet panel ─────────────────────────────────────────────────
 .av2-panel {
   background: #1e2035;
-  margin: 8px 8px 0;
+  // margin: 8px 8px 0;
   border-radius: 12px;
   padding: 12px;
   border: 1px solid rgba(255,255,255,0.07);
@@ -329,9 +347,9 @@
     cursor: pointer !important;
   }
   &--locked {
-    background: #2a2d45 !important;
-    color: rgba(255,255,255,0.5) !important;
-    border: 1px solid rgba(255,255,255,0.1);
+    background: #7f1d1d !important;
+    color: rgba(255,255,255,0.75) !important;
+    border: 1px solid rgba(255,82,82,0.3);
     cursor: not-allowed !important;
     opacity: 1 !important;
     font-size: 13px;
@@ -435,4 +453,128 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+// ── Light theme overrides ───────────────────────────────────────
+// NOTE: the flight-chart canvas (.av2-game, chart svg, plane, countdown
+// card) is intentionally left dark — like Roulette's wheel/board, it is
+// a graphic display (dark grid lines, white axis labels, glow effects)
+// that isn't meant to flip to a white background. Only the structural
+// chrome around it (header, bet panel, My Bets modal) adapts.
+[data-theme="light"] {
+  .av2-container {
+    background: var(--color-background) !important;
+    color: #111827 !important;
+  }
+
+  .av2-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .av2-mybets-bar {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+  }
+
+  // ── Bet panel ───────────────────────────────────────────────
+  .av2-panel {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .av2-amt-row {
+    background: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .av2-pm {
+    background: rgba(0, 0, 0, 0.05) !important;
+    color: #111827 !important;
+    &:hover  { background: rgba(0, 0, 0, 0.09) !important; }
+    &:active { background: rgba(0, 0, 0, 0.04) !important; }
+  }
+
+  .av2-amt-val {
+    color: #111827 !important;
+  }
+
+  .av2-play-btn {
+    &--locked {
+      background: rgba(255, 82, 82, 0.25) !important;
+      color: #b91c1c !important;
+      border: 1px solid rgba(255, 82, 82, 0.4) !important;
+    }
+  }
+
+  .av2-q {
+    background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    &:hover { border-color: rgba(180, 140, 255, 0.4) !important; }
+  }
+
+  .av2-autobet {
+    background: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+    color: #6b7280 !important;
+
+    &--on {
+      background: rgba(16, 185, 129, 0.22) !important;
+      border-color: #10b981 !important;
+      color: #059669 !important;
+    }
+  }
+
+  .av2-co-input {
+    background: #f3f4f6 !important;
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+  }
+
+  // ── My Bets modal ───────────────────────────────────────────
+  .av2-bets-panel {
+    background: #ffffff !important;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .av2-bets-header {
+    border-color: #e5e7eb !important;
+  }
+
+  .av2-bets-title {
+    color: #111827 !important;
+  }
+
+  .av2-bets-close {
+    color: #6b7280 !important;
+  }
+
+  .av2-bets-tabswrap {
+    border-color: #e5e7eb !important;
+  }
+
+  .av2-bets-tab {
+    color: #6b7280 !important;
+
+    &--active {
+      background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
+      color: #ffffff !important;
+      border-bottom-color: #EFB32D !important;
+    }
+  }
+
+  .av2-bets-table {
+    thead tr { background: #0a0a0a !important; }
+    thead th { color: #ffffff !important; }
+
+    tbody tr {
+      border-color: #e5e7eb !important;
+    }
+    tbody tr:hover { background: rgb(238 238 238) !important; }
+  }
+
+  .av2-bets-td-round { color: #6b7280 !important; }
+  .av2-bets-td-stake { color: #111827 !important; }
+  .av2-bets-empty    { color: #6b7280 !important; }
 }

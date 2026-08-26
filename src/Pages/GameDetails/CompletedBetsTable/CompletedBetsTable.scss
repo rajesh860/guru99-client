@@ -193,3 +193,10 @@
     }
   }
 }
+
+[data-theme="light"] {
+  .completed-bets-header {
+    background: #000000 !important;
+    color: #ffffff !important;
+  }
+}

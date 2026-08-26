@@ -633,3 +633,95 @@ $color-history-h: #7a6010;
     margin: 12px 8px 0;
   }
 }
+
+// ── Light theme ─────────────────────────────────────────────
+[data-theme="light"] {
+  .l7n-container {
+    background: var(--color-background) !important;
+    color: #111827 !important;
+  }
+
+  .l7n-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+    color: #ffffff !important;
+
+    .l7n-header-left {
+      color: #ffffff !important;
+    }
+
+    .l7n-header-right {
+      color: rgba(255, 255, 255, 0.75) !important;
+    }
+  }
+
+  .l7n-timer {
+    &--open {
+      background: rgba(0, 230, 118, 0.22) !important;
+    }
+    &--closed {
+      background: rgba(255, 82, 82, 0.25) !important;
+    }
+  }
+
+  .l7n-rate-label {
+    color: #111827 !important;
+  }
+
+  .l7n-pl {
+    color: #6b7280 !important;
+  }
+
+  .l7n-min-max {
+    color: #6b7280 !important;
+  }
+
+  .l7n-card-section {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .l7n-cell-amount {
+    color: #111827 !important;
+  }
+
+  .l7n-result-header {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  .l7n-no-history {
+    color: #6b7280 !important;
+  }
+
+  .l7n-open-bets-title {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .l7n-open-bets-table-wrapper {
+    border-color: #e5e7eb !important;
+  }
+
+  .l7n-open-bets-table {
+    background: #ffffff !important;
+
+    thead {
+      background: #0a0a0a !important;
+      th {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+      }
+    }
+
+    tbody {
+      tr { border-color: #e5e7eb !important; }
+      tr:hover { background: rgb(238 238 238) !important; }
+      td { color: #111827 !important; }
+    }
+
+    .l7n-no-bets { color: #6b7280 !important; }
+  }
+}

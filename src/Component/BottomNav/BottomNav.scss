@@ -1,38 +1,26 @@
-// Casino Game Buttons Bar
+// Match Ticker Bar
 
-.casino-btn-bar {
+.match-ticker-bar {
   display: flex;
+  align-items: center;
   gap: 8px;
   padding: 5px 7px;
-  background: var(--color-surface, #131a26);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-
-  // Mobile — infinite horizontal scroll
-  &--mobile {
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    flex-wrap: nowrap;
-    &::-webkit-scrollbar { display: none; }
-  }
-
-  // Desktop — normal wrap layout
-  &--desktop {
-    overflow-x: visible;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 8px 16px;
-    gap: 10px;
-  }
+  background: #0d1117;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex-wrap: nowrap;
+  &::-webkit-scrollbar { display: none; }
 }
 
-// ── Base button ───────────────────────────────────────────────
-.casino-btn {
-  display: flex;
+// ── Base pill ─────────────────────────────────────────────────
+.ticker-pill {
+  display: inline-flex;
   align-items: center;
   gap: 5px;
   flex-shrink: 0;
-  padding: 7px 14px;
+  padding: 6px 12px;
   border-radius: 20px;
   border: none;
   cursor: pointer;
@@ -40,26 +28,17 @@
   font-weight: 600;
   font-family: "Roboto", sans-serif;
   white-space: nowrap;
-  transition: transform 0.15s, opacity 0.15s;
+  transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+  background: transparent;
 
   &:active { transform: scale(0.96); }
 }
 
-// ── Coming Soon / Off ─────────────────────────────────────────
-.casino-btn--off {
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.45);
-  border: 1px solid rgba(255,255,255,0.1);
-
-  &:hover { background: rgba(255,255,255,0.11); color: rgba(255,255,255,0.65); }
-}
-
-// ── Live / Active ─────────────────────────────────────────────
-.casino-btn--live {
+// ── Live match pill ───────────────────────────────────────────
+.ticker-pill--live {
   background: linear-gradient(135deg, #1a3a2a 0%, #0d2018 100%);
-  color: #00e676;
-  border: 1px solid rgba(0,230,118,0.45);
-  box-shadow: 0 0 12px rgba(0,230,118,0.15), inset 0 1px 0 rgba(0,230,118,0.08);
+  border: 1px solid rgba(0, 230, 118, 0.45);
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.12), inset 0 1px 0 rgba(0,230,118,0.06);
   position: relative;
   overflow: hidden;
 
@@ -70,56 +49,99 @@
     width: 35%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(0,230,118,0.12), transparent);
-    animation: btnShimmer 2s linear infinite;
+    animation: tickerShimmer 2.4s linear infinite;
   }
 
-  &:hover { box-shadow: 0 0 18px rgba(0,230,118,0.3); }
+  &:hover { box-shadow: 0 0 18px rgba(0,230,118,0.28); }
+
+  .ticker-name { color: #e0ffe8; }
 }
 
-@keyframes btnShimmer {
-  from { left: -60%; }
-  to   { left: 120%; }
+// ── Upcoming match pill ───────────────────────────────────────
+.ticker-pill--upcoming {
+  background: #45474a;
+  border: 1px solid #c1c6ce;
+
+  &:hover { background: #525558; }
+
+  .ticker-name { color: #eaf2ea !important; }
 }
 
-// ── Live dot ──────────────────────────────────────────────────
-.casino-btn-dot {
+// ── Match name ────────────────────────────────────────────────
+.ticker-name {
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #ffffff !important;
+}
+
+// ── Live pulsing dot ─────────────────────────────────────────
+.ticker-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #00e676;
   flex-shrink: 0;
-  animation: dotPing 1.3s ease-in-out infinite;
+  animation: tickerDotPulse 1.3s ease-in-out infinite;
   box-shadow: 0 0 5px #00e676;
 }
 
-@keyframes dotPing {
+@keyframes tickerDotPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50%       { opacity: 0.5; transform: scale(1.5); }
+  50%       { opacity: 0.4; transform: scale(1.6); }
 }
 
-// ── LIVE tag ──────────────────────────────────────────────────
-.casino-btn-live-tag {
+// ── Tags ─────────────────────────────────────────────────────
+.ticker-tag {
   font-size: 8.5px;
   font-weight: 800;
   letter-spacing: 0.8px;
-  color: #00e676;
-  background: rgba(0,230,118,0.12);
-  border: 1px solid rgba(0,230,118,0.3);
   padding: 1px 5px;
   border-radius: 4px;
+  flex-shrink: 0;
+
+  &--live {
+    color: #00e676;
+    background: rgba(0, 230, 118, 0.12);
+    border: 1px solid rgba(0, 230, 118, 0.3);
+  }
+
+  &--soon {
+    color: #a6f0ff;
+    background: #ff98001a;
+    border: 1px solid #bcc6d6;
+  }
 }
 
-.casino-btn-label {
-  position: relative;
+// ── Clock emoji (upcoming) ────────────────────────────────────
+.ticker-clock {
+  font-size: 11px;
+  flex-shrink: 0;
 }
 
-.casino-btn-soon-tag {
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  color: rgba(255,255,255,0.4);
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 1px 5px;
-  border-radius: 4px;
+@keyframes tickerShimmer {
+  from { left: -60%; }
+  to   { left: 120%; }
 }
+
+// ── Dark theme upcoming pill override ─────────────────────────
+[data-theme="dark"] {
+  .ticker-pill--upcoming {
+    background: #1a2340;
+    border: 1px solid #3a5080;
+
+    &:hover { background: #1f2b4e; }
+
+    .ticker-name { color: #a8c8f8 !important; }
+  }
+
+  .ticker-tag--soon {
+    color: #a6f0ff;
+    background: rgba(100, 180, 255, 0.1);
+    border: 1px solid #3a6080;
+  }
+}
+

@@ -46,6 +46,7 @@ const Header = () => {
   const balance  = userBalance?.data?.balance?.toFixed(2)  ?? "0.00"
   const exposure = userBalance?.data?.exposure?.toFixed(2) ?? "0.00"
   const uId      = userBalance?.data?.userId || userId
+  const fullName = userBalance?.data?.fullName
 
   const handleLogOut = () => {
     logOut()
@@ -242,9 +243,13 @@ const Header = () => {
           <aside className="sidebar">
             {/* Sidebar header */}
             <div className="sidebar__head">
-              <img src="/img/user.png" alt="avatar" className="sidebar__avatar" />
-              <span className="sidebar__name">{uId}</span>
-              <span className="sidebar__balance">₹ {balance}</span>
+              <span className="sidebar__fullName">
+                {fullName ? `${fullName} (${uId})` : uId}
+              </span>
+              <div className="sidebar__statsRow">
+                <span className="sidebar__balance">₹ {balance}</span>
+                <span className="sidebar__exposure">Exposure: {exposure}</span>
+              </div>
             </div>
 
             {/* Nav links */}
@@ -270,8 +275,46 @@ const Header = () => {
                 className="sidebar__item"
                 onClick={() => setShowSidebar(false)}
               >
-                <img src="/img/matka.png" alt="" className="sidebar__icon" />
+                <img src="/casino/matka.png" alt="" className="sidebar__icon" />
                 <span>Matka</span>
+                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+
+              {/* Dice */}
+              <Link
+                to="/casino/detail/99"
+                className="sidebar__item"
+                onClick={() => setShowSidebar(false)}
+              >
+                <img src="/img/dice.png" alt="" className="sidebar__icon" />
+                <span>Dice</span>
+                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+
+              {/* Roulette — coming soon */}
+              <button
+                className="sidebar__item"
+                onClick={() => { setShowSidebar(false); snackbarUtil.info("Coming Soon!") }}
+              >
+                <img src="/img/roulete.png" alt="" className="sidebar__icon" />
+                <span>Roulette</span>
+                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+
+              {/* Aviator */}
+              <Link
+                to="/aviator"
+                className="sidebar__item"
+                onClick={() => setShowSidebar(false)}
+              >
+                <img src="/img/aviator.png" alt="" className="sidebar__icon" />
+                <span>Aviator</span>
                 <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>

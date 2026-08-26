@@ -9,7 +9,7 @@ const Layout = () => {
     <>
       <Header />
       <Menu />
-      <BottomNav />
+      {/* <BottomNav /> */}
       <div className="contant_old" style={{ lineHeight: "1.3" }}>
         <div className="content">
           <Outlet />

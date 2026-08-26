@@ -13,6 +13,7 @@ const DragonTiger20: React.FC = () => {
   const [betModalVisible, setBetModalVisible] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
   const [countdown, setCountdown] = useState("00:00")
+  const [remainingSecs, setRemainingSecs] = useState(0)
   const [betsTab, setBetsTab] = useState<"open" | "completed">("open")
   const [roundDetailOpen, setRoundDetailOpen] = useState(false)
   const [selectedRoundId, setSelectedRoundId] = useState("")
@@ -70,12 +71,14 @@ const DragonTiger20: React.FC = () => {
     const autotime = wsData?.autotime ?? wsData?.t1?.autotime
     if (!autotime) {
       setCountdown("00:00")
+      setRemainingSecs(0)
       return
     }
 
     const autoTimeSeconds = parseInt(autotime)
     if (autoTimeSeconds <= 0) {
       setCountdown("00:00")
+      setRemainingSecs(0)
       return
     }
 
@@ -84,13 +87,16 @@ const DragonTiger20: React.FC = () => {
       `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`
 
     setCountdown(fmt(remaining))
+    setRemainingSecs(remaining)
     const timer = setInterval(() => {
       remaining -= 1
       if (remaining <= 0) {
         setCountdown("00:00")
+        setRemainingSecs(0)
         clearInterval(timer)
       } else {
         setCountdown(fmt(remaining))
+        setRemainingSecs(remaining)
       }
     }, 1000)
 
@@ -105,8 +111,8 @@ const DragonTiger20: React.FC = () => {
   const tigerMain  = getOption("Tiger")
   const tieMain    = getOption("Tie")
 
-  // gstatus "1" = active, "0" = suspended
-  const isSuspended = (item: any) => !item || item.gstatus !== "1"
+  // gstatus "1" = active, "0" = suspended; also suspend within 2s of round end.
+  const isSuspended = (item: any) => !item || item.gstatus !== "1" || remainingSecs <= 2
 
   const resultHistory: any[] = wsData?.t3 ?? []
 
@@ -132,7 +138,7 @@ const DragonTiger20: React.FC = () => {
         <div className="dt20-video-wrapper">
           <div className="dt20-video-area">
             <iframe
-              src="https://alpha-g.qnsports.live/route/rih2.php?id=3030"
+              src="https://alpha-g.qnsports.live/route/rih2.php?id=3035"
               title="20-20 Dragon Tiger Stream"
               allowFullScreen
             />
@@ -423,6 +429,7 @@ const DragonTiger20: React.FC = () => {
         selectedPlayer={selectedPlayer}
         matchId={id}
         game="dt20"
+        roundSeconds={remainingSecs}
       />
 
       <DT20RoundDetailModal

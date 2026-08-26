@@ -513,3 +513,29 @@
     text-align: center;
   }
 }
+
+[data-theme="light"] {
+  .matka-detail-header {
+    .header-date,
+    .game-title {
+      color: #ffffff !important;
+    }
+  }
+
+  .number-button {
+    background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+
+    &:hover {
+      border-color: rgba(180, 140, 255, 0.4) !important;
+      box-shadow: 0 8px 20px rgba(88, 28, 190, 0.4) !important;
+    }
+
+    &.selected {
+      background: #EFB32D !important;
+      border-color: #EFB32D !important;
+      color: #0a0518 !important;
+    }
+  }
+}

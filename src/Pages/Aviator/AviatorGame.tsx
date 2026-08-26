@@ -8,6 +8,7 @@ import {
   useAviatorPendingBetsQuery,
   useAviatorCompletedBetsQuery,
 } from "../../../store/service/userServices/userServices"
+import "../../Component/casinoDetail/Dice/DiceGame.scss"
 import "./AviatorGame.scss"
 
 type Phase = "waiting" | "flying" | "crashed"
@@ -38,7 +39,6 @@ const AviatorGame = () => {
   const [dotPos, setDotPos]     = useState({ x: MARGIN_L, y: CHART_H })
   const [maxMult, setMaxMult]   = useState(2)
   const [chartMaxT, setChartMaxT] = useState(8)
-  const [showBets, setShowBets] = useState(false)
   const [betOpen, setBetOpen]   = useState(false)
 
   // Two bet panels
@@ -387,9 +387,10 @@ const AviatorGame = () => {
         </div>
       </div>
 
-      {/* My Bets — separate row below header */}
-      <div className="av2-mybets-bar">
-        <button className="av2-mybets" onClick={() => setShowBets(s => !s)}>My Bets</button>
+      {/* Title bar — game name + round id */}
+      <div className="av2-mybets-bar av2-title-bar">
+        <span className="av2-title">Aviator</span>
+        {roundId && <span className="av2-title-round">#{roundId}</span>}
       </div>
 
       {/* Game canvas */}
@@ -504,9 +505,6 @@ const AviatorGame = () => {
             </div>
           </div>
         )}
-
-        {/* Round ID */}
-        {roundId && <div className="av2-round-id">{roundId.slice(-8)}</div>}
       </div>
 
       {/* Bet panels — only first panel shown */}
@@ -559,73 +557,56 @@ const AviatorGame = () => {
         </div>
       ))}
 
-      {/* Players */}
-      {/* <div className="av2-players-bar">
-        <span>50 Players online</span>
-        <span>—</span>
-      </div>
-      <div className="av2-table-head">
-        <span>USER</span><span>MULT.</span><span>BET</span>
-      </div> */}
-
-      {/* My Bets modal */}
-      {showBets && (
-        <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.72)", zIndex:999, display:"flex", alignItems:"center", justifyContent:"center", padding:"16px" }}
-          onClick={() => setShowBets(false)}>
-          <div style={{ background:"#1a2230", width:"100%", maxWidth:"520px", maxHeight:"80vh", borderRadius:"16px", display:"flex", flexDirection:"column", overflow:"hidden", boxShadow:"0 8px 40px rgba(0,0,0,0.6)" }}
-            onClick={e => e.stopPropagation()}>
-            {/* Header */}
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"12px 16px", borderBottom:"1px solid rgba(255,255,255,0.08)" }}>
-              <span style={{ color:"#fff", fontWeight:700, fontSize:14 }}>My Bets</span>
-              <button onClick={() => setShowBets(false)} style={{ background:"none", border:"none", color:"rgba(255,255,255,0.5)", fontSize:18, cursor:"pointer" }}>✕</button>
-            </div>
-            {/* Tabs */}
-            <div style={{ display:"flex", borderBottom:"1px solid rgba(255,255,255,0.08)" }}>
-              {(["pending","completed"] as const).map(t => (
-                <button key={t} onClick={() => { setBetsTab(t); t === "pending" ? refetchPending() : refetchCompleted() }}
-                  style={{ flex:1, padding:"10px", background:"none", border:"none", color: betsTab===t ? "#10b981" : "rgba(255,255,255,0.4)", fontWeight:700, fontSize:13, borderBottom: betsTab===t ? "2px solid #10b981" : "2px solid transparent", cursor:"pointer", textTransform:"capitalize" }}>
-                  {t}
-                </button>
-              ))}
-            </div>
-            {/* Table */}
-            <div style={{ overflowY:"auto", flex:1 }}>
-              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:12 }}>
-                <thead>
-                  <tr style={{ background:"#243044" }}>
-                    {["Round","Stake","Cashout","P/L","Status"].map(h => (
-                      <th key={h} style={{ padding:"7px 8px", color:"rgba(255,255,255,0.6)", fontWeight:600, textAlign:"center" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    const list = betsTab === "pending"
-                      ? (pendingBetsData?.data ?? pendingBetsData?.bets ?? [])
-                      : (completedBetsData?.data ?? completedBetsData?.bets ?? [])
-                    if (!list.length) return (
-                      <tr><td colSpan={5} style={{ textAlign:"center", padding:20, color:"rgba(255,255,255,0.3)" }}>No bets found</td></tr>
-                    )
-                    return list.map((b: any, i: number) => (
-                      <tr key={i} style={{ borderBottom:"1px solid rgba(255,255,255,0.04)" }}>
-                        <td style={{ padding:"6px 8px", textAlign:"center", color:"rgba(255,255,255,0.4)", fontFamily:"monospace", fontSize:10 }}>{(b.roundId ?? "—").slice(-8)}</td>
-                        <td style={{ padding:"6px 8px", textAlign:"center", color:"#fff" }}>{b.stake}</td>
-                        <td style={{ padding:"6px 8px", textAlign:"center", color:"#f59e0b" }}>{b.autoCashout ? `${b.autoCashout}x` : "—"}</td>
-                        <td style={{ padding:"6px 8px", textAlign:"center", color: b.profitLoss > 0 ? "#00e676" : b.profitLoss < 0 ? "#ff5252" : "#fff" }}>
-                          {b.profitLoss ?? "—"}
-                        </td>
-                        <td style={{ padding:"6px 8px", textAlign:"center", color: b.status==="won" ? "#00e676" : b.status==="lost" ? "#ff5252" : "#ffc107", fontWeight:700, fontSize:11 }}>
-                          {b.status ?? "pending"}
-                        </td>
-                      </tr>
-                    ))
-                  })()}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      {/* Open Bets / Completed — inline, matching other casino games */}
+      <div className="dice-open-bets">
+        <div className="dice-bets-tabs">
+          <button
+            className={`dbt ${betsTab === "pending" ? "dbt--active" : ""}`}
+            onClick={() => { setBetsTab("pending"); refetchPending() }}
+          >Open Bets</button>
+          <button
+            className={`dbt ${betsTab === "completed" ? "dbt--active" : ""}`}
+            onClick={() => { setBetsTab("completed"); refetchCompleted() }}
+          >Completed</button>
         </div>
-      )}
+
+        <div className="dice-open-bets-wrapper">
+          <table className="dice-open-bets-table">
+            <thead>
+              <tr>
+                <th>Round</th><th>Stake</th><th>Cashout</th><th>P/L</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(() => {
+                const list = betsTab === "pending"
+                  ? (pendingBetsData?.data ?? pendingBetsData?.bets ?? [])
+                  : (completedBetsData?.data ?? completedBetsData?.bets ?? [])
+                if (!list.length) return (
+                  <tr><td className="dice-no-bets" colSpan={5}>No bets found</td></tr>
+                )
+                return list.map((b: any, i: number) => (
+                  <tr key={i}>
+                    <td style={{ fontFamily: "monospace" }}>{(b.roundId ?? "—").slice(-8)}</td>
+                    <td>₹{b.stake}</td>
+                    <td>{b.autoCashout ? `${b.autoCashout}x` : "—"}</td>
+                    <td className={b.profitLoss > 0 ? "dice-profit" : b.profitLoss < 0 ? "dice-loss" : ""}>
+                      {b.profitLoss ?? "—"}
+                    </td>
+                    <td>
+                      <span className={`dice-badge ${
+                        b.status === "won" ? "dice-badge-win"
+                        : b.status === "lost" ? "dice-badge-loss"
+                        : "dice-badge-pending"
+                      }`}>{b.status ?? "pending"}</span>
+                    </td>
+                  </tr>
+                ))
+              })()}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   )
 }

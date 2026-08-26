@@ -1,92 +1,87 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
-import snackbarUtil from "../../utils/Snackbar"
+import { useActiveMatchQuery } from "../../../store/service/odds/oddsServices"
 import "./BottomNav.scss"
 
-const CASINO_GAMES = [
-  { to: "/inplay",      label: "Cricket", live: true  },
-  { to: "/casino-list", label: "Casino",  live: true  },
-  { to: "/satta-matka", label: "Matka",   live: true  },
-  { to: "/dice",        label: "Dice",    live: true  },
-  { to: "/aviator",     label: "Aviator", live: true  },
-]
-
-const MOBILE_BP = 768
-
 const BottomNav = () => {
-  const navigate   = useNavigate()
-  const barRef     = useRef<HTMLDivElement>(null)
-  const rafRef     = useRef<number | null>(null)
-  const pausedRef  = useRef(false)
-  const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_BP)
+  const navigate = useNavigate()
+  const trackRef = useRef<HTMLDivElement>(null)
+  const animRef  = useRef<number | null>(null)
+  const pausedRef = useRef(false)
 
-  // Track screen size — updates on resize
+  const { data } = useActiveMatchQuery(undefined, { pollingInterval: 10000 })
+
+  const liveMatches     = data?.data?.live     || []
+  const upcomingMatches = data?.data?.upcoming || []
+
+  const allItems = [
+    ...liveMatches.map((m: any) => ({ ...m, _type: "live" })),
+    ...upcomingMatches.map((m: any) => ({ ...m, _type: "upcoming" })),
+  ]
+
+  // Auto-scroll
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < MOBILE_BP)
-    window.addEventListener("resize", check)
-    return () => window.removeEventListener("resize", check)
-  }, [])
+    const track = trackRef.current
+    if (!track || allItems.length === 0) return
 
-  // Infinite scroll — only on mobile
-  useEffect(() => {
-    const bar = barRef.current
-    if (!bar || !isMobile) return
-
-    const SPEED = 0.6
-    bar.scrollLeft = bar.scrollWidth / 3
-
+    const SPEED = 0.5
     const tick = () => {
-      if (!pausedRef.current && bar) {
-        bar.scrollLeft += SPEED
-        const oneThird = bar.scrollWidth / 3
-        if (bar.scrollLeft >= oneThird * 2) bar.scrollLeft -= oneThird
+      if (!pausedRef.current && track) {
+        track.scrollLeft += SPEED
+        if (track.scrollLeft >= track.scrollWidth / 2) {
+          track.scrollLeft = 0
+        }
       }
-      rafRef.current = requestAnimationFrame(tick)
+      animRef.current = requestAnimationFrame(tick)
     }
-
-    rafRef.current = requestAnimationFrame(tick)
+    animRef.current = requestAnimationFrame(tick)
 
     const pause  = () => { pausedRef.current = true }
-    const resume = () => { setTimeout(() => { pausedRef.current = false }, 2000) }
-
-    bar.addEventListener("mouseenter", pause)
-    bar.addEventListener("mouseleave", resume)
-    bar.addEventListener("touchstart", pause, { passive: true })
-    bar.addEventListener("touchend",   resume)
+    const resume = () => { setTimeout(() => { pausedRef.current = false }, 1500) }
+    track.addEventListener("mouseenter", pause)
+    track.addEventListener("mouseleave", resume)
+    track.addEventListener("touchstart", pause, { passive: true })
+    track.addEventListener("touchend", resume)
 
     return () => {
-      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
-      bar.removeEventListener("mouseenter", pause)
-      bar.removeEventListener("mouseleave", resume)
-      bar.removeEventListener("touchstart", pause)
-      bar.removeEventListener("touchend",   resume)
+      if (animRef.current) cancelAnimationFrame(animRef.current)
+      track.removeEventListener("mouseenter", pause)
+      track.removeEventListener("mouseleave", resume)
+      track.removeEventListener("touchstart", pause)
+      track.removeEventListener("touchend", resume)
     }
-  }, [isMobile])
+  }, [allItems.length])
 
-  const items = isMobile
-    ? [...CASINO_GAMES, ...CASINO_GAMES, ...CASINO_GAMES]
-    : CASINO_GAMES
+  if (allItems.length === 0) return null
+
+  // Duplicate for seamless loop
+  const doubled = [...allItems, ...allItems]
+
+  const handleClick = (m: any) => {
+    navigate(`/cricket/${m.beventId}/${m.gmid}/${m.bid || m.bmarketId}`)
+  }
 
   return (
-    <div
-      className={`casino-btn-bar ${isMobile ? "casino-btn-bar--mobile" : "casino-btn-bar--desktop"}`}
-      ref={barRef}
-    >
-      {items.map((game, i) => (
+    <div className="match-ticker-bar" ref={trackRef}>
+      {doubled.map((m, i) => (
         <button
-          key={`${game.to}-${i}`}
-          className={`casino-btn ${game.live ? "casino-btn--live" : "casino-btn--off"}`}
-          onClick={() => {
-            if (game.live) navigate(game.to)
-            else snackbarUtil.info("Coming Soon!")
-          }}
+          key={`${m.beventId}-${i}`}
+          className={`ticker-pill ${m._type === "live" ? "ticker-pill--live" : "ticker-pill--upcoming"}`}
+          onClick={() => handleClick(m)}
         >
-          {game.live && <span className="casino-btn-dot" />}
-          <span className="casino-btn-label">{game.label}</span>
-          {game.live
-            ? <span className="casino-btn-live-tag">LIVE</span>
-            : <span className="casino-btn-soon-tag">SOON</span>
-          }
+          {m._type === "live" ? (
+            <>
+              <span className="ticker-dot" />
+              <span className="ticker-name">{m.eventName}</span>
+              <span className="ticker-tag ticker-tag--live">LIVE</span>
+            </>
+          ) : (
+            <>
+              <span className="ticker-clock">⏰</span>
+              <span className="ticker-name">{m.eventName}</span>
+              <span className="ticker-tag ticker-tag--soon">SOON</span>
+            </>
+          )}
         </button>
       ))}
     </div>

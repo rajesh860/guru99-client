@@ -382,6 +382,27 @@ hr {
 
 // Light theme overrides for components with hardcoded secondary colors
 [data-theme="light"] {
+  // Marquee — light blue bg, white text
+  .menu_marqueee {
+    background: #FF7A45 !important;
+    color: #ffffff !important;
+    * { color: #ffffff !important; }
+  }
+
+  // Casino tabs bar — dark bg so green LIVE buttons remain readable
+  .casino-btn-bar {
+    background: #111111 !important;
+    border-bottom-color: rgba(255,255,255,0.08) !important;
+  }
+
+  // Back button bar (BackBtn component) — match gold/black theme
+  .menu_back .navMain li.active a {
+    background: #0a0a0a !important;
+    color: #EFB32D !important;
+    border-color: #EFB32D !important;
+
+    &:hover { background: #161616 !important; }
+  }
   // CricketScoreCard — always dark, block global text color from bleeding in
   .cscard, .cscard-upcoming {
     p, span, label { color: inherit; }
@@ -391,7 +412,7 @@ hr {
   .match-card {
     background: #ffffff !important;
     border-color: transparent !important;
-    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.25), 0 1px 4px rgba(25, 118, 210, 0.15) !important;
+    // box-shadow: 0 4px 16px rgba(25, 118, 210, 0.25), 0 1px 4px rgba(25, 118, 210, 0.15) !important;
     .team-name { color: #1a1a2e !important; }
     .bookmaker-title { color: #1a1a2e !important; }
     .league-name { color: #546e7a !important; }
@@ -399,7 +420,7 @@ hr {
       background: #f0f4f8 !important;
       box-shadow: none !important;
     }
-    .match-time { color: #1565c0 !important; text-shadow: none !important; }
+    .match-time { color: #3B2A99 !important; text-shadow: none !important; }
   }
 
   // MyBets / CompletedBets tables

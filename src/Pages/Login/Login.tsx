@@ -50,14 +50,13 @@ const Login = () => {
       //   return
       // }
 
+      const apiBase = import.meta.env.VITE_API_BASE_URL || ''
+      const appUrl = apiBase ? new URL(apiBase).hostname : window.location.hostname
       trigger({
         username: "C" + clientCode,
         password: password,
-        panel: "client" ,
-        appUrl: import.meta.env.VITE_CLIENT_DOMAIN || window.location.hostname,
-        // url: "fastbet365.in",
-        // url: "betexch247.net",
-        // url: "1expro.net",
+        panel: "client",
+        appUrl,
       })
     }
   }

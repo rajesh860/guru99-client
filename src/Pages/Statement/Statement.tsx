@@ -83,18 +83,17 @@ const Statement = () => {
               <table className="statement-ss2__table">
                 <thead>
                   <tr>
-                    <th style={{ width: "22%" }}>DATE</th>
-                    <th style={{ width: "38%" }}>DESCRIPTION</th>
-                    <th style={{ width: "10%" }}>PrevBal</th>
-                    <th style={{ width: "10%" }}>CREDIT</th>
-                    <th style={{ width: "10%" }}>DEBIT</th>
-                    <th style={{ width: "10%" }}>BALANCE</th>
+                    <th style={{ width: "30%" }}>DESCRIPTION</th>
+                    <th style={{ width: "20%" }}>PrevBal</th>
+                    <th style={{ width: "12%" }}>CREDIT</th>
+                    <th style={{ width: "12%" }}>DEBIT</th>
+                    <th style={{ width: "20%" }}>BALANCE</th>
                   </tr>
                 </thead>
                 <tbody>
                   {computedRows.length === 0 ? (
                     <tr>
-                      <td className="statement-ss2__empty" colSpan={6}>
+                      <td className="statement-ss2__empty" colSpan={5}>
                         No data
                       </td>
                     </tr>
@@ -106,10 +105,14 @@ const Statement = () => {
 
                       return (
                         <tr key={r?.transactionId || idx}>
-                          <td className="statement-ss2__date">
-                            {dateText ? moment(dateText).format("MMM DD, YYYY h:mm:ss A") : ""}
+                          <td className="statement-ss2__desc">
+                            <span className="statement-ss2__descText">{desc}</span>
+                            {dateText && (
+                              <span className="statement-ss2__date">
+                                {moment(dateText).format("MMM DD, YYYY h:mm:ss A")}
+                              </span>
+                            )}
                           </td>
-                          <td className="statement-ss2__desc">{desc}</td>
                           <td className="statement-ss2__num">{x.prevBalText}</td>
                           <td className="statement-ss2__num statement-ss2__credit">{x.creditText}</td>
                           <td className="statement-ss2__num statement-ss2__debit">{x.debitText}</td>

@@ -31,7 +31,7 @@
   font-size: 13px;
   color: var(--color-text);
   font-weight: 700;
-  background: var(--color-primary) !important;
+  // background: var(--color-primary) !important;
 }
 
 // .navMain li a:hover,
@@ -622,4 +622,78 @@ p {
 .betslip-modal-submit {
   background: #1aa21a;
   color: #fff;
+}
+
+/* ── Gold ribbon section header (Bookmaker / Session) ── */
+.gd-ribbon {
+  position: relative;
+  overflow: hidden;
+  background: #0a0a0a !important;
+  border-left: none !important;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    bottom: -40%;
+    right: -8%;
+    width: 60%;
+    background: linear-gradient(100deg, #a97318 0%, #EFB32D 30%, #f7d488 50%, #EFB32D 70%, #a97318 100%);
+    transform: skewX(-18deg);
+    z-index: 0;
+  }
+
+  .gd-ribbon__left {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gd-ribbon__icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .gd-ribbon__title {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .gd-ribbon__info {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .gd-ribbon__meta {
+    position: relative;
+    z-index: 1;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
 }

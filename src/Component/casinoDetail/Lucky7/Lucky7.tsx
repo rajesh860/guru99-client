@@ -15,6 +15,7 @@ const Lucky7: React.FC = () => {
   const [betModalVisible, setBetModalVisible] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
   const [countdown, setCountdown] = useState("00:00")
+  const [remainingSecs, setRemainingSecs] = useState(0)
   const [wsData, setWsData] = useState<any>(null)
   const [cardFlipping, setCardFlipping] = useState(false)
   const [betsTab, setBetsTab] = useState<"open" | "completed">("open")
@@ -66,12 +67,14 @@ const Lucky7: React.FC = () => {
     const autotime = wsData?.t1?.autotime ?? wsData?.autotime
     if (!autotime) {
       setCountdown("00:00")
+      setRemainingSecs(0)
       return
     }
 
     const autoTimeSeconds = parseInt(autotime)
     if (autoTimeSeconds <= 0) {
       setCountdown("00:00")
+      setRemainingSecs(0)
       return
     }
 
@@ -80,13 +83,16 @@ const Lucky7: React.FC = () => {
       `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`
 
     setCountdown(fmt(remaining))
+    setRemainingSecs(remaining)
     const timer = setInterval(() => {
       remaining -= 1
       if (remaining <= 0) {
         setCountdown("00:00")
+        setRemainingSecs(0)
         clearInterval(timer)
       } else {
         setCountdown(fmt(remaining))
+        setRemainingSecs(remaining)
       }
     }, 1000)
 
@@ -101,7 +107,9 @@ const Lucky7: React.FC = () => {
   const highOption  = getOption("HIGH Card")
   const card7Option = getOption("Card 7")
 
-const isSuspended = (item: any) => !item || item.gstatus !== "1"
+// Suspend when backend marks it closed, OR within 2s of the round ending
+// (frontend pre-empts the backend suspend).
+const isSuspended = (item: any) => !item || item.gstatus !== "1" || remainingSecs <= 2
 
   const handleRateClick = (item: any) => {
     if (isSuspended(item)) return
@@ -328,6 +336,7 @@ const isSuspended = (item: any) => !item || item.gstatus !== "1"
         selectedPlayer={selectedPlayer}
         matchId={id}
         game="lucky7eu"
+        roundSeconds={remainingSecs}
       />
 
       <Lucky7RoundDetailModal

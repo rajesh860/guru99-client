@@ -40,6 +40,14 @@ export const rouletteApi = createApi({
         method: "GET",
       }),
     }),
+
+    // Bets for a specific round
+    getMyRoundBets: build.query<any, string>({
+      query: (roundId: string) => ({
+        url: `/roulette/my-round-bets?roundId=${roundId}`,
+        method: "GET",
+      }),
+    }),
   }),
 })
 
@@ -49,4 +57,5 @@ export const {
   usePlaceRouletteBetMutation,
   useGetRoulettePendingBetsQuery,
   useGetRouletteCompletedBetsQuery,
+  useGetMyRoundBetsQuery,
 } = rouletteApi

@@ -8,6 +8,25 @@
     vertical-align: bottom;
 }
 
+[data-theme="light"] .casino-card {
+  border-color: rgb(238 238 238);
+}
+
+[data-theme="light"] .casino-card:hover {
+  border-color: #5B3FE0;
+  box-shadow: 0 6px 20px rgba(91, 63, 224, 0.3);
+}
+
+[data-theme="light"] .casino-card-title {
+  border-left: 3px solid #EFB32D;
+  padding-left: 10px;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .casino-card-content {
+  background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
+}
+
 .casino-page {
   background: var(--color-background);
   min-height: 100vh;
@@ -67,7 +86,7 @@
 .casino-card-image {
   position: relative;
   width: 160px;
-  height: 140px;
+  height: 115px;
   flex-shrink: 0;
   overflow: hidden;
   background: var(--color-cardBg);
@@ -76,7 +95,7 @@
 .casino-card-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   transition: transform 0.3s ease;
 }
 
@@ -215,7 +234,7 @@
 
   .casino-card-image {
     width: 100%;
-    height: 180px;
+    height: 115px;
   }
 
   .casino-card-content {
@@ -223,7 +242,7 @@
   }
 
   .casino-card-title {
-    font-size: 16px;
+    font-size: 10px;
   }
 
   .casino-status-badge {
@@ -239,11 +258,11 @@
   }
 
   .casino-card-image {
-    height: 150px;
+    height: 115px;
   }
 
   .casino-card-title {
-    font-size: 14px;
+    font-size: 10px;
   }
 
   .casino-card-content {

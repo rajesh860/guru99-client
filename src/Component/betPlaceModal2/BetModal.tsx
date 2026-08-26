@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import "./BetModal.scss"
 import { useBetPlaceMutation } from "../../../store/service/casino/casinoServices"
 import { useGetCasinoMyBetsQuery } from "../../../store/service/userServices/userServices"
@@ -8,6 +8,11 @@ const amounts = [200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000
 
 const formatAmount = (n: number) =>
   n >= 1000 ? `${n / 1000}K` : `${n}`
+
+// Auto-close the bet module after this many idle seconds.
+const AUTO_CLOSE_SECONDS = 8
+// Close the bet module this many seconds before the round ends (pre-empt backend suspend).
+const SUSPEND_THRESHOLD = 2
 
 type Props = {
   onClose?: () => void
@@ -25,10 +30,19 @@ type Props = {
     sectionId?: string
   }
   matchId?: string
+  /** Remaining seconds of the current game round (from `autotime`). At the
+   *  suspend threshold the modal auto-closes 2s before backend suspends. */
+  roundSeconds?: number
 }
 
-const BetModal: React.FC<Props> = ({ onClose, selectedPlayer, matchId}) => {
-  const [seconds, setSeconds] = useState(8)
+const BetModal: React.FC<Props> = ({ onClose, selectedPlayer, matchId, roundSeconds}) => {
+  const [seconds, setSeconds] = useState(AUTO_CLOSE_SECONDS)
+  const isSuspended = roundSeconds != null && roundSeconds <= SUSPEND_THRESHOLD
+
+  // Keep the latest onClose in a ref so the countdown isn't reset every time the
+  // parent re-renders (it re-creates onClose each second via its own timer).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
   const [selectedAmount, setSelectedAmount] = useState(0)
   const [customAmount, setCustomAmount] = useState("")
   const [userIp, setUserIp] = useState("127.0.0.1") // Default fallback
@@ -132,19 +146,24 @@ const BetModal: React.FC<Props> = ({ onClose, selectedPlayer, matchId}) => {
     }
   }, [error])
 
-  // Countdown logic
+  // Countdown logic (auto-close after 15s)
   useEffect(() => {
     if (seconds <= 0) {
-      onClose && onClose()
+      onCloseRef.current && onCloseRef.current()
       return
     }
-    
+
     const timerId = setTimeout(() => {
       setSeconds(prev => prev - 1)
     }, 1000)
-    
+
     return () => clearTimeout(timerId)
-  }, [seconds, onClose])
+  }, [seconds])
+
+  // Round about to end — close 2s before backend suspends the odds.
+  useEffect(() => {
+    if (isSuspended) onCloseRef.current && onCloseRef.current()
+  }, [isSuspended])
 
   // Handle amount selection
   const handleAmountClick = (amount: number) => {
@@ -160,8 +179,12 @@ const BetModal: React.FC<Props> = ({ onClose, selectedPlayer, matchId}) => {
 
   // Handle bet submission
   const handleSubmit = () => {
+    if (isSuspended) {
+      snackbarUtil.error("Betting is suspended for this round")
+      return
+    }
     const amount = selectedAmount || parseInt(customAmount) || 0
-    
+
     if (amount <= 0) {
       snackbarUtil.error("Please enter a valid amount")
       return
@@ -256,13 +279,13 @@ const BetModal: React.FC<Props> = ({ onClose, selectedPlayer, matchId}) => {
         {/* Footer */}
         <div className="modal-footer">
           <button className="cancel" onClick={() => onClose && onClose()}>{`Cancel ${seconds}s ✖`}</button>
-          <button 
-            className="submit" 
+          <button
+            className="submit"
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={isLoading || isSuspended}
           >
-            
-            {isLoading ? "Placing..." : "Submit ✔"}
+
+            {isSuspended ? "Suspended" : isLoading ? "Placing..." : "Submit ✔"}
           </button>
         </div>
 </div>

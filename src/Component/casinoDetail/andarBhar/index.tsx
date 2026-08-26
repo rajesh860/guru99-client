@@ -31,6 +31,7 @@ const AndarBhar = () => {
   const [modalVisible, setModalVisible] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState("")
   const [countdown, setCountdown] = useState("00:00")
+  const [remainingSecs, setRemainingSecs] = useState(0)
 
   const [trigger, { data: betPlaceResponse, isLoading }] = useBetPlaceMutation()
 
@@ -64,25 +65,30 @@ const AndarBhar = () => {
   useEffect(() => {
     if (!odds?.t1?.[0]?.autotime) {
       setCountdown("00:00")
+      setRemainingSecs(0)
       return
     }
 
     const autoTimeSeconds = parseInt(odds.t1[0].autotime)
     if (autoTimeSeconds <= 0) {
       setCountdown("00:00")
+      setRemainingSecs(0)
       return
     }
 
     let remainingTime = autoTimeSeconds
     setCountdown(`${Math.floor(remainingTime / 60).toString().padStart(2, '0')}:${(remainingTime % 60).toString().padStart(2, '0')}`)
+    setRemainingSecs(remainingTime)
 
     const timer = setInterval(() => {
       remainingTime -= 1
       if (remainingTime <= 0) {
         setCountdown("00:00")
+        setRemainingSecs(0)
         clearInterval(timer)
       } else {
         setCountdown(`${Math.floor(remainingTime / 60).toString().padStart(2, '0')}:${(remainingTime % 60).toString().padStart(2, '0')}`)
+        setRemainingSecs(remainingTime)
       }
     }, 1000)
 
@@ -266,13 +272,14 @@ const AndarBhar = () => {
               )
             })}
           </div> */}
-          <CardGameBoard 
-            modalVisible={modalVisible} 
+          <CardGameBoard
+            modalVisible={modalVisible}
             setModalVisible={setModalVisible}
             t2Data={odds?.t2 || []}
             liabilityData={liblity?.data || []}
             onRateClick={handleRateClick}
             countdown={countdown}
+            roundSeconds={remainingSecs}
           />
         </div>
 
@@ -324,7 +331,7 @@ const AndarBhar = () => {
         </div>
       </div>
       {openMod && <ResultModal result={first} open={openMod} setOpen={setOpenMod} />}
-      {modalVisible && <BetModal onClose={handleModalClose} />}
+      {modalVisible && <BetModal onClose={handleModalClose} roundSeconds={remainingSecs} />}
     </>
   )
 }

@@ -21,6 +21,7 @@ const AAA: React.FC = () => {
   const [betModalVisible, setBetModalVisible] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState<any>(null)
   const [countdown, setCountdown] = useState("00:00")
+  const [remainingSecs, setRemainingSecs] = useState(0)
   const [betsTab, setBetsTab] = useState<"open" | "completed">("open")
   const [wsData, setWsData] = useState<any>(null)
   const [cardFlipping, setCardFlipping] = useState(false)
@@ -73,20 +74,21 @@ const AAA: React.FC = () => {
   // Countdown timer from autotime
   useEffect(() => {
     const autotime = wsData?.autotime ?? wsData?.t1?.autotime
-    if (!autotime) { setCountdown("00:00"); return }
+    if (!autotime) { setCountdown("00:00"); setRemainingSecs(0); return }
 
     const secs = parseInt(autotime)
-    if (secs <= 0) { setCountdown("00:00"); return }
+    if (secs <= 0) { setCountdown("00:00"); setRemainingSecs(0); return }
 
     const fmt = (s: number) =>
       `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`
 
     let remaining = secs
     setCountdown(fmt(remaining))
+    setRemainingSecs(remaining)
     const timer = setInterval(() => {
       remaining -= 1
-      if (remaining <= 0) { setCountdown("00:00"); clearInterval(timer) }
-      else setCountdown(fmt(remaining))
+      if (remaining <= 0) { setCountdown("00:00"); setRemainingSecs(0); clearInterval(timer) }
+      else { setCountdown(fmt(remaining)); setRemainingSecs(remaining) }
     }, 1000)
 
     return () => clearInterval(timer)
@@ -109,7 +111,8 @@ const AAA: React.FC = () => {
   const videoId = videoIdById[id ?? ""] ?? "3056"
 
   const getOption = (nat: string) => t2.find((o: any) => o.nat === nat)
-  const isSuspended = (item: any) => !item || item.gstatus !== "ACTIVE"
+  // Suspend when backend marks it inactive, OR within 2s of the round ending.
+  const isSuspended = (item: any) => !item || item.gstatus !== "ACTIVE" || remainingSecs <= 2
 
   const handleRateClick = (item: any) => {
     if (isSuspended(item)) return
@@ -298,6 +301,7 @@ const AAA: React.FC = () => {
         selectedPlayer={selectedPlayer}
         matchId={id}
         game="aaa"
+        roundSeconds={remainingSecs}
       />
 
       <AaaRoundDetailModal

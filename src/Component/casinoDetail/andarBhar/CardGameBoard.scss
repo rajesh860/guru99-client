@@ -1,5 +1,14 @@
 .game-wrapper {
   font-family: Arial, sans-serif;
+
+  // Frontend pre-empt suspend: within 2s of round end, lock the whole board.
+  &.round-suspended .bet-btn {
+    pointer-events: none;
+    opacity: 0.45;
+    filter: grayscale(0.6);
+    cursor: not-allowed;
+    position: relative;
+  }
   .top-bar {
     background: #525252;
     color: #fff;

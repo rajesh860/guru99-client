@@ -70,13 +70,22 @@ const baseQueryWithAuth: BaseQueryFn<
           method: "GET",
         }),
       }),
-      
+      // Per-match market limits (min/max) — replaces socket-derived limits
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      marketLimits: build.query<any, string>({
+        query: (beventId) => ({
+          url: `/market-limits/${beventId}`,
+          method: "GET",
+        }),
+      }),
+
     }),
   });
-  
+
   export const {
     useActiveMatchQuery,
     useOddsDataQuery,
-    useInPlayMatchQuery
+    useInPlayMatchQuery,
+    useMarketLimitsQuery
   } = oddsData;
   

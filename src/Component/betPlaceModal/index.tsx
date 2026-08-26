@@ -1,12 +1,43 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import "./styles.scss"
 import { useParams } from "react-router-dom"
 
 const amountOptions = [100, 200, 500, 1000, 5000, 10000, 25000, 50000]
 
-const PlaceBetModal = ({ show, onClose, onSubmit, player, isLoading }) => {
+// Auto-close the bet module after this many idle seconds.
+const AUTO_CLOSE_SECONDS = 8
+// Close the bet module this many seconds before the round ends (pre-empt backend suspend).
+const SUSPEND_THRESHOLD = 2
+
+const PlaceBetModal = ({ show, onClose, onSubmit, player, isLoading, roundSeconds = null }) => {
   const [stake, setStake] = useState("")
+  const [seconds, setSeconds] = useState(AUTO_CLOSE_SECONDS)
   const { id } = useParams()
+
+  const isSuspended = roundSeconds != null && roundSeconds <= SUSPEND_THRESHOLD
+
+  // Keep the latest onClose in a ref so the countdown interval isn't reset every
+  // time the parent re-renders (it re-creates onClose each second via its timer).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
+
+  // Auto-close countdown (15s).
+  useEffect(() => {
+    if (!show) { setSeconds(AUTO_CLOSE_SECONDS); return }
+    const timer = setInterval(() => {
+      setSeconds(prev => {
+        if (prev <= 1) { clearInterval(timer); onCloseRef.current(); return 0 }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [show])
+
+  // Round about to end — close 2s before backend suspends the odds.
+  useEffect(() => {
+    if (show && isSuspended) onCloseRef.current()
+  }, [show, isSuspended])
+
   if (!show || !player) return null
 
   const profit = (parseFloat(stake || "0") * parseFloat(player?.rate)).toFixed(
@@ -18,6 +49,7 @@ const PlaceBetModal = ({ show, onClose, onSubmit, player, isLoading }) => {
   }
 
   const handleSubmit = () => {
+    if (isSuspended) return
     const payload = {
       casinoName: 2,
       colorName: "back",
@@ -94,14 +126,14 @@ const PlaceBetModal = ({ show, onClose, onSubmit, player, isLoading }) => {
               setStake("")
             }}
           >
-            CANCEL
+            CANCEL ({seconds}s)
           </button>
           <button
-            disabled={isLoading}
+            disabled={isLoading || isSuspended}
             className="submit-btn"
             onClick={handleSubmit}
           >
-            SUBMIT
+            {isSuspended ? "SUSPENDED" : "SUBMIT"}
           </button>
         </div>
         {isLoading && (

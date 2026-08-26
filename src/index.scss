@@ -22,14 +22,16 @@
 [data-theme="light"] {
   --color-text: #111827;
   --color-textSecondary: #6b7280;
-  --color-background: #f0f2f5;
-  --color-surface: #f8fafc;
+  --color-background: #d9d9d9;
+  --color-surface: #ffffff;
   --color-cardBg: #ffffff;
-  --color-headerBg: #1976d2;
-  --color-sidebarBg: #ffffff;
+  --color-headerBg: #000000;
+  --color-sidebarBg: #5B3FE0;
   --color-border: #e5e7eb;
-  --color-primary: #1976d2;
-  --color-secondary: #1565c0;
+  --color-primary: #5B3FE0;
+  --color-secondary: #3B2A99;
+  --color-accent: #FF7A45;
+  --color-gradient: linear-gradient(135deg, #5B3FE0 0%, #3B2A99 100%);
   --bg-panel: #f3f4f6;
 }
 
@@ -270,7 +272,7 @@ body {
 
   &--live {
     border: 2px solid #1aa21a;
-    box-shadow: 0 0 15px rgba(26, 162, 26, 0.3);
+    // box-shadow: 0 0 15px rgba(26, 162, 26, 0.3);
     animation: livePulse 2s ease-in-out infinite;
 
     &::before {

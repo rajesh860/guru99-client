@@ -17,6 +17,7 @@ import CompletedBetsTable from "./CompletedBetsTable/CompletedBetsTable"
 import { useEffect, useRef, useState } from "react"
 import moment from "moment"
 import snackbarUtil from "../../utils/Snackbar"
+import { formatLimit } from "../../utils/helpers"
 import { MdTv } from "react-icons/md"
 // Removed useGetUserCoinMutation import
 import BackBtn from "../../Component/BackBtn/BackBtn"
@@ -30,12 +31,13 @@ import { j } from "vitest/dist/reporters-w_64AS5f.js"
 import OddsButton from "./OddsButton"
 import CricketScoreCard from "../../Component/CricketScoreCard"
 import { useGetLiveCricketScoreQuery, useGetBallFeedsQuery } from "../../../store/service/cricketScore/cricketScoreService"
+import { useTheme } from "../../context/ThemeContext"
 
 const GameDeatils = () => {
+  const { themeName } = useTheme()
   const [placeBetData, setPlaceBetData] = useState<any>(null)
-  const { id,bid } = useParams()
+  const { id, gmid, bid, scoreKey } = useParams()
   const [timer, setTimer] = useState<number>(null)
-  console.log(bid,"hvjkn")
   // WebSocket state
   const [oddsData, setOddsData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -164,7 +166,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     } else {
       // Bookmaker bet payload
       // Get team A and team B sids from sections
-      const bookmakerSections = oddsData?.bookmaker?.find((m: any) => m.mname === "Bookmaker")?.section || []
+      const bookmakerSections = (oddsData?.bookmaker?.find((m: any) => m.mname === "Bookmaker") || oddsData?.bookmaker?.[0])?.section || []
       const teamASid = bookmakerSections[0]?.sid || ""
       const teamBSid = bookmakerSections[1]?.sid || ""
 
@@ -205,7 +207,8 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     const connectWebSocket = () => {
       if (!isComponentMounted.current || !id) return
 
-      const wsUrl = `${import.meta.env.VITE_WS_BASE_URL}/ws/odds?beventId=${id}`
+      const token = localStorage.getItem("client-token") || ""
+      const wsUrl = `${import.meta.env.VITE_WS_BASE_URL}/ws/odds?beventId=${id}&token=${token}`
       
       const ws = new WebSocket(wsUrl)
       
@@ -302,14 +305,16 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     let isSuspended = false
 
     if (ref.betType === "bookmaker") {
-      const sections = oddsData?.bookmaker?.find((m: any) => m.mname === "Bookmaker")?.section || []
+      const bkMkt = oddsData?.bookmaker?.find((m: any) => m.mname === "Bookmaker") || oddsData?.bookmaker?.[0]
+      const sections = bkMkt?.section || []
+      const isNormalBookmaker = bkMkt?.mname === "Bookmaker" && sections.length === 2
       const section = sections.find((s: any) => s.sid?.toString() === ref.teamSid?.toString())
       if (section) {
         const isBack = ref.backOrLay === "back"
         currentOdds = section.odds?.find((o: any) =>
           o.otype === (isBack ? "back" : "lay") && o.oname === (isBack ? "back1" : "lay1")
         )?.odds ?? null
-        isSuspended = section.gstatus?.toUpperCase() === "SUSPENDED" || currentOdds === 0 || Number(currentOdds) > 100
+        isSuspended = section.gstatus?.toUpperCase() === "SUSPENDED" || currentOdds === 0 || (isNormalBookmaker && Number(currentOdds) > 100)
       }
     } else if (ref.betType === "fancy") {
       const allFancy = (oddsData?.fancy || []).flatMap((f: any) => f.section || [])
@@ -358,14 +363,10 @@ const amountInputRef = useRef<HTMLInputElement>(null)
 
   // Extract bookmaker data from new API structure
   const bookmakerMarkets = oddsData?.bookmaker || []
-  const mainBookmaker = bookmakerMarkets.find(m => m.mname === "Bookmaker")
+  const mainBookmaker = bookmakerMarkets.find((m: any) => m.mname === "Bookmaker") || bookmakerMarkets[0] || null
   const bookmakerSections = mainBookmaker?.section || []
   
   // Extract team data from sections with odds
-  const team1Section = bookmakerSections[0]
-  const team2Section = bookmakerSections[1]
-  const drawSection = bookmakerSections[2] || null
-  
   // Get P/L for teams based on sid matching
   const getTeamPL = (sid: number, name?: string) => {
     const teams: any[] = teamPLData?.data?.bookmaker?.teams || []
@@ -387,48 +388,6 @@ const amountInputRef = useRef<HTMLInputElement>(null)
     return runners.find((r: any) => r.sid === sid) || null
   }
   
-  // Map to old structure for compatibility
-  const team1 = team1Section ? {
-    nation: team1Section.nat,
-    sid: team1Section.sid,
-    gstatus: team1Section.gstatus,
-    mid: mainBookmaker?.mid,
-    matchName: oddsData?.ename || "Match",
-    b1: team1Section.odds?.find(o => o.otype === "back" && o.oname === "back1")?.odds || 0,
-    bs1: team1Section.odds?.find(o => o.otype === "back" && o.oname === "back1")?.size || 0,
-    l1: team1Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.odds || 0,
-    ls1: team1Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.size || 0,
-    rem: team1Section.rem || "",
-    pl: getTeamPL(team1Section.sid, team1Section.nat),
-  } : null
-  
-  const team2 = team2Section ? {
-    nation: team2Section.nat,
-    sid: team2Section.sid,
-    gstatus: team2Section.gstatus,
-    mid: mainBookmaker?.mid,
-    matchName: oddsData?.ename || "Match",
-    b1: team2Section.odds?.find(o => o.otype === "back" && o.oname === "back1")?.odds || 0,
-    bs1: team2Section.odds?.find(o => o.otype === "back" && o.oname === "back1")?.size || 0,
-    l1: team2Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.odds || 0,
-    ls1: team2Section.odds?.find(o => o.otype === "lay" && o.oname === "lay1")?.size || 0,
-    rem: team2Section.rem || "",
-    pl: getTeamPL(team2Section.sid, team2Section.nat),
-  } : null
-  
-  const draw = drawSection ? {
-    nation: drawSection.nat,
-    sid: drawSection.sid,
-    gstatus: drawSection.gstatus,
-    mid: mainBookmaker?.mid,
-    matchName: oddsData?.ename || "Match",
-    b1: drawSection.odds?.find((o: any) => o.otype === "back" && o.oname === "back1")?.odds || 0,
-    bs1: drawSection.odds?.find((o: any) => o.otype === "back" && o.oname === "back1")?.size || 0,
-    l1: drawSection.odds?.find((o: any) => o.otype === "lay" && o.oname === "lay1")?.odds || 0,
-    ls1: drawSection.odds?.find((o: any) => o.otype === "lay" && o.oname === "lay1")?.size || 0,
-    rem: drawSection.rem || "",
-    pl: getTeamPL(drawSection.sid, drawSection.nat),
-  } : null
 
   const maxBet = mainBookmaker?.maxBet || mainBookmaker?.max || 100000
   // Bookmaker min/max from the market-limits API (replaces socket-derived values)
@@ -491,27 +450,32 @@ const amountInputRef = useRef<HTMLInputElement>(null)
       
       {/* Match Header */}
       <div style={{
-        background: "rgb(37, 37, 37)",
-        padding: "8px",
+        background: themeName === "light"
+          ? "#0a0a0a"
+          : "linear-gradient(90deg, #0a1628 0%, #0d2b5e 100%)",
+        padding: "10px 12px",
         color: "#ffffff",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        borderBottom: themeName === "light" ? "2px solid #EFB32D" : "2px solid #4087fb",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.3)"
       }}>
-        <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-          {team1?.matchName || ""}
+        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+          {/* <span style={{ fontSize: "8px", fontWeight: "600", color: "rgba(255,255,255,0.55)", letterSpacing: "1.2px", textTransform: "uppercase" }}>LIVE MATCH</span> */}
+          <span style={{ fontSize: "14px", fontWeight: "700", color: "#fff", letterSpacing: "0.2px" }}>{oddsData?.ename || ""}</span>
         </div>
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
           <button
             onClick={() => setShowTV(!showTV)}
             style={{
-              background: showTV ? "rgba(255,255,255,0.2)" : "transparent",
-              border: "1px solid rgba(255,255,255,0.4)",
+              background: showTV ? (themeName === "light" ? "rgba(239,179,45,0.25)" : "rgba(64,135,251,0.35)") : "rgba(255,255,255,0.08)",
+              border: `1px solid ${showTV ? (themeName === "light" ? "#EFB32D" : "#4087fb") : "rgba(255,255,255,0.25)"}`,
               color: "#ffffff",
-              padding: "4px 8px",
-              borderRadius: "4px",
+              padding: "5px 10px",
+              borderRadius: "6px",
               cursor: "pointer",
-              transition: "all 0.3s ease",
+              transition: "all 0.2s ease",
               display: "flex",
               alignItems: "center",
               justifyContent: "center"
@@ -521,11 +485,11 @@ const amountInputRef = useRef<HTMLInputElement>(null)
               setScorecardState(scorecardState === 'hidden' ? 'compact' : 'hidden')
             }}
             style={{
-              background: scorecardState !== 'hidden' ? "rgba(255,255,255,0.2)" : "transparent",
-              border: "1px solid rgba(255,255,255,0.4)",
+              background: scorecardState !== 'hidden' ? (themeName === "light" ? "rgba(239,179,45,0.25)" : "rgba(64,135,251,0.35)") : "rgba(255,255,255,0.08)",
+              border: `1px solid ${scorecardState !== 'hidden' ? (themeName === "light" ? "#EFB32D" : "#4087fb") : "rgba(255,255,255,0.25)"}`,
               color: "#ffffff",
-              padding: "4px 8px",
-              borderRadius: "4px",
+              padding: "5px 10px",
+              borderRadius: "6px",
               cursor: "pointer",
               transition: "all 0.3s ease"
             }}>⛶</button>
@@ -594,28 +558,39 @@ const amountInputRef = useRef<HTMLInputElement>(null)
           marginBottom: "12px"
         }}>
           {/* Header */}
-          <div style={{
+          <div className="gd-ribbon" style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr",
+            gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
             marginBottom: "4px",
             gap: "8px",
-            background: "#2c3548",
             borderRadius: "6px 6px 0 0",
-            padding: "6px 8px"
           }}>
-            <div style={{
+            <div className="gd-ribbon__left" style={{ padding: "8px 0 8px 10px" }}>
+              <span className="gd-ribbon__icon">📈</span>
+              <span className="gd-ribbon__title">Bookmaker</span>
+              <span className="gd-ribbon__info">i</span>
+            </div>
+            <div className="gd-ribbon__meta" style={{
               display: "flex",
               alignItems: "center",
-              gap: "8px"
+              justifyContent: "flex-end",
+              gap: "10px",
+              padding: "8px 10px 8px 0",
             }}>
-              <span style={{ color: "#fff", fontSize: "16px", fontWeight: "bold" }}>Bookmaker</span>
-              <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>Min: {bmLimit?.minBet ?? 100} Max: {bmLimit?.maxBet ?? maxBet}</span>
+              <span>MIN:{formatLimit(bmLimit?.minBet ?? 100)}</span>
+              <span>MAX:{formatLimit(bmLimit?.maxBet ?? maxBet)}</span>
             </div>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "4px",
-            }}>
+          </div>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+            marginBottom: "4px",
+            gap: "8px",
+            background: themeName === "light" ? "rgb(238 238 238)" : "var(--bg-panel)",
+            alignItems: "center",
+          }}>
+            <span style={{ color: "var(--color-text)", fontSize: "14px", fontWeight: "bold", paddingLeft: "12px" }}>Market</span>
+            <div style={{ display: "flex", gap: "4px" }}>
               <div style={{
                 color: "white",
                 padding: "8px",
@@ -624,11 +599,13 @@ const amountInputRef = useRef<HTMLInputElement>(null)
                 textAlign: "center",
                 borderRadius: "4px",
                 background: "rgb(64 135 251)",
+                width: "70px",
               }}>
                 LAGAI
               </div>
               <div style={{
                 background: "rgb(240 121 143)",
+                width: "70px",
                 color: "white",
                 padding: "8px",
                 fontSize: "14px",
@@ -641,306 +618,134 @@ const amountInputRef = useRef<HTMLInputElement>(null)
             </div>
           </div>
 
-          {/* Team 1 */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: "6px",
-            marginBottom: "4px"
-          }}>
-            <div style={{
-              background: "var(--bg-panel)",
-              color: "var(--color-text)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              padding: "4px 12px",
-              borderRadius: "4px"
-            }}>
-              <div style={{ fontWeight: "bold", fontSize: "13px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>{team1?.nation}</span>
-                {team1?.pl && (
-                  <span style={{
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: team1.pl.pl >= 0 ? "#4CAF50" : "#f44336"
-                  }}>
-                    {team1.pl.display}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: "4px", position: "relative" }}>
-              {/* Suspended Overlay for Team 1 */}
-              {(team1?.gstatus === "SUSPENDED" || (team1?.b1 === 0 && team1?.l1 === 0) || Number(team1?.b1) > 100 || Number(team1?.l1) > 100) && (
-                <div style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "rgba(22, 33, 62, 0.9)",
-                  color: "red",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  zIndex: 10,
-                  borderRadius: "4px"
-                }}>
-                  SUSPENDED
-                </div>
-              )}
-
-              <OddsButton
-                type="back"
-                value={team1?.gstatus === "SUSPENDED" || team1?.b1 === 0 || Number(team1?.b1) > 100 || Number(team1?.l1) > 100 ? "0" : team1?.b1 || "0"}
-                onClick={() => {
-                  if (team1?.gstatus !== "SUSPENDED" && team1?.b1 !== 0 && Number(team1?.b1) <= 100 && Number(team1?.l1) <= 100) {
-                    handleBetData(
-                      false,
-                      true,
-                      team1?.b1,
-                      "Bookmaker",
-                      team1?.sid?.toString(),
-                      team1?.b1,
-                      team1?.mid,
-                      team1?.nation,
-                      "Back",
-                      new Date(),
-                    )
-                    focusAmountInput()
-                  }
-                }}
-                disabled={team1?.gstatus === "SUSPENDED" || team1?.b1 === 0 || Number(team1?.b1) > 100 || Number(team1?.l1) > 100}
-              />
-              <OddsButton
-                type="lay"
-                value={team1?.gstatus === "SUSPENDED" || team1?.l1 === 0 || Number(team1?.b1) > 100 || Number(team1?.l1) > 100 ? "0" : team1?.l1 || "0"}
-                onClick={() => {
-                  if (team1?.gstatus !== "SUSPENDED" && team1?.l1 !== 0 && Number(team1?.b1) <= 100 && Number(team1?.l1) <= 100) {
-                    handleBetData(
-                      false,
-                      false,
-                      team1?.l1,
-                      "Bookmaker",
-                      team1?.sid?.toString(),
-                      team1?.l1,
-                      team1?.mid,
-                      team1?.nation,
-                      "Lay",
-                      new Date(),
-                    )
-                    focusAmountInput()
-                  }
-                }}
-                disabled={team1?.gstatus === "SUSPENDED" || team1?.l1 === 0 || Number(team1?.b1) > 100 || Number(team1?.l1) > 100}
-              />
-            </div>
-          </div>
-
-          {/* Team 2 */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: "6px"
-          }}>
-            <div style={{
-              background: "var(--bg-panel)",
-              color: "var(--color-text)",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              padding: "8px 12px",
-              borderRadius: "4px"
-            }}>
-              <div style={{ fontWeight: "bold", fontSize: "13px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span>{team2?.nation}</span>
-                {team2?.pl && (
-                  <span style={{
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: team2.pl.pl >= 0 ? "#4CAF50" : "#f44336"
-                  }}>
-                    {team2.pl.display}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: "4px", position: "relative" }}>
-              {/* Suspended Overlay for Team 2 */}
-              {(team2?.gstatus === "SUSPENDED" || (team2?.b1 === 0 && team2?.l1 === 0) || Number(team2?.b1) > 100 || Number(team2?.l1) > 100) && (
-                <div style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: "rgba(22, 33, 62, 0.9)",
-                  color: "red",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                  zIndex: 10,
-                  borderRadius: "4px"
-                }}>
-                  SUSPENDED
-                </div>
-              )}
-
-              <OddsButton
-                type="back"
-                value={team2?.gstatus === "SUSPENDED" || team2?.b1 === 0 || Number(team2?.b1) > 100 || Number(team2?.l1) > 100 ? "0" : team2?.b1 || "0"}
-                onClick={() => {
-                  if (team2?.gstatus !== "SUSPENDED" && team2?.b1 !== 0 && Number(team2?.b1) <= 100 && Number(team2?.l1) <= 100) {
-                    handleBetData(
-                      false,
-                      true,
-                      team2?.b1,
-                      "Bookmaker",
-                      team2?.sid?.toString(),
-                      team2?.b1,
-                      team2?.mid,
-                      team2?.nation,
-                      "Back",
-                      new Date(),
-                    )
-                    focusAmountInput()
-                  }
-                }}
-                disabled={team2?.gstatus === "SUSPENDED" || team2?.b1 === 0 || Number(team2?.b1) > 100 || Number(team2?.l1) > 100}
-              />
-              <OddsButton
-                type="lay"
-                value={team2?.gstatus === "SUSPENDED" || team2?.l1 === 0 || Number(team2?.b1) > 100 || Number(team2?.l1) > 100 ? "0" : team2?.l1 || "0"}
-                onClick={() => {
-                  if (team2?.gstatus !== "SUSPENDED" && team2?.l1 !== 0 && Number(team2?.b1) <= 100 && Number(team2?.l1) <= 100) {
-                    handleBetData(
-                      false,
-                      false,
-                      team2?.l1,
-                      "Bookmaker",
-                      team2?.sid?.toString(),
-                      team2?.l1,
-                      team2?.mid,
-                      team2?.nation,
-                      "Lay",
-                      new Date(),
-                    )
-                    focusAmountInput()
-                  }
-                }}
-                disabled={team2?.gstatus === "SUSPENDED" || team2?.l1 === 0 || Number(team2?.b1) > 100 || Number(team2?.l1) > 100}
-              />
-            </div>
-          </div>
-
-          {/* Draw */}
-          {draw && (
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr",
-              gap: "6px",
-              marginTop: "4px"
-            }}>
-              <div style={{
-                background: "var(--bg-panel)",
-                color: "var(--color-text)",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                padding: "8px 12px",
-                borderRadius: "4px"
+          {(bookmakerSections.length === 0 ? (() => {
+            const parts = (oddsData?.ename || "Team 1 v Team 2").split(" v ")
+            return [
+              { sid: 1, nat: parts[0]?.trim() || "Team 1", gstatus: "", odds: [] },
+              { sid: 2, nat: parts[1]?.trim() || "Team 2", gstatus: "", odds: [] },
+            ]
+          })() : bookmakerSections).map((sec: any, idx: number) => {
+            const b1 = sec.odds?.find((o: any) => o.otype === "back" && o.oname === "back1")?.odds || 0
+            const l1 = sec.odds?.find((o: any) => o.otype === "lay"  && o.oname === "lay1")?.odds  || 0
+            const isNormalBM = mainBookmaker?.mname === "Bookmaker" && bookmakerSections.length === 2
+            const isSusp = sec.gstatus === "SUSPENDED" || (b1 === 0 && l1 === 0) || (isNormalBM && (Number(b1) > 100 || Number(l1) > 100))
+            const pl = getTeamPL(sec.sid, sec.nat)
+            return (
+              <div key={sec.sid ?? idx} style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+                gap: "8px",
+                marginBottom: "4px"
               }}>
-                <div style={{ fontWeight: "bold", fontSize: "13px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span>{draw.nation}</span>
-                  {draw.pl && (
-                    <span style={{
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: draw.pl.pl >= 0 ? "#4CAF50" : "#f44336"
+                <div style={{
+                  background: themeName === "light" ? "rgb(238 238 238)" : "var(--bg-panel)",
+                  color: "var(--color-text)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  padding: "6px 12px",
+                  borderRadius: "4px",
+                  minWidth: 0,
+                  overflow: "hidden"
+                }}>
+                  <div style={{ fontWeight: "bold", fontSize: "13px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{sec.nat}</span>
+                    {pl && (
+                      <span style={{ fontSize: "12px", fontWeight: "600", color: pl.pl >= 0 ? "#4CAF50" : "#f44336" }}>
+                        {pl.display}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: "4px", position: "relative" }}>
+                  {isSusp && (
+                    <div style={{
+                      position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+                      backgroundColor: "rgba(22,33,62,0.9)", color: "red",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "14px", fontWeight: "bold", zIndex: 10, borderRadius: "4px"
                     }}>
-                      {draw.pl.display}
-                    </span>
+                      SUSPENDED
+                    </div>
                   )}
+                  <OddsButton
+                    type="back"
+                    value={isSusp ? "0" : b1 || "0"}
+                    onClick={() => {
+                      if (!isSusp && b1 !== 0) {
+                        handleBetData(false, true, b1, "Bookmaker", sec.sid?.toString(), b1, mainBookmaker?.mid, sec.nat, "Back", new Date())
+                        focusAmountInput()
+                      }
+                    }}
+                    disabled={isSusp || b1 === 0}
+                  />
+                  <OddsButton
+                    type="lay"
+                    value={isSusp ? "0" : l1 || "0"}
+                    onClick={() => {
+                      if (!isSusp && l1 !== 0) {
+                        handleBetData(false, false, l1, "Bookmaker", sec.sid?.toString(), l1, mainBookmaker?.mid, sec.nat, "Lay", new Date())
+                        focusAmountInput()
+                      }
+                    }}
+                    disabled={isSusp || l1 === 0}
+                  />
                 </div>
               </div>
-              <div style={{ display: "flex", gap: "4px", position: "relative" }}>
-                {(draw.gstatus === "SUSPENDED" || (draw.b1 === 0 && draw.l1 === 0)) && (
-                  <div style={{
-                    position: "absolute",
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    backgroundColor: "rgba(22, 33, 62, 0.9)",
-                    color: "red",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    zIndex: 10,
-                    borderRadius: "4px"
-                  }}>
-                    SUSPENDED
-                  </div>
-                )}
-                <OddsButton
-                  type="back"
-                  value={draw.gstatus === "SUSPENDED" || draw.b1 === 0 ? "0" : draw.b1 || "0"}
-                  onClick={() => {
-                    if (draw.gstatus !== "SUSPENDED" && draw.b1 !== 0) {
-                      handleBetData(false, true, draw.b1, "Bookmaker", draw.sid?.toString(), draw.b1, draw.mid, draw.nation, "Back", new Date())
-                      focusAmountInput()
-                    }
-                  }}
-                  disabled={draw.gstatus === "SUSPENDED" || draw.b1 === 0}
-                />
-                <OddsButton
-                  type="lay"
-                  value={draw.gstatus === "SUSPENDED" || draw.l1 === 0 ? "0" : draw.l1 || "0"}
-                  onClick={() => {
-                    if (draw.gstatus !== "SUSPENDED" && draw.l1 !== 0) {
-                      handleBetData(false, false, draw.l1, "Bookmaker", draw.sid?.toString(), draw.l1, draw.mid, draw.nation, "Lay", new Date())
-                      focusAmountInput()
-                    }
-                  }}
-                  disabled={draw.gstatus === "SUSPENDED" || draw.l1 === 0}
-                />
-              </div>
-            </div>
-          )}
+            )
+          })}
         </div>
 
         {/* Toss Section */}
         {oddsData?.toss?.runners?.length > 0 && (
           <div style={{ background: "var(--color-cardBg)", borderRadius: "8px", padding: "2px", marginBottom: "12px" }}>
             {/* Header */}
-            <div style={{
+            <div className="gd-ribbon" style={{
               display: "grid",
-              gridTemplateColumns: "2fr 1fr",
+              gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
               marginBottom: "4px",
-              gap: "6px",
-              background: "#2c3548",
+              gap: "8px",
               borderRadius: "6px 6px 0 0",
-              padding: "6px 8px",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ color: "#fff", fontSize: "16px", fontWeight: "bold" }}>Toss</span>
+              <div className="gd-ribbon__left" style={{ padding: "8px 0 8px 10px" }}>
+                <span className="gd-ribbon__icon">🪙</span>
+                <span className="gd-ribbon__title">Toss</span>
+                <span className="gd-ribbon__info">i</span>
+              </div>
+              <div className="gd-ribbon__meta" style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                gap: "10px",
+                padding: "8px 10px 8px 0",
+              }}>
                 {(() => {
                   const minVal = oddsData.toss.runners[0]?.min || 0
                   const maxVal = oddsData.toss.runners[0]?.max || 0
                   return (minVal > 0 || maxVal > 0) ? (
-                    <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "13px" }}>Min: {minVal} Max: {maxVal}</span>
+                    <>
+                      <span>MIN:{formatLimit(minVal)}</span>
+                      <span>MAX:{formatLimit(maxVal)}</span>
+                    </>
                   ) : null
                 })()}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
-                <div style={{ background: "rgb(64 135 251)", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
+            </div>
+
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)",
+              marginBottom: "4px",
+              gap: "8px",
+              background: themeName === "light" ? "rgb(238 238 238)" : "var(--bg-panel)",
+              alignItems: "center",
+            }}>
+              <span style={{ color: "var(--color-text)", fontSize: "14px", fontWeight: "bold", paddingLeft: "12px" }}>Market</span>
+              <div style={{ display: "flex", gap: "4px" }}>
+                <div style={{ background: "rgb(64 135 251)", width: "70px", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
                   BACK
                 </div>
-                <div style={{ background: "rgb(240 121 143)", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
+                <div style={{ background: "rgb(240 121 143)", width: "70px", color: "white", padding: "8px", fontSize: "14px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>
                   LAY
                 </div>
               </div>
@@ -957,16 +762,16 @@ const amountInputRef = useRef<HTMLInputElement>(null)
               const tossPL = getTossPL(sid)
 
               return (
-                <div key={fancyId} style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "6px", marginBottom: "4px" }}>
-                  <div style={{ background: "var(--bg-panel)", color: "var(--color-text)", padding: "8px 12px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontWeight: "bold", fontSize: "13px" }}>{name}</span>
+                <div key={fancyId} style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", gap: "8px", marginBottom: "4px" }}>
+                  <div style={{ background: themeName === "light" ? "rgb(238 238 238)" : "var(--bg-panel)", color: "var(--color-text)", padding: "8px 12px", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "space-between", minWidth: 0, overflow: "hidden" }}>
+                    <span style={{ fontWeight: "bold", fontSize: "13px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
                     {tossPL && (
-                      <span style={{ fontSize: "12px", fontWeight: "bold", color: tossPL.pl >= 0 ? "#4CAF50" : "#f44336" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "bold", color: tossPL.pl >= 0 ? "#4CAF50" : "#f44336", flexShrink: 0, marginLeft: "6px" }}>
                         {tossPL.display}
                       </span>
                     )}
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px", position: "relative" }}>
+                  <div style={{ display: "flex", gap: "4px", position: "relative" }}>
                     {isSuspended && (
                       <div style={{
                         position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
@@ -994,19 +799,21 @@ const amountInputRef = useRef<HTMLInputElement>(null)
           </div>
         )}
 
-        {/* Fancy Section — one block per mname group */}
-        {(oddsData?.fancy || []).map((group: any, i: number) => (
-          <Fancy
-            key={group.mid || group.mname || i}
-            groupName={group.mname}
-            fancyData={group.section || []}
-            handleBetData={handleBetData}
-            focusAmountInput={focusAmountInput}
-            teamPLData={teamPLData}
-            beventId={id}
-            marketLimits={marketLimitsData}
-          />
-        ))}
+        {/* Fancy Section — all groups combined under one "Session" header, no category split */}
+        {(() => {
+          const allFancyRows = (oddsData?.fancy || []).flatMap((group: any) => group.section || [])
+          return allFancyRows.length > 0 ? (
+            <Fancy
+              groupName="Session"
+              fancyData={allFancyRows}
+              handleBetData={handleBetData}
+              focusAmountInput={focusAmountInput}
+              teamPLData={teamPLData}
+              beventId={id}
+              marketLimits={marketLimitsData}
+            />
+          ) : null
+        })()}
       </div>
 
       {/* Betslip */}

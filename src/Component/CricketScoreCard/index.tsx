@@ -335,6 +335,8 @@ function ballEventClass(val: string): string {
   if (val === '^2') return 'be-wicket'
   if (val === '^4') return 'be-wicket'
   if (val === '^5') return 'be-wicket'
+  if (val === '^8') return 'be-wicket'
+  if (val.toLowerCase() === 'u') return 'be-umpire'
   if (val.toLowerCase() === 'no') return 'be-notout'
   if (val.toLowerCase() === 'ba') return 'be-ballair'
   if (val === 'B') return 'be-ball'
@@ -360,6 +362,8 @@ function ballEventLabel(val: string): string {
   if (val === '^2') return 'Caught Out!'
   if (val === '^4') return 'Run Out!'
   if (val === '^5') return 'LBW Out!'
+  if (val === '^8') return 'Stumped Out!'
+  if (val.toLowerCase() === 'u') return 'Third Umpire'
   if (val === '0') return '0'
   if (val.toLowerCase() === 'b') return 'Ball'
   if (val.toLowerCase() === 'e') return 'Player Entering'
@@ -387,7 +391,25 @@ function normalizeScoreData(input: any): ScoreData | null {
   const latestV1Over: any = v1.find((x: any) => x.type === 'o')
 
   // 1. innings object — most reliable: directly tells which team is in current innings
-  const inningsObj: any = d.innings || {}
+  const inningsObjRaw: any = d.innings || {}
+
+  // Follow-on correction: when the team bowled out first (innings2) is forced to follow on,
+  // they bat AGAIN immediately as innings3 — but the feed can still tag innings3.team as the
+  // alternating (wrong) team, since it doesn't seem to special-case follow-on. followOnRuns
+  // (from liveData) tells us the threshold, so detect and correct it here.
+  const followOnRuns: number = Number(d.liveData?.followOnRuns) || 0
+  const inn1 = inningsObjRaw.innings1
+  const inn2 = inningsObjRaw.innings2
+  const inn3 = inningsObjRaw.innings3
+  const isFollowOn = !!(
+    followOnRuns && inn1 && inn2 && inn3 &&
+    inn1.runs - inn2.runs >= followOnRuns &&
+    inn3.team && inn2.team && inn3.team !== inn2.team
+  )
+  const inningsObj: any = isFollowOn
+    ? { ...inningsObjRaw, innings3: { ...inn3, team: inn2.team, teamName: inn2.teamName } }
+    : inningsObjRaw
+
   const activeInningsData =
     inningsObj.innings4 || inningsObj.innings3 || inningsObj.innings2 || inningsObj.innings1
   const battingFromInnings: string = activeInningsData?.team || ''
@@ -427,14 +449,28 @@ function normalizeScoreData(input: any): ScoreData | null {
     const t1Key: string = teams.team1?.key || score.team1Key || ''
     const t2Key: string = teams.team2?.key || score.team2Key || ''
 
+    // speech_names has short clean names — use them when team name is null, empty, or
+    // is the full match name (contains " v "/" V " meaning it was stored incorrectly)
+    const speechNames: Record<string, string> = (d as any).liveData?.speech_names || {}
+    const matchName: string = (d.ename || '').toLowerCase()
+    const fixName = (name: string | null | undefined, key: string): string => {
+      if (!name) return speechNames[key] || key
+      const n = name.trim()
+      if (!n) return speechNames[key] || key
+      // If name is identical to full match name or contains " v " separator it's a bad name
+      if (n.toLowerCase() === matchName || / v /i.test(n)) return speechNames[key] || n
+      return n
+    }
+
     const fixedTeams = {
       ...teams,
-      team1: { ...teams.team1, batting: !!t1Key && t1Key === battingTeamKey },
-      team2: { ...teams.team2, batting: !!t2Key && t2Key === battingTeamKey },
+      team1: { ...teams.team1, batting: !!t1Key && t1Key === battingTeamKey, name: fixName(teams.team1?.name, t1Key) },
+      team2: { ...teams.team2, batting: !!t2Key && t2Key === battingTeamKey, name: fixName(teams.team2?.name, t2Key) },
     }
 
     // Fix innings.innings1.team so the component computes t1First correctly
-    const existingInnings: any = d.innings || {}
+    // (starts from inningsObj, not raw d.innings, so the follow-on correction above carries through)
+    const existingInnings: any = inningsObj
     let fixedInnings = existingInnings
     // Only compute innings1.team if raw data doesn't already have it (Test matches provide it)
     if (score.innings1 && battingTeamKey && !existingInnings.innings1?.team) {
@@ -525,7 +561,6 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const score = scoreData.score
   const v1 = scoreData.v1 || []
   const liveData = scoreData.liveData || {}
-  const teams = scoreData.teams || {}
   const ename = scoreData.ename || ''
 
   // Toss info from v1
@@ -536,12 +571,16 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
 
   const { format, status, team1Key, team2Key, innings1, innings2, innings3, innings4, startTime, raw = {} } = score
 
-  const team1Name = teams.team1?.name || team1Key || ''
-  const team2Name = teams.team2?.name || team2Key || ''
-  const t1Key = teams.team1?.key || team1Key || ''
-  const t2Key = teams.team2?.key || team2Key || ''
+  const t1Key = team1Key || ''
+  const t2Key = team2Key || ''
 
-  // Determine batting team key from reliable sources (excluding teams.batting and bat_team_fkey)
+  // teams.name is already sanitized by fixName() in normalizeScoreData — trust it first.
+  // speech_names/raw key are only fallbacks for feeds where teams.name itself is missing.
+  const speechNames: Record<string, string> = (scoreData as any).liveData?.speech_names || {}
+  const teamsInfo = scoreData.teams || {}
+  const team1Name = teamsInfo.team1?.name || speechNames[t1Key] || t1Key || ''
+  const team2Name = teamsInfo.team2?.name || speechNames[t2Key] || t2Key || ''
+
   const inningsRaw: any = scoreData?.innings || {}
 
   // Upcoming match view
@@ -596,41 +635,24 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
     )
   }
 
-  const nameMatch = (a: string, b: string) => !!(a && b && (a === b || a.includes(b) || b.includes(a)))
-  const t1NameL = team1Name.toLowerCase()
   const activeInnNum = innings4 ? 4 : innings3 ? 3 : innings2 ? 2 : 1
 
-  // v1 feed is NEWEST-FIRST. v1.find() gives the most recent entry — current innings data.
-  // teams.batting from API is unreliable, do not use it.
-  //
-  // Signal 1: v1 over summary team name (most recent over = current innings batting team).
-  // Signal 2: innings structure fallback (innings.team keys from backend).
-  let team1Batting: boolean | undefined
+  // teams.batting was already resolved in normalizeScoreData via the reliable priority chain
+  // (innings.team > F > a > wp > tfkey). Trust it — don't re-derive with a different, conflicting
+  // priority here, or the two computations can disagree on which team is batting.
+  const hasBattingFlag = typeof teamsInfo.team1?.batting === 'boolean' || typeof teamsInfo.team2?.batting === 'boolean'
 
-  // crickapi uses 0-indexed inning field (inning:0=inn1, inning:3=inn4)
-  const currInnIdx = activeInnNum - 1
-  const v1OverEntry = (v1 as any[]).find(x =>
-    x.type === 'o' && (x.inning === undefined || x.inning === currInnIdx)
-  )
-  const v1OverTeam = (v1OverEntry?.team || '').trim().toLowerCase()
-  if (v1OverTeam) {
-    const t1M = nameMatch(v1OverTeam, t1NameL)
-    const t2M = nameMatch(v1OverTeam, team2Name.toLowerCase())
-    if (t1M && !t2M) team1Batting = true
-    else if (t2M && !t1M) team1Batting = false
-  }
+  // Fallback signals only used when normalizeScoreData had nothing to resolve teams.batting from
+  const batFromV1: string = (v1 as any[]).find((x: any) => x.type === 'b' && x.bat_team_fkey)?.bat_team_fkey || ''
+  const batFromF: string = (liveData as any)?.F ? String((liveData as any).F).replace(/^\^/, '') : ''
+  const batFromA: string = (liveData as any)?.a ? (String((liveData as any).a).split('.')[1] || '') : ''
+  const batFromInn: string = inningsRaw.innings4?.team || inningsRaw.innings3?.team ||
+                             inningsRaw.innings2?.team || inningsRaw.innings1?.team || ''
+  const activeBattingKey: string = batFromV1 || batFromF || batFromA || batFromInn
 
-  if (team1Batting === undefined) {
-    const inn1TName = ((inningsRaw.innings1?.teamName) || '').trim().toLowerCase()
-    const inn1Team  = inningsRaw.innings1?.team
-    const inn2Team  = inningsRaw.innings2?.team
-    const t1Fb = inn1TName
-      ? nameMatch(inn1TName, t1NameL)
-      : inn1Team ? inn1Team === t1Key : inn2Team ? inn2Team !== t1Key : true
-    team1Batting = t1Fb ? (activeInnNum % 2 === 1) : (activeInnNum % 2 === 0)
-  }
-
-  const team1BattingFinal = team1Batting as boolean
+  const team1BattingFinal: boolean = hasBattingFlag
+    ? !!teamsInfo.team1?.batting
+    : (activeBattingKey ? activeBattingKey === t1Key : true)
   const team2Batting = !team1BattingFinal
   const t1First = team1BattingFinal ? (activeInnNum % 2 === 1) : (activeInnNum % 2 === 0)
 
@@ -645,7 +667,7 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const rawB = liveData.B && String(liveData.B).trim() !== '' ? String(liveData.B) : null
   // "B" alone just means a ball was bowled — no banner needed
   const isKnownBallValue = (b: string) =>
-    /^([0-9]|W|Wd|Nb|wd|nb|w|o|O|cd|CD|ruka|RUKA|\^1|\^2|\^4|\^5|no|NO|ba|BA|B|e|E|f|F|fh|FH)$/.test(b.trim())
+    /^([0-9]|W|Wd|Nb|wd|nb|w|o|O|cd|CD|ruka|RUKA|\^1|\^2|\^4|\^5|\^8|no|NO|ba|BA|B|u|U|e|E|f|F|fh|FH)$/.test(b.trim())
   const lastBall   = rawB && isKnownBallValue(rawB) ? rawB : null
   const breakLabel = rawB && !isKnownBallValue(rawB) ? rawB : null
 
@@ -655,7 +677,26 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
     ? calcCRR(activeInnings.runs, activeInnings.overs)
     : null
 
+  // liveData.C carries a human-readable rain/weather reduction notice e.g.
+  // "Match Reduced to 16 overs per side" — often the only text notice the feed gives us
+  // that the original format's overs no longer apply.
+  const reducedOversNote: string | null = (liveData as any)?.C ? String((liveData as any).C).trim() || null : null
+  const reducedOversMatch = reducedOversNote?.match(/(\d+)\s*overs?/i)
+  const reducedOvers = reducedOversMatch ? parseInt(reducedOversMatch[1]) : null
+
+  // liveData.T carries "<ballsAllowedForChase>.<revisedTarget>" (e.g. "54.83") once DLS/rain
+  // has revised the chase — present even when liveData.C's text notice isn't. This is the only
+  // reliable source for the revised target: after a DLS recalculation the target can move far
+  // from the naive innings1.runs + 1 (e.g. a 172-run first innings can revise to a target of 83).
+  const tField: string = (liveData as any)?.T ? String((liveData as any).T).trim() : ''
+  const tParts = tField.split('.')
+  const revisedBallsAllowed = tParts.length === 2 ? parseInt(tParts[0]) : NaN
+  const revisedTarget = tParts.length === 2 ? parseInt(tParts[1]) : NaN
+  const hasRevisedTarget = !isNaN(revisedBallsAllowed) && !isNaN(revisedTarget) && revisedBallsAllowed > 0 && revisedTarget > 0
+
   const formatMaxBalls = (() => {
+    if (hasRevisedTarget) return revisedBallsAllowed
+    if (reducedOvers) return reducedOvers * 6
     const f = (format || '').toLowerCase()
     if (f.includes('t10')) return 60
     if (f.includes('hundred')) return 100
@@ -666,7 +707,7 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
 
   let chaseInfo: { battingName: string; needed: number; ballsLeft: number | null } | null = null
   if (innings1 && innings2 && !innings3) {
-    const target = innings1.runs + 1
+    const target = hasRevisedTarget ? revisedTarget : innings1.runs + 1
     const needed = target - innings2.runs
     const i2Parts = String(innings2.overs).split('.')
     const ballsBowled = parseInt(i2Parts[0]) * 6 + parseInt(i2Parts[1] || '0')
@@ -766,19 +807,34 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
         </div>
       )}
 
+      {/* Rain/weather overs reduction */}
+      {reducedOversNote && (
+        <div className="cscard-toss cscard-toss--rain">
+          🌧️ {reducedOversNote}
+        </div>
+      )}
+
       {/* Main Score */}
       <div className="cscard-scores">
         {(() => {
-          // t1First is computed at component level via innings.teamName matching
-          const t1InningsList = (t1First
-            ? [innings1, innings3]
-            : [innings2, innings4]
-          ).filter((x): x is Innings => !!x)
+          // Group each score-innings by the team that actually played it, using inningsRaw's
+          // per-innings .team tag (follow-on corrected in normalizeScoreData) instead of
+          // assuming strict odd/even alternation — alternation breaks whenever a team follows
+          // on and bats two innings in a row (e.g. innings2 AND innings3 both theirs).
+          const scoreSlots: Array<{ n: number; data: Innings }> = (
+            [[1, innings1], [2, innings2], [3, innings3], [4, innings4]] as const
+          ).filter((s): s is [number, Innings] => !!s[1]).map(([n, data]) => ({ n, data }))
 
-          const t2InningsList = (t1First
-            ? [innings2, innings4]
-            : [innings1, innings3]
-          ).filter((x): x is Innings => !!x)
+          const teamForSlot = (n: number): string => {
+            const tagged = inningsRaw[`innings${n}`]?.team
+            if (tagged) return tagged
+            // No tag for this slot — fall back to the odd/even alternation assumption
+            const isOddSlot = n % 2 === 1
+            return isOddSlot === t1First ? t1Key : t2Key
+          }
+
+          const t1InningsList = scoreSlots.filter(s => teamForSlot(s.n) === t1Key).map(s => s.data)
+          const t2InningsList = scoreSlots.filter(s => teamForSlot(s.n) === t2Key).map(s => s.data)
 
           // Names: use backend names — team1BattingFinal tells us who's batting/active on left
           const leftName  = team1BattingFinal ? team1Name : team2Name

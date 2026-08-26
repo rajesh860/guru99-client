@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import BackBtn from "../../Component/BackBtn/BackBtn"
 import { Link, useNavigate } from "react-router-dom"
 import {
@@ -7,6 +7,8 @@ import {
 import moment from "moment"
 import CommonLodding from "../../Component/CommonLodding"
 import "./Ledger.scss"
+
+const GAME_MARKET_TYPES = new Set(["casino", "roulette", "dice", "aviator"])
 
 const Ledger = () => {
   const [page, setPage] = useState(1)
@@ -41,6 +43,33 @@ const Ledger = () => {
         <div className="ledger-ss2__container">
           <div className="ledger-ss2__card">
             <div className="ledger-ss2__title">MY LEDGER</div>
+
+            <div className="ledger-ss2__summary">
+              <div className="ledger-ss2__summaryItem">
+                <span className="ledger-ss2__summaryLabel">Win</span>
+                <span className="ledger-ss2__num ledger-ss2__num--won">
+                  {Number(summary.totalWon).toFixed(2)}
+                </span>
+              </div>
+              <div className="ledger-ss2__summaryItem">
+                <span className="ledger-ss2__summaryLabel">Loss</span>
+                <span className="ledger-ss2__num ledger-ss2__num--lost">
+                  {Number(summary.totalLost).toFixed(2)}
+                </span>
+              </div>
+              <div
+                className={
+                  Number(summary.totalHisab) >= 0
+                    ? "ledger-ss2__summaryItem ledger-ss2__summaryItem--pos"
+                    : "ledger-ss2__summaryItem ledger-ss2__summaryItem--neg"
+                }
+              >
+                <span className="ledger-ss2__summaryLabel">P/L</span>
+                <span className="ledger-ss2__num">
+                  {Number(summary.totalHisab).toFixed(2)}
+                </span>
+              </div>
+            </div>
 
             <div className="ledger-ss2__tableWrap">
               <table className="ledger-ss2__table">
@@ -78,10 +107,12 @@ const Ledger = () => {
                               )}
                             </span>
                           </Link>
-                        ) : data?.marketType === "casino" ? (
-                          <div 
+                        ) : GAME_MARKET_TYPES.has(data?.marketType) ? (
+                          <div
                             className="ledger-ss2__matchLink ledger-ss2__matchLink--clickable"
-                            onClick={() => navigate(`/casino-ledger/${data?.gameCode || ""}/${moment(data?.settledAt).format("YYYY-MM-DD")}`)}
+                            onClick={() => {
+                              navigate(`/casino-ledger/${data?.gameCode || ""}/${moment(data?.settledAt).format("YYYY-MM-DD")}`)
+                            }}
                           >
                             <span className="ledger-ss2__matchName">
                               {data?.matchName || data?.description}

@@ -8,6 +8,10 @@ import { Provider } from "react-redux"
 import { store } from "../store/store"
 import { SnackbarUtilsConfigurator } from "./utils/Snackbar"
 
+window.addEventListener('vite:preloadError', () => {
+  window.location.reload()
+})
+
 const container = document.getElementById("root")
 
 if (container) {

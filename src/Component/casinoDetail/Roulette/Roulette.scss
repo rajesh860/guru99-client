@@ -33,8 +33,21 @@
   letter-spacing: 0.5px;
 }
 
+.rl-sound-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background 0.15s;
+  &:hover { background: rgba(255,255,255,0.12); }
+}
+
 // ── Wheel section ────────────────────────────────────
 .rl-wheel-section {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -68,21 +81,16 @@
   filter: drop-shadow(0 0 12px rgba(140,60,255,0.5));
 }
 
-// Ball orbit
+// Ball orbit — animation controlled entirely by GSAP
 .rl-ball-orbit {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  animation: rl-ball-spin 2.2s linear infinite;
-}
-
-@keyframes rl-ball-spin {
-  to { transform: rotate(-360deg); }
 }
 
 .rl-ball {
   position: absolute;
-  top: calc(50% - 130px);
+  top: 10px;
   left: calc(50% - 6px);
   width: 12px;
   height: 12px;
@@ -91,25 +99,23 @@
   box-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 20px rgba(255,255,255,0.4);
 }
 
-// Countdown overlay in wheel center
+// Countdown — right bottom corner of wheel section
 .rl-cd-overlay {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  bottom: 14px;
+  right: 14px;
   pointer-events: none;
   z-index: 20;
 }
 
 .rl-cd-num {
-  font-size: 64px;
+  font-size: 36px;
   font-weight: 900;
   color: #fff;
   text-shadow:
-    0 0 20px rgba(192,132,252,0.9),
-    0 0 40px rgba(192,132,252,0.5),
-    0 2px 8px rgba(0,0,0,0.8);
+    0 0 14px rgba(192,132,252,0.9),
+    0 0 28px rgba(192,132,252,0.5),
+    0 2px 6px rgba(0,0,0,0.8);
   animation: rl-cd-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -118,9 +124,9 @@
 .rl-cd-overlay--red .rl-cd-num {
   color: #ff5252;
   text-shadow:
-    0 0 20px rgba(255,82,82,0.9),
-    0 0 40px rgba(255,82,82,0.5),
-    0 2px 8px rgba(0,0,0,0.8);
+    0 0 14px rgba(255,82,82,0.9),
+    0 0 28px rgba(255,82,82,0.5),
+    0 2px 6px rgba(0,0,0,0.8);
   animation: rl-cd-pop-red 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -246,9 +252,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
-  padding: 0 10px;
+  padding: 0 2px;
 }
 
 .rl-hist-bubble {
@@ -376,6 +382,75 @@
     box-shadow: 0 0 16px rgba(255,215,0,0.8);
     border-color: #ffd700;
   }
+
+  &.win-col {
+    transform: scale(1.12);
+    filter: brightness(1.7);
+    z-index: 2;
+    position: relative;
+    box-shadow: 0 0 12px rgba(255,255,255,0.25);
+    transition: transform 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  &.has-bet {
+    border-color: rgba(255,215,0,0.5);
+    box-shadow: 0 0 6px rgba(255,215,0,0.25);
+  }
+}
+
+// Wrapper: button + outcome label stacked
+.rl-cell-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+
+  // number cells inside wrap should stretch full width
+  .rl-num-cell { flex: unset; }
+  // dozens/outside inside wrap stretch full width
+  .rl-dozen-btn,
+  .rl-outside-btn { flex: unset; }
+}
+
+.rl-zero-wrap {
+  margin-bottom: 4px;
+}
+
+.rl-outcome-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+
+  &--win  { color: #4ade80; }
+  &--loss { color: #f87171; }
+}
+
+.rl-bet-chip {
+  display: block;
+  font-size: 7px;
+  font-weight: 800;
+  color: #ffd700;
+  background: rgba(255,215,0,0.18);
+  border-radius: 3px;
+  padding: 1px 3px;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+  text-align: center;
+
+  &--win {
+    color: #4ade80;
+    background: rgba(74,222,128,0.15);
+  }
+
+  &--loss {
+    color: #f87171;
+    background: rgba(248,113,113,0.12);
+    font-weight: 700;
+  }
 }
 
 @keyframes rl-num-flash {
@@ -412,7 +487,8 @@
 }
 
 .rl-dozen-btn {
-  flex: 1;
+  flex: unset;
+  width: 100%;
   padding: 8px 4px;
   background: rgba(255,255,255,0.05);
   border: 1.5px solid rgba(255,255,255,0.12);
@@ -433,6 +509,12 @@
   }
 
   &.suspended { opacity: 0.35; cursor: not-allowed; }
+
+  &.has-bet {
+    border-color: rgba(255,215,0,0.5);
+    box-shadow: 0 0 6px rgba(255,215,0,0.25);
+    color: #fff;
+  }
 }
 
 // Outside bets (1-18, Even, Red, Black, Odd, 19-36)
@@ -443,7 +525,8 @@
 }
 
 .rl-outside-btn {
-  flex: 1;
+  flex: unset;
+  width: 100%;
   padding: 9px 2px;
   border-radius: 6px;
   font-size: 9px;
@@ -484,6 +567,67 @@
   }
 
   &.suspended { opacity: 0.35; cursor: not-allowed; }
+
+  &.has-bet {
+    box-shadow: 0 0 8px rgba(255,215,0,0.3);
+    border-color: rgba(255,215,0,0.55) !important;
+  }
+}
+
+// ── Round Summary ─────────────────────────────────────
+.rl-round-summary {
+  margin: 10px 10px 0;
+  background: rgba(255,215,0,0.05);
+  border: 1px solid rgba(255,215,0,0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+
+  &__title {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,215,0,0.7);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  &__rows { display: flex; flex-direction: column; gap: 5px; }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  &__bet {
+    flex: 1;
+    color: #fff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10px;
+  }
+
+  &__stake { color: rgba(255,255,255,0.5); font-size: 10px; }
+
+  &__pl {
+    font-weight: 800;
+    font-size: 11px;
+    min-width: 50px;
+    text-align: right;
+    &.pos { color: #4ade80; }
+    &.neg { color: #f87171; }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+  }
 }
 
 // ── My Bets section ──────────────────────────────────
@@ -712,4 +856,121 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
+}
+
+// ── Light theme ─────────────────────────────────────────────
+// NOTE: the wheel graphic, the red/black/green number-cell colors and
+// win/loss text colors are FUNCTIONAL (real roulette colors) and are
+// intentionally left untouched here — only the structural chrome
+// (page bg, header, panels, history strip, tabs, bets table) is themed.
+[data-theme="light"] {
+  .rl-page {
+    background: var(--color-background) !important;
+    color: #111827 !important;
+  }
+
+  .rl-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .rl-section-title {
+    color: #6b7280 !important;
+  }
+
+  .rl-timer-box {
+    background: #0a0a0a !important;
+    border-color: rgba(140, 60, 255, 0.4) !important;
+  }
+
+  .rl-dozen-btn {
+    background: rgba(20, 20, 20, 0.85) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+
+    &:hover { background: rgba(140, 60, 255, 0.35) !important; border-color: rgba(140, 60, 255, 0.6) !important; color: #ffffff !important; }
+    &.has-bet { color: #ffffff !important; }
+  }
+
+  .rl-outside-btn {
+    &--low, &--high {
+      background: rgba(20, 20, 20, 0.85) !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+      color: #ffffff !important;
+    }
+
+    &--even, &--odd {
+      background: rgba(140, 60, 255, 0.4) !important;
+      border-color: rgba(140, 60, 255, 0.7) !important;
+      color: #ffffff !important;
+    }
+
+    &--red {
+      background: rgba(192, 57, 43, 0.6) !important;
+      border-color: rgba(192, 57, 43, 0.85) !important;
+      color: #ffffff !important;
+    }
+
+    &--black {
+      background: rgba(20, 20, 20, 0.9) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
+    }
+  }
+
+  // History strip — acts as both container + label (matches dice-history)
+  .rl-hist-label {
+    background: #0a0a0a !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  // My Round Bets summary (kept themed for parity even though currently unused)
+  .rl-round-summary {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+
+    &__title { color: #6b7280 !important; }
+    &__bet   { color: #111827 !important; }
+    &__stake { color: #6b7280 !important; }
+    &__footer {
+      border-color: #e5e7eb !important;
+      color: #6b7280 !important;
+    }
+  }
+
+  // Bets tabs
+  .rl-tab {
+    &--inactive {
+      background: rgba(0, 0, 0, 0.04) !important;
+      color: #6b7280 !important;
+      &:hover { background: rgba(0, 0, 0, 0.08) !important; color: #111827 !important; }
+    }
+    &--active {
+      background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
+      color: #ffffff !important;
+      box-shadow: none !important;
+      border-bottom: 2px solid #EFB32D !important;
+    }
+  }
+
+  // Bets table
+  .rl-bets-table {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+
+    th {
+      color: #6b7280 !important;
+      border-color: #e5e7eb !important;
+    }
+    td {
+      color: #111827 !important;
+      border-color: #e5e7eb !important;
+    }
+    tr:hover td { background: rgb(238 238 238) !important; }
+  }
+
+  .rl-bets-empty {
+    color: #6b7280 !important;
+  }
 }

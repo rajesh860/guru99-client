@@ -14,6 +14,7 @@ type Phase = "betting" | "rolling" | "result"
 const RESULT_MS    = 3000
 
 // ── Web Audio ─────────────────────────────────────────────────
+let _soundEnabled = localStorage.getItem("game-sound") !== "0"
 let _ctx: AudioContext | null = null
 
 function getCtx(): AudioContext | null {
@@ -25,6 +26,7 @@ function getCtx(): AudioContext | null {
 }
 
 function playTick() {
+  if (!_soundEnabled) return
   const ctx = getCtx()
   if (!ctx) return
   try {
@@ -43,6 +45,7 @@ function playTick() {
 }
 
 function playChime() {
+  if (!_soundEnabled) return
   const ctx = getCtx()
   if (!ctx) return
   try {
@@ -165,6 +168,12 @@ const DiceGame = () => {
   const [isWin, setIsWin]         = useState(false)
   const [betsTab, setBetsTab]     = useState<"open" | "completed">("open")
   const [roundId, setRoundId]     = useState<string>("")
+  const [soundOn, setSoundOn]     = useState(() => localStorage.getItem("game-sound") !== "0")
+
+  useEffect(() => {
+    _soundEnabled = soundOn
+    localStorage.setItem("game-sound", soundOn ? "1" : "0")
+  }, [soundOn])
 
   const wsRef             = useRef<WebSocket | null>(null)
   const lastRoundIdRef    = useRef<string>("")
@@ -406,6 +415,18 @@ const DiceGame = () => {
           <div className="dice-header-left">
             Dice Game<span className="dice-rules-link"> | Rules</span>
           </div>
+          <button
+            onClick={() => setSoundOn(v => !v)}
+            title={soundOn ? "Mute sounds" : "Unmute sounds"}
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 8, padding: "4px 8px",
+              fontSize: 16, cursor: "pointer", lineHeight: 1,
+            }}
+          >
+            {soundOn ? "🔊" : "🔇"}
+          </button>
           <div className="dice-header-right" title={roundId}>
             {roundId ? roundId.replace("DICE", "#") : `#${history.length}`}
           </div>

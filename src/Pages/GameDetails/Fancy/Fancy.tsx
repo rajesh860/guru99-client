@@ -1,13 +1,14 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import type { Fancy2, FancySection } from "../../../../store/service/odds/odds"
-import { formatNumber } from "../FormateNum"
-import { formatToDecimal } from "../../../utils/helpers"
+import { formatToDecimal, formatLimit } from "../../../utils/helpers"
 import OddsButton from "../OddsButton"
 import FancyBookModal from "./FancyBookModal"
 import { useGetFancyBookDataQuery } from "../../../../store/service/userServices/userServices"
+import { useTheme } from "../../../context/ThemeContext"
 
 interface Props {
   fancyData: FancySection[] | Fancy2[]
+  groupName?: string
   handleBetData: (
     isFancy: boolean,
     isBack: boolean,
@@ -25,11 +26,14 @@ interface Props {
   focusAmountInput: () => void
   teamPLData?: any
   beventId?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  marketLimits?: any
 }
 
-const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventId }: Props) => {
+const Fancy = ({ fancyData, groupName, handleBetData, focusAmountInput, teamPLData, beventId, marketLimits }: Props) => {
   const [selectedFancy, setSelectedFancy] = useState<{ fancyId: string; name: string } | null>(null)
-  
+  const { themeName } = useTheme()
+
   const { data: fancyBookData, isLoading: isFancyBookLoading } = useGetFancyBookDataQuery(
     { fancyId: selectedFancy?.fancyId || "", beventId: beventId || "" },
     { skip: !selectedFancy?.fancyId || !beventId }
@@ -41,7 +45,7 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
     if (fancy.odds) {
       const backOdds = fancy.odds.find((o: any) => o.otype === "back" && o.oname === "back1")
       const layOdds = fancy.odds.find((o: any) => o.otype === "lay" && o.oname === "lay1")
-      
+
       switch(field) {
         case "name": return fancy.nat
         case "sid": return fancy.sid?.toString() || fancy.fancyId
@@ -58,7 +62,7 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
         default: return 0
       }
     }
-    
+
     // Old structure (Fancy2) - fallback
     switch(field) {
       case "name": return fancy.nation
@@ -76,296 +80,123 @@ const Fancy = ({ fancyData, handleBetData, focusAmountInput, teamPLData, beventI
       default: return 0
     }
   }
-  
+
+  // Group-level min/max from the market-limits API (matched by group name)
+  const fancyLimits: any = (marketLimits?.data ?? marketLimits)?.fancy || {}
+  const norm = (s: any) => String(s || "").toLowerCase().replace(/\s+/g, "")
+  const limKey = Object.keys(fancyLimits).find((k) => norm(k) === norm(groupName))
+  const groupLimit: any = limKey ? fancyLimits[limKey] : null
+  const groupMin = groupLimit?.minBet ?? 0
+  const groupMax = groupLimit?.maxBet ?? 0
+
+  const filteredRows = [...(fancyData || [])]
+    .filter((fancy) => {
+      const name = getFancyValue(fancy, "name")
+      if (/\s+\d+\.?$/.test(name?.trim() || '')) {
+        const match = name?.trim().match(/\s+(\d+)\.?$/)
+        if (match && Number(match[1]) !== 2) return false
+      }
+      if (/Only\s+\d+-\d+\s+over\s+run/i.test(name)) return false
+      return true
+    })
+    .sort((a, b) => Number(getFancyValue(a, "srno")) - Number(getFancyValue(b, "srno")))
+
   return (
-    <div style={{ background: "var(--color-surface)" }}>
-      {/* Header */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          marginBottom: "4px",
-          gap: "6px",
-          background: "#2c3548",
-          borderRadius: "6px 6px 0 0",
-          padding: "6px 8px",
-        }}
-      >
-        <div
-          style={{
-            color: "#fff",
-            padding: "4px 2px",
-            fontSize: "16px",
-            fontWeight: "bold",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          Session
+    <div style={{ marginBottom: "8px", borderRadius: "6px", overflow: "hidden" }}>
+
+      {/* Ribbon header (matches Bookmaker) */}
+      <div className="gd-ribbon" style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", marginBottom: "4px", gap: "0", borderRadius: "6px 6px 0 0", alignItems: "center" }}>
+        <div className="gd-ribbon__left" style={{ padding: "8px 10px", minWidth: 0, overflow: "hidden" }}>
+          <span className="gd-ribbon__icon">📋</span>
+          <span className="gd-ribbon__title">{groupName || "Session"}</span>
+          <span className="gd-ribbon__info">i</span>
+          {(groupMin > 0 || groupMax > 0) && (
+            <span className="gd-ribbon__meta" style={{ marginLeft: "6px" }}>MIN:{formatLimit(groupMin)} MAX:{formatLimit(groupMax)}</span>
+          )}
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "4px",
-          }}
-        >
-
-           
-          <div
-            style={{
-              background: "rgb(240 121 143)",
-              color: "white",
-              padding: "10px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              textAlign: "center",
-              borderRadius: "4px",
-
-            }}
-          >
-            NO
+        <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
+          <div style={{ padding: "4px", paddingInline: 0 }}>
+            <div style={{ background: "rgb(240 121 143)", color: "#fff", padding: "8px 4px", fontSize: "13px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>NO</div>
           </div>
-          <div
-            style={{
-              background: "rgb(64 135 251)",
-              color: "white",
-              padding: "10px",
-              fontSize: "14px",
-              fontWeight: "bold",
-              textAlign: "center",
-              borderRadius: "4px",
-            }}
-          >
-            YES
+          <div style={{ padding: "4px", paddingInline: 0 }}>
+            <div style={{ background: "rgb(64 135 251)",  color: "#fff", padding: "8px 4px", fontSize: "13px", fontWeight: "bold", textAlign: "center", borderRadius: "4px" }}>YES</div>
           </div>
         </div>
       </div>
 
-      {/* Fancy Data Rows */}
-      {[...(fancyData || [])]
-        .filter((fancy) => {
-          const name = getFancyValue(fancy, "name")
-          // Block items ending with a trailing number, but allow those ending with 2
-          if (/\s+\d+\.?$/.test(name?.trim() || '')) {
-            const match = name?.trim().match(/\s+(\d+)\.?$/)
-            if (match && Number(match[1]) !== 2) return false
-          }
-          
-          // Block items like "Only 16-17 over run DC" (any number-number pattern)
-          if (/Only\s+\d+-\d+\s+over\s+run/i.test(name)) return false
-          
-          return true
-        })
-        .sort((a, b) => Number(getFancyValue(a, "srno")) - Number(getFancyValue(b, "srno")))?.map((fancy, idx) => {
-        const name = getFancyValue(fancy, "name")
-        const sid = getFancyValue(fancy, "sid")
-        const mid = getFancyValue(fancy, "mid")
-        const gstatus = getFancyValue(fancy, "gstatus")
-        const maxBet = getFancyValue(fancy, "maxBet")
-        const b1 = getFancyValue(fancy, "b1")  // YES odds
-        const bs1 = getFancyValue(fancy, "bs1")  // YES size
-        const l1 = getFancyValue(fancy, "l1")  // NO odds
-        const ls1 = getFancyValue(fancy, "ls1")  // NO size
-        const rem = getFancyValue(fancy, "rem")  // Remark/Message
-        
-        return (
-          <div key={mid || idx}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "2fr 1fr",
-                marginBottom: "2px",
-                gap: "6px",
-              }}
-            >
-              {/* Session Info */}
-              <div
-                style={{
-                  background: "var(--bg-panel)",
-                  borderRadius: "4px",
-                  padding: "4px 12px",
-                  color: "var(--color-text)",
-                }}
-              >
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "13px",
-                  marginBottom: "4px",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: "8px"
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span>{name}</span>
-                 
-              
+      {/* Single flat grid — header + all rows share same columns → perfect alignment */}
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)" }}>
+
+        {/* ── Data rows (each row = 2 grid cells) ── */}
+        {filteredRows.map((fancy, idx) => {
+          const name    = getFancyValue(fancy, "name")
+          const sid     = getFancyValue(fancy, "sid")
+          const mid     = getFancyValue(fancy, "mid")
+          const gstatus = getFancyValue(fancy, "gstatus")
+          const b1      = getFancyValue(fancy, "b1")
+          const bs1     = getFancyValue(fancy, "bs1")
+          const l1      = getFancyValue(fancy, "l1")
+          const ls1     = getFancyValue(fancy, "ls1")
+          const rem     = getFancyValue(fancy, "rem")
+          const rowMin  = getFancyValue(fancy, "minBet")
+          const rowMax  = getFancyValue(fancy, "maxBet")
+          const isSusp  = gstatus === "SUSPENDED" || b1 === 0 || gstatus === "Ball Running"
+
+          const rawFancy   = teamPLData?.data?.fancy
+          const fancyArray: any[] = Array.isArray(rawFancy) ? rawFancy : rawFancy && typeof rawFancy === "object" ? [rawFancy] : []
+          const matchingPL = fancyArray.find((f: any) => f.fancyId === mid)
+          const plVal      = matchingPL?.worstCase
+
+          return (
+            <React.Fragment key={mid || idx}>
+              {/* Left cell */}
+              <div style={{ background: themeName === "light" ? "rgb(238 238 238)" : "var(--bg-panel)", padding: "6px 10px", borderTop: "1px solid rgba(128,128,128,0.2)", borderBottom: "1px solid rgba(128,128,128,0.2)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", minWidth: 0, overflow: "hidden" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0, overflow: "hidden" }}>
+                  <span style={{ fontWeight: "600", fontSize: "13px", color: "var(--color-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
+                  {(rowMin > 0 || rowMax > 0) && (
+                    <span style={{ fontSize: "10px", color: themeName === "light" ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)" }}>Min: {formatLimit(rowMin)} | Max: {formatLimit(rowMax)}</span>
+                  )}
                 </div>
-                {(() => {
-                  const rawFancy = teamPLData?.data?.fancy
-                  const fancyArray: any[] = Array.isArray(rawFancy)
-                    ? rawFancy
-                    : rawFancy && typeof rawFancy === "object"
-                    ? [rawFancy]
-                    : []
-                  const matchingFancy = fancyArray.find((f: any) => f.fancyId === mid)
-                  if (!matchingFancy) return null
-                  const val = matchingFancy.worstCase
-                  return (
-                    <span style={{
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: val >= 0 ? "#4CAF50" : "#f44336"
-                    }}>
-                      {val >= 0 ? '+' : ''}{val?.toFixed(2)}
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                  {plVal != null && (
+                    <span style={{ fontSize: "12px", fontWeight: "600", color: plVal >= 0 ? "#4CAF50" : "#f44336" }}>
+                      {plVal >= 0 ? "+" : ""}{plVal?.toFixed(2)}
                     </span>
-                  )
-                })()}
-                    {/* Leaderboard Icon */}
+                  )}
                   <button
                     onClick={() => setSelectedFancy({ fancyId: mid?.toString() || "", name })}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: "0",
-                      display: "flex",
-                      alignItems: "center",
-                      color: "#72a8ff",
-                      transition: "color 0.2s"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = "#5a8de8"}
-                    onMouseLeave={(e) => e.currentTarget.style.color = "#72a8ff"}
+                    style={{ background: "transparent", border: "none", cursor: "pointer", padding: 0, color: "#72a8ff", fontSize: "16px", lineHeight: 1 }}
                     title="View Book"
-                  >
-                    🪜
-                  </button>
+                  >🪜</button>
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  color: "var(--color-textSecondary)",
-                }}
-              >
-                Max:{formatNumber(maxBet)}
-              </div>
-            </div>
 
-            {/* Buttons Container */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "4px",
-                position: "relative",
-              }}
-            >
-              {/* Suspended Overlay */}
-              {(gstatus === "SUSPENDED" || b1 === 0 || gstatus === 'Ball Running') && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: "rgba(22, 33, 62, 0.9)",
-                    color: "red",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    zIndex: 10,
-                    borderRadius: "4px",
-                    textTransform:"uppercase"
-                  }}
-                >
-                  {gstatus}
+              {/* Right cell (odds buttons) */}
+              <div style={{ display: "flex", gap: "4px", position: "relative" }}>
+                {isSusp && (
+                  <div style={{ position: "absolute", inset: 0, background: "rgba(22,33,62,0.9)", color: "red", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "bold", zIndex: 10, borderRadius: "4px", textTransform: "uppercase" }}>
+                    {gstatus}
+                  </div>
+                )}
+                <OddsButton type="lay"  value={isSusp || l1 === 0 ? "0" : l1}  size={isSusp || l1 === 0 ? undefined : formatToDecimal(ls1)}
+                  onClick={() => { if (!isSusp && l1 !== 0) { handleBetData(true, false, l1, "Fancy2", sid?.toString(), ls1, mid?.toString(), name, "No",  new Date(), ls1, mid?.toString()); focusAmountInput() } }}
+                  disabled={isSusp || l1 === 0} />
+                <OddsButton type="back" value={isSusp || b1 === 0 ? "0" : b1}  size={isSusp || b1 === 0 ? undefined : formatToDecimal(bs1)}
+                  onClick={() => { if (!isSusp && b1 !== 0) { handleBetData(true, true,  b1, "Fancy2", sid?.toString(), bs1, mid?.toString(), name, "Yes", new Date(), bs1, mid?.toString()); focusAmountInput() } }}
+                  disabled={isSusp || b1 === 0} />
+              </div>
+
+              {/* Remark — spans full width */}
+              {rem && (
+                <div style={{ gridColumn: "1 / -1", background: "rgba(255,0,0,0.08)", color: "red", padding: "4px 10px", fontSize: "11px", fontWeight: "500", borderTop: "1px solid rgba(255,0,0,0.2)" }}>
+                  {rem}
                 </div>
               )}
+            </React.Fragment>
+          )
+        })}
+      </div>
 
-              {/* NO Button */}
-              <OddsButton
-                type="lay"
-                value={gstatus === "SUSPENDED" || l1 === 0 ? "0" : l1}
-                size={gstatus === "SUSPENDED" || l1 === 0 ? undefined : formatToDecimal(ls1)}
-                onClick={() => {
-                  if (gstatus !== "SUSPENDED" && l1 !== 0) {
-                    handleBetData(
-                      true,
-                      false,
-                      l1,
-                      "Fancy2",
-                      sid?.toString(),
-                      ls1,
-                      mid?.toString(),
-                      name,
-                      "No",
-                      new Date(),
-                      ls1, // size
-                      mid?.toString() // fancyId
-                    )
-                    focusAmountInput()
-                  }
-                }}
-                disabled={gstatus === "SUSPENDED" || l1 === 0}
-              />
-
-              {/* YES Button */}
-              <OddsButton
-                type="back"
-                value={gstatus === "SUSPENDED" || b1 === 0 ? "0" : b1}
-                size={gstatus === "SUSPENDED" || b1 === 0 ? undefined : formatToDecimal(bs1)}
-                onClick={() => {
-                  if (gstatus !== "SUSPENDED" && b1 !== 0) {
-                    handleBetData(
-                      true,
-                      true,
-                      b1,
-                      "Fancy2",
-                      sid?.toString(),
-                      bs1,
-                      mid?.toString(),
-                      name,
-                      "Yes",
-                      new Date(),
-                      bs1, // size
-                      mid?.toString() // fancyId
-                    )
-                    focusAmountInput()
-                  }
-                }}
-                disabled={gstatus === "SUSPENDED" || b1 === 0}
-              />
-            </div>
-          </div>
-            
-          {/* Remark Message */}
-          {rem && (
-            <div
-              style={{
-                background: "rgba(255, 0, 0, 0.1)",
-                color: "red",
-                padding: "6px 12px",
-                fontSize: "12px",
-                fontWeight: "500",
-                borderRadius: "4px",
-                marginBottom: "2px",
-                border: "1px solid rgba(255, 0, 0, 0.3)"
-              }}
-            >
-              {rem}
-            </div>
-          )}
-        </div>
-        )
-      })}
-
-      {/* Fancy Book Modal */}
       <FancyBookModal
         isOpen={!!selectedFancy}
         onClose={() => setSelectedFancy(null)}

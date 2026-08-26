@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import "./PlaceBetModal.scss"
 import { usePlaceCasinoBetMutation } from "../../../../store/service/teenPattiApi"
 import { useGetCasinoMyBetsQuery } from "../../../../store/service/userServices/userServices"
@@ -16,14 +16,33 @@ interface Props {
   } | null
   matchId?: string
   game?: string
+  /** Remaining seconds of the current game round (from `autotime`). When this
+   *  reaches the suspend threshold, the modal auto-closes (2s before backend
+   *  actually suspends the odds). */
+  roundSeconds?: number
 }
 
 const quickAmounts = [100, 500, 1000, 2000, 5000, 10000, 25000, 50000, 100000]
 
-const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen20" }: Props) => {
+// Close the bet module this many seconds before the round ends — frontend
+// pre-empts the backend suspend so no bet is placed in the last moments.
+const SUSPEND_THRESHOLD = 2
+// Auto-close the bet module after this many idle seconds.
+const AUTO_CLOSE_SECONDS = 8
+
+const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen20", roundSeconds }: Props) => {
   const [amount, setAmount] = useState("")
-  const [countdown, setCountdown] = useState(20)
+  const [countdown, setCountdown] = useState(AUTO_CLOSE_SECONDS)
   const [userIp, setUserIp] = useState("127.0.0.1")
+
+  // Round is (about to be) suspended — either the backend already closed it, or
+  // we're within the pre-empt window of the round ending.
+  const isSuspended = roundSeconds != null && roundSeconds <= SUSPEND_THRESHOLD
+
+  // Keep the latest onClose in a ref so the countdown interval isn't reset every
+  // time the parent re-renders (it re-creates onClose each second via its timer).
+  const onCloseRef = useRef(onClose)
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
 
   const [trigger, { data: betPlaceResponse, isLoading, error: betError }] = usePlaceCasinoBetMutation()
   const { refetch: refetchMyBets } = useGetCasinoMyBetsQuery(
@@ -45,10 +64,10 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
     getUserIP()
   }, [])
 
-  // Countdown timer
+  // Auto-close countdown (15s). Closes the modal when it hits 0.
   useEffect(() => {
     if (!isOpen) {
-      setCountdown(7)
+      setCountdown(AUTO_CLOSE_SECONDS)
       return
     }
 
@@ -56,7 +75,7 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
       setCountdown((prev) => {
         if (prev <= 1) {
           clearInterval(timer)
-          onClose()
+          onCloseRef.current()
           return 0
         }
         return prev - 1
@@ -64,7 +83,13 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isOpen, onClose])
+  }, [isOpen])
+
+  // Round about to end — close the bet module 2s before the backend suspends,
+  // so a bet can't be placed in the final moments of the round.
+  useEffect(() => {
+    if (isOpen && isSuspended) onCloseRef.current()
+  }, [isOpen, isSuspended])
 
   // Handle bet place response (HTTP 200 with success/failure)
   useEffect(() => {
@@ -88,6 +113,10 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
   }, [betError])
 
   const handlePlaceBet = async () => {
+    if (isSuspended) {
+      snackbarUtil.error("Betting is suspended for this round")
+      return
+    }
     if (!amount || parseFloat(amount) <= 0) {
       snackbarUtil.error("Please enter a valid amount")
       return
@@ -186,9 +215,9 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
           <button
             className={`pbm-submit ${selectedPlayer.isBack ? "pbm-submit--back" : "pbm-submit--lay"}`}
             onClick={handlePlaceBet}
-            disabled={isLoading || !amount}
+            disabled={isLoading || !amount || isSuspended}
           >
-            {isLoading ? "Placing..." : "Place Bet"}
+            {isSuspended ? "Suspended" : isLoading ? "Placing..." : "Place Bet"}
           </button>
         </div>
 

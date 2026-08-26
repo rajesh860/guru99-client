@@ -60,6 +60,7 @@ const TeenPattiGame = () => {
   const [isConnected, setIsConnected] = useState(false)
   const [wsData, setWsData] = useState<any>(null)
   const [countdown, setCountdown] = useState("00:00")
+  const [remainingSecs, setRemainingSecs] = useState(0)
 
   const slug = tableIdtoUrl[id]
 
@@ -129,8 +130,8 @@ const TeenPattiGame = () => {
   }, [])
 
   const handleRateClick = (item: SelectedPlayerType) => {
-    // Check if betting option is suspended
-    if (!item?.gstatus) {
+    // Check if betting option is suspended (backend flag, or within 2s of round end)
+    if (!item?.gstatus || remainingSecs <= 2) {
       console.log("Betting option is suspended, modal will not open")
       snackbarUtil.error("This betting option is currently suspended")
       return
@@ -158,17 +159,18 @@ const TeenPattiGame = () => {
   // Countdown — same as DT20
   useEffect(() => {
     const autotime = wsData?.t1?.autotime ?? wsData?.autotime
-    if (!autotime) { setCountdown("00:00"); return }
+    if (!autotime) { setCountdown("00:00"); setRemainingSecs(0); return }
     const secs = parseInt(autotime)
-    if (secs <= 0) { setCountdown("00:00"); return }
+    if (secs <= 0) { setCountdown("00:00"); setRemainingSecs(0); return }
     const fmt = (s: number) =>
       `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`
     let remaining = secs
     setCountdown(fmt(remaining))
+    setRemainingSecs(remaining)
     const timer = setInterval(() => {
       remaining -= 1
-      if (remaining <= 0) { clearInterval(timer); setCountdown("00:00") }
-      else setCountdown(fmt(remaining))
+      if (remaining <= 0) { clearInterval(timer); setCountdown("00:00"); setRemainingSecs(0) }
+      else { setCountdown(fmt(remaining)); setRemainingSecs(remaining) }
     }, 1000)
     return () => clearInterval(timer)
   }, [wsData?.t1?.autotime, wsData?.autotime])
@@ -268,7 +270,7 @@ const TeenPattiGame = () => {
 
           {/* Betting Section */}
          <div className="betting-section">
-          <TeamTable data={wsData} handleRateClick={handleRateClick} />
+          <TeamTable data={wsData} handleRateClick={handleRateClick} roundSeconds={remainingSecs} />
          </div>
          <div className="last-10-result">
             <div className="result-header">Last 10 Results</div>
@@ -369,6 +371,7 @@ const TeenPattiGame = () => {
           onClose={() => setBetModalVisible(false)}
           selectedPlayer={selectedPlayer}
           matchId={id}
+          roundSeconds={remainingSecs}
         />
       )}
       

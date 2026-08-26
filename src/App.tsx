@@ -1,4 +1,4 @@
-import { Route, Routes, Navigate } from "react-router-dom"
+import { Route, Routes, Navigate, useParams, useLocation } from "react-router-dom"
 import { Suspense, lazy, useEffect } from "react"
 import "./App.scss"
 import CommonLodding from "./Component/CommonLodding"
@@ -8,6 +8,10 @@ import "slick-carousel/slick/slick.css"
 import "slick-carousel/slick/slick-theme.css"
 import LayoutOld from "./Component/LayoutOld"
 import { ThemeProvider } from "./context/ThemeContext"
+import Maintenance from "./Pages/Maintenance/Maintenance"
+
+// Set to true to lock the entire site and show only the maintenance page.
+const MAINTENANCE_MODE = false
 
 const Dashboard = lazy(() => import("./Pages/Dashboard/Dashboard"))
 const Layout = lazy(() => import("./Component/Layout"))
@@ -16,6 +20,7 @@ const TermsConditions = lazy(
   () => import("./Pages/TermsConditions/TermsConditions"),
 )
 const GameDeatils = lazy(() => import("./Pages/GameDetails/GameDeatils"))
+const GameDeatilsRoute = () => { const { id } = useParams(); return <GameDeatils key={id} /> }
 const Complete = lazy(() => import("./Pages/Complete/Complete"))
 const CricketResult = lazy(() => import("./Pages/Complete/CricketResult"))
 const Ledger = lazy(() => import("./Pages/Ledger/Ledger"))
@@ -30,6 +35,7 @@ const CasinoDetail = lazy(() => import("./Pages/Casino/CasinoDetail"))
 const Matka = lazy(() => import("./Pages/matka"))
 const DicePage    = lazy(() => import("./Pages/Dice/DicePage"))
 const AviatorGame = lazy(() => import("./Pages/Aviator/AviatorGame"))
+const RouletteGame = lazy(() => import("./Component/casinoDetail/Roulette/Roulette"))
 const MatkaDetail = lazy(() => import("./Pages/matkaDetail"))
 const AllCasinoResults = lazy(() => import("./Pages/AllCasinoResults/AllCasinoResults"))
 
@@ -39,13 +45,34 @@ const Loading = () => (
   </>
 )
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 const App = () => {
   useEffect(() => {
     document.title = "Guru99"
   }, [])
+  if (MAINTENANCE_MODE) {
+    return (
+      <ThemeProvider>
+        <div className="App">
+          <Routes>
+            <Route path="*" element={<Maintenance />} />
+          </Routes>
+        </div>
+      </ThemeProvider>
+    )
+  }
+
   return (
     <ThemeProvider>
       <div className="App">
+        <ScrollToTop />
         <Suspense fallback={<Loading />}>
           <Routes>
             <Route path="/" element={<NewLoginPage />} />
@@ -58,6 +85,7 @@ const App = () => {
                 <Route path="/satta-matka" element={<Matka />} />
                 <Route path="/dice" element={<DicePage />} />
                 <Route path="/aviator" element={<AviatorGame />} />
+                <Route path="/roulette" element={<RouletteGame />} />
                 <Route path="/satta-matka/:gameName" element={<MatkaDetail />} />
                 {/* Casino routes — list + detail active, others blocked */}
                 <Route path="/casino-list"       element={<Casino />} />
@@ -71,7 +99,7 @@ const App = () => {
                 <Route path="/casino-ledger/:game/:date" element={<CasinoLedger />} />
                 <Route path="/statement" element={<Statement />} />
                 <Route path="/all-casino-result/:gameType" element={<AllCasinoResults />} />
-                <Route path="/cricket/:id" element={<GameDeatils />} />
+                <Route path="/cricket/:id/:gmid/:bid/:scoreKey?" element={<GameDeatilsRoute />} />
                 <Route path="/cricketResult/:id" element={<CricketResult />} />
               </Route>
             </Route>

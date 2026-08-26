@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useActiveMatchQuery } from "../../../store/service/odds/oddsServices"
 import moment from "moment"
 import { Link } from "react-router-dom"
-import { FaRegClock } from "react-icons/fa"
+import { MdOutlineLiveTv } from "react-icons/md"
 import CommonLodding from "../../Component/CommonLodding"
 import "./inplay.scss"
 
@@ -27,35 +27,14 @@ const Inpaly = () => {
 
   return (
     <div className={`inplay-page ${visible ? "page-visible" : ""}`}>
-
-      {liveMatches.length > 0 && (
-        <div className="inplay-section">
-          {/* <div className="section-label live-label">
-            <span className="label-dot" />
-            LIVE
-            <span className="label-count">{liveMatches.length}</span>
-          </div> */}
-          <div className="inplay-container">
-            {liveMatches.map((match, index) => (
-              <MatchCard key={match?.gmid} match={match} index={index} isLive parseTeams={parseTeams} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {upcomingMatches.length > 0 && (
-        <div className="inplay-section">
-          {/* <div className="section-label upcoming-label">
-            UPCOMING
-            <span className="label-count">{upcomingMatches.length}</span>
-          </div> */}
-          <div className="inplay-container">
-            {upcomingMatches.map((match, index) => (
-              <MatchCard key={match?.gmid} match={match} index={index} isLive={false} parseTeams={parseTeams} />
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="inplay-container">
+        {liveMatches.map((match, index) => (
+          <MatchCard key={match?.gmid} match={match} index={index} isLive parseTeams={parseTeams} />
+        ))}
+        {upcomingMatches.map((match, index) => (
+          <MatchCard key={match?.gmid} match={match} index={index + liveMatches.length} isLive={false} parseTeams={parseTeams} />
+        ))}
+      </div>
 
       {isLoading && <CommonLodding />}
       {!isLoading && allMatches.length === 0 && (
@@ -68,66 +47,71 @@ const Inpaly = () => {
   )
 }
 
-const MatchCard = ({ match, index, isLive, parseTeams }: any) => {
-  const { team1, team2 } = parseTeams(match?.eventName || "")
-  const isVsMatch = team2 !== ""
+const OddsBox = ({ label, value, susp }: { label: string; value: number | null; susp?: boolean }) => (
+  <div className={`odds-box odds-${label.toLowerCase()}`}>
+    <span className="odds-label">{label}</span>
+    <span className="odds-value">{susp ? "—" : (value && value > 0 ? value.toFixed(2) : "-")}</span>
+  </div>
+)
 
-  if (isLive) {
+const MatchCard = ({ match, index, isLive, parseTeams }: any) => {
+  const parsed = parseTeams(match?.eventName || "")
+  const team1Name = match?.odds?.team1?.name || parsed.team1
+  const team2Name = match?.odds?.team2?.name || parsed.team2
+  const isVsMatch = !!team2Name
+
+  const t1 = match?.odds?.team1
+  const t2 = match?.odds?.team2
+  const susp = (o: any) => o?.status !== "ACTIVE"
+
+  const hasOdds   = !!match?.odds?.hasMatchOdds
+  const hasFancy  = !!match?.odds?.hasFancy
+  const hasBM     = !!match?.odds?.hasBookmaker
+
+  const date = moment(match?.matchTime).format("DD MMM")
+  const time = moment(match?.matchTime).format("HH:mm")
+
+  const to = isLive
+    ? `/cricket/${match?.beventId}/${match?.gmid}/${match?.bid}/${(match?.scoreMatchKey || '').split('/')[1] || ''}`
+    : `/cricket/${match?.beventId}/${match?.gmid}/${match?.bid}`
+
+  if (match?.isSeries) {
     return (
       <Link
-        to={`/cricket/${match?.beventId}/${match?.gmid}/${match?.bid}`}
-        className="match-card match-card--live"
-        style={{ animationDelay: `${index * 60}ms` }}
+        to={to}
+        className={`match-card ${isLive ? "match-card--live" : "match-card--upcoming"}`}
+        style={{ animationDelay: `${index * 50}ms` }}
       >
-        {/* Glow border */}
-        <div className="live-glow-border" />
-
-        {/* Header */}
-        <div className="card-header">
-          <span className="card-sport">🏏 {match?.sportName || "Cricket"}</span>
-          <span className="badge badge--live">
-            <span className="live-dot" />
-            LIVE
-          </span>
+        <div className="match-card__header">
+          {isLive
+            ? <span className="live-badge"><span className="live-dot" />LIVE</span>
+            : <span className="upcoming-badge">Upcoming</span>
+          }
+          <span className="league-name">{match?.sportName || "Cricket"}</span>
+          <span className="match-time">{date} • {time}</span>
         </div>
-
-        {/* Teams */}
-        <div className="card-body">
-          {isVsMatch ? (
-            <div className="teams-row">
-              <div className="team">
-                {/* <div className="team-flag">
-                  {team1.slice(0, 2).toUpperCase()}
-                </div> */}
-                <span className="team-name">{team1}</span>
-              </div>
-              <div className="vs-wrap">
-                <span className="vs-label">VS</span>
-              </div>
-              <div className="team team--right">
-                {/* <div className="team-flag">
-                  {team2.slice(0, 2).toUpperCase()}
-                </div> */}
-                <span className="team-name">{team2}</span>
-              </div>
+        <div className="match-card__body">
+          <div className="team-col team-col--left">
+            <div className="team-name-row">
+              <span className="team-name">{match?.eventName}</span>
             </div>
-          ) : (
-            <div className="match-title">{match?.eventName}</div>
-          )}
-          {match?.liveData?.B && (
-            <div className="toss-info">
-              🪙 {match.liveData.B}
+            <div className="odds-row">
+              <OddsBox label="Back" value={null} />
+              <OddsBox label="Lay"  value={null} />
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="card-footer">
-          <span className="match-time">
-            <FaRegClock size={11} />
-            {moment(match?.matchTime).format("ddd DD MMM · hh:mm A")}
-          </span>
-          <span className="bet-now-btn">BET NOW ›</span>
+          </div>
+          <div className="match-card__center">
+            <span className="sport-emoji">🏏</span>
+          </div>
+          <div className="team-col team-col--right">
+            <div className="team-name-row">
+              <span className="team-name">&nbsp;</span>
+            </div>
+            <div className="odds-row">
+              <OddsBox label="Back" value={null} />
+              <OddsBox label="Lay"  value={null} />
+            </div>
+          </div>
         </div>
       </Link>
     )
@@ -135,42 +119,58 @@ const MatchCard = ({ match, index, isLive, parseTeams }: any) => {
 
   return (
     <Link
-      to={`/cricket/${match?.beventId}/${match?.gmid}/${match?.bid}`}
-      className="match-card match-card--upcoming"
-      style={{ animationDelay: `${index * 60}ms` }}
+      to={to}
+      className={`match-card ${isLive ? "match-card--live" : "match-card--upcoming"}`}
+      style={{ animationDelay: `${index * 50}ms` }}
     >
-      <div className="card-top-strip" />
-
-      <div className="card-header">
-        <span className="card-sport">🏏 {match?.sportName || "Cricket"}</span>
-        <span className="badge badge--upcoming">UPCOMING</span>
+      {/* Header */}
+      <div className="match-card__header">
+        {isLive
+          ? <span className="live-badge"><span className="live-dot" />LIVE</span>
+          : <span className="upcoming-badge">Upcoming</span>
+        }
+        <span className="league-name">{match?.sportName || "Cricket"}</span>
+        <span className="match-time">{date} • {time}</span>
       </div>
 
-      <div className="card-body">
-        {isVsMatch ? (
-          <div className="teams-row">
-            <div className="team">
-              <span className="team-name">{team1}</span>
-            </div>
-            <div className="vs-wrap">
-              <span className="vs-label">VS</span>
-            </div>
-            <div className="team team--right">
-              <span className="team-name">{team2}</span>
-            </div>
+      {/* Body */}
+      <div className="match-card__body">
+        <div className="team-col team-col--left">
+          <div className="team-name-row">
+            <span className="team-name">{team1Name}</span>
           </div>
-        ) : (
-          <div className="match-title">{match?.eventName}</div>
-        )}
+          <div className="odds-row">
+            <OddsBox label="Back" value={hasOdds ? (t1?.back ?? null) : null} susp={hasOdds ? susp(t1) : false} />
+            <OddsBox label="Lay"  value={hasOdds ? (t1?.lay  ?? null) : null} susp={hasOdds ? susp(t1) : false} />
+          </div>
+        </div>
+
+        <div className="match-card__center">
+          <span className="sport-emoji">🏏</span>
+          <span className="vs-text">vs</span>
+        </div>
+
+        <div className="team-col team-col--right">
+          <div className="team-name-row">
+            <span className="team-name">{isVsMatch ? team2Name : ""}</span>
+          </div>
+          {isVsMatch && (
+            <div className="odds-row">
+              <OddsBox label="Back" value={hasOdds ? (t2?.back ?? null) : null} susp={hasOdds ? susp(t2) : false} />
+              <OddsBox label="Lay"  value={hasOdds ? (t2?.lay  ?? null) : null} susp={hasOdds ? susp(t2) : false} />
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="card-footer">
-        <span className="match-time">
-          <FaRegClock size={11} />
-          {moment(match?.matchTime).format("ddd DD MMM · hh:mm A")}
-        </span>
-        <div className="arrow-icon">›</div>
-      </div>
+      {/* Footer */}
+      {(hasOdds || hasFancy || hasBM) && (
+        <div className="match-card__footer">
+          {hasOdds  && <span className="mc-badge"><MdOutlineLiveTv /></span>}
+          {hasFancy && <span className="mc-badge mc-badge--text">F</span>}
+          {hasBM    && <span className="mc-badge mc-badge--text">BM</span>}
+        </div>
+      )}
     </Link>
   )
 }

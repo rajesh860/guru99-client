@@ -8,7 +8,7 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 10px;
+  // padding: 0 10px;
 }
 
 .casino-ledger-page__card {
@@ -161,6 +161,43 @@
     td {
       padding: 6px 4px;
       font-size: 10px;
+    }
+  }
+}
+
+[data-theme="light"] {
+  .casino-ledger-page {
+    background: var(--color-background);
+  }
+
+  .casino-ledger-page__title {
+    background: #0a0a0a !important;
+    color: #EFB32D !important;
+  }
+
+  .casino-ledger-page__tableWrap {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .casino-ledger-page__table {
+    th {
+      background: #0a0a0a !important;
+      color: #ffffff !important;
+      border-color: #e5e7eb !important;
+    }
+
+    td {
+      color: #111827 !important;
+      border-color: #e5e7eb !important;
+    }
+
+    tbody tr {
+      background: rgb(238 238 238) !important;
+
+      &:hover {
+        background: rgb(225 225 225) !important;
+      }
     }
   }
 }

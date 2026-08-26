@@ -430,7 +430,7 @@ $half: 35px;
 
 // ── Sections ─────────────────────────────────────────────────
 .dice-section {
-  margin: 8px 10px 0;
+  margin: 8px 7px 0;
   background: $bg-secondary;
   border-radius: 12px;
   padding: 12px 12px 10px;
@@ -908,4 +908,92 @@ $half: 35px;
     border-bottom: 2px solid #4facfe;
   }
   &:hover:not(.dbt--active) { background: rgba(255,255,255,0.04); }
+}
+
+// ── Light theme ─────────────────────────────────────────────
+[data-theme="light"] {
+  .dice-container {
+    background: var(--color-background) !important;
+    color: #111827 !important;
+  }
+
+  .dice-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+    color: #ffffff !important;
+
+    .dice-header-right {
+      background: rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.75) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+  }
+
+  .dice-section {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dice-history {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dice-section-title,
+  .dice-no-history,
+  .dice-min-max {
+    color: #6b7280 !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dice-history-label {
+    color: rgba(255, 255, 255, 0.6) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .dice-open-bets-title {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dice-open-bets-wrapper {
+    border-color: #e5e7eb !important;
+  }
+
+  .dice-open-bets-table {
+    background: #ffffff !important;
+
+    thead {
+      background: #0a0a0a !important;
+      th {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+      }
+    }
+
+    tbody {
+      color: #111827 !important;
+      tr { border-color: #e5e7eb !important; }
+      tr:hover { background: rgb(238 238 238) !important; }
+    }
+
+    .dice-no-bets { color: #6b7280 !important; }
+  }
+
+  .dice-bets-tabs {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dbt {
+    color: #6b7280 !important;
+
+    &--active {
+      background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
+      color: #ffffff !important;
+      border-bottom-color: #EFB32D !important;
+    }
+    &:hover:not(.dbt--active) { background: rgba(0, 0, 0, 0.04) !important; }
+  }
 }

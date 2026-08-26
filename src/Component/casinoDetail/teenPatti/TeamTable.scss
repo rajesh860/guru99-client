@@ -1,15 +1,15 @@
 .table-wrapper {
 //   padding: 10px;
 display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 8px;
+grid-template-columns: 2fr 1fr;
+// gap: 8px;
 background-color: transparent;
 // margin-block: 10px;
 button{
   border: none;
   outline: none;
   padding-block:10px ;
-  border-radius: 5px;
+  // border-radius: 5px;
   background-color: #252a3d;
   color: white;
   &:nth-child(1) {
@@ -18,6 +18,14 @@ button{
   &:nth-child(2) {
   background-color: #4083f8;
   }
+}
+
+.rate-button {
+  background-color: rgb(64 135 251) !important;
+}
+
+.locked-button {
+  background-color: rgba(64, 135, 251, 0.4) !important;
 }
 }
 

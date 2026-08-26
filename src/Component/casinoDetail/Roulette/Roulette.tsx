@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import gsap from "gsap"
 import { FaLock } from "react-icons/fa"
 import BackBtn from "../../BackBtn/BackBtn"
 import snackbarUtil from "../../../utils/Snackbar"
@@ -9,6 +10,7 @@ import {
   usePlaceRouletteBetMutation,
   useGetRoulettePendingBetsQuery,
   useGetRouletteCompletedBetsQuery,
+  useGetMyRoundBetsQuery,
 } from "../../../../store/service/roulette/rouletteServices"
 import "./Roulette.scss"
 
@@ -77,9 +79,9 @@ const OUTSIDE_BETS = [
   { nat: "Odd",   label: "ODD",   mod: "--odd"  },
 ]
 const DOZEN_BETS = [
-  { nat: "1 to 12",  label: "1st 12"  },
-  { nat: "13 to 24", label: "2nd 12"  },
-  { nat: "25 to 36", label: "3rd 12"  },
+  { nat: "1 to 12",  label: "1st 12", display: "1 — 12"  },
+  { nat: "13 to 24", label: "2nd 12", display: "13 — 24" },
+  { nat: "25 to 36", label: "3rd 12", display: "25 — 36" },
 ]
 
 // ── SVG Wheel ────────────────────────────────────────────────────────────────
@@ -97,19 +99,28 @@ function RouletteWheel({ resultNum, svgRef }: { resultNum: number | null; svgRef
           const isResult = num === resultNum
           return (
             <g key={num} transform={`rotate(${rotation})`}>
-              <path
-                d={SECTOR_PATH}
-                fill={isResult ? "#ffd700" : fill}
-                stroke="#C9A227"
-                strokeWidth="0.6"
-              />
-              <text
-                x="0" y={-TEXT_R}
-                textAnchor="middle" dominantBaseline="middle"
-                fontSize="6.5" fontWeight="bold"
-                fill={isResult ? "#000" : "#fff"}
-                style={{ userSelect: "none" }}
-              >{num}</text>
+              <g style={{
+                transform: isResult ? "scale(1.1)" : "scale(1)",
+                transformOrigin: "0 0",
+                transition: "transform 0.4s ease, filter 0.4s ease",
+                filter: isResult
+                  ? "brightness(1.8) drop-shadow(0 0 5px rgba(255,215,0,0.95))"
+                  : "none",
+              }}>
+                <path
+                  d={SECTOR_PATH}
+                  fill={isResult ? "#ffd700" : fill}
+                  stroke="#C9A227"
+                  strokeWidth="0.6"
+                />
+                <text
+                  x="0" y={-TEXT_R}
+                  textAnchor="middle" dominantBaseline="middle"
+                  fontSize="6.5" fontWeight="bold"
+                  fill={isResult ? "#000" : "#fff"}
+                  style={{ userSelect: "none" }}
+                >{num}</text>
+              </g>
             </g>
           )
         })}
@@ -143,16 +154,104 @@ const RouletteGame = () => {
   const [betSheet,   setBetSheet]   = useState<{ label: string; betType: string; betOn: string } | null>(null)
   const [stakeInput, setStakeInput] = useState("")
   const [wsResult,   setWsResult]   = useState<{ result: number; color: string } | null>(null)
-  const [wsHistory,  setWsHistory]  = useState<{ result: number; color: string }[]>([])
   const [wsRoundId,  setWsRoundId]  = useState("")
   const [phase,      setPhase]      = useState<"betting" | "spinning" | "result">("betting")
-  const wsRef          = useRef<WebSocket | null>(null)
-  const cdRef          = useRef<ReturnType<typeof setInterval> | null>(null)
-  const wheelRef       = useRef<SVGSVGElement>(null)
-  const ballRef        = useRef<HTMLDivElement>(null)
-  const rafRef         = useRef<number>(0)
-  const angleRef       = useRef(0)
-  const resultTimeRef  = useRef(0)   // timestamp when result phase started
+  const wsRef         = useRef<WebSocket | null>(null)
+  const cdRef         = useRef<ReturnType<typeof setInterval> | null>(null)
+  const wheelRef      = useRef<SVGSVGElement>(null)
+
+  const gsapTlRef     = useRef<any>(null)
+  const resultTimeRef = useRef(0)
+
+  // ── Audio ────────────────────────────────────────────────────────────────
+  const [soundOn, setSoundOn] = useState(() => localStorage.getItem("game-sound") !== "0")
+  const soundOnRef = useRef(soundOn)
+  useEffect(() => { soundOnRef.current = soundOn; localStorage.setItem("game-sound", soundOn ? "1" : "0") }, [soundOn])
+  const audioCtxRef    = useRef<AudioContext | null>(null)
+  const spinSrcRef     = useRef<AudioBufferSourceNode | null>(null)
+  const spinGainRef    = useRef<GainNode | null>(null)
+  const tickIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const stopSpinSound = useCallback(() => { // always stop regardless of soundOn
+    if (tickIntervalRef.current) { clearInterval(tickIntervalRef.current); tickIntervalRef.current = null }
+    const ctx = audioCtxRef.current
+    if (!ctx || !spinGainRef.current) return
+    spinGainRef.current.gain.setTargetAtTime(0, ctx.currentTime, 0.4)
+    setTimeout(() => { try { spinSrcRef.current?.stop() } catch { /* already stopped */ } spinSrcRef.current = null }, 1500)
+  }, [])
+
+  const playSpinSound = useCallback(() => {
+    if (!soundOnRef.current) return
+    if (tickIntervalRef.current) { clearInterval(tickIntervalRef.current); tickIntervalRef.current = null }
+    const ctx = (() => {
+      if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      return audioCtxRef.current
+    })()
+
+    const sr  = ctx.sampleRate
+    const buf = ctx.createBuffer(1, sr * 3, sr)
+    const d   = buf.getChannelData(0)
+    let last = 0
+    for (let i = 0; i < d.length; i++) {
+      const w = Math.random() * 2 - 1
+      d[i] = last = (last + 0.02 * w) / 1.02 * 3.5
+    }
+    const src = ctx.createBufferSource()
+    src.buffer = buf; src.loop = true
+
+    const filter = ctx.createBiquadFilter()
+    filter.type = "bandpass"; filter.frequency.value = 160; filter.Q.value = 0.7
+
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(0, ctx.currentTime)
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.6)
+
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination)
+    src.start()
+    spinSrcRef.current = src; spinGainRef.current = gain
+
+    let interval = 80
+    const tick = () => {
+      const c = audioCtxRef.current!
+      const osc = c.createOscillator(); const g = c.createGain()
+      osc.connect(g); g.connect(c.destination)
+      osc.type = "square"; osc.frequency.value = 900 + Math.random() * 200
+      g.gain.setValueAtTime(0.25, c.currentTime)
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.04)
+      osc.start(c.currentTime); osc.stop(c.currentTime + 0.04)
+    }
+    const runTick = () => {
+      tick()
+      interval = Math.min(interval * 1.07, 600)
+      tickIntervalRef.current = setTimeout(runTick, interval) as any
+    }
+    runTick()
+  }, [])
+
+  const playResultSound = useCallback((win: boolean) => {
+    if (!soundOnRef.current) return
+    if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const ctx = audioCtxRef.current
+    if (win) {
+      ;[523, 659, 784, 1047].forEach((freq, i) => {
+        const osc = ctx.createOscillator(); const g = ctx.createGain()
+        osc.connect(g); g.connect(ctx.destination)
+        osc.type = "sine"; osc.frequency.value = freq
+        const t = ctx.currentTime + i * 0.12
+        g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.35)
+        osc.start(t); osc.stop(t + 0.35)
+      })
+    } else {
+      ;[440, 330].forEach((freq, i) => {
+        const osc = ctx.createOscillator(); const g = ctx.createGain()
+        osc.connect(g); g.connect(ctx.destination)
+        osc.type = "sine"; osc.frequency.value = freq
+        const t = ctx.currentTime + i * 0.18
+        g.gain.setValueAtTime(0.25, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3)
+        osc.start(t); osc.stop(t + 0.3)
+      })
+    }
+  }, [])
 
   const token = localStorage.getItem("client-token") ?? ""
   const { data: userBalance } = useGetUserBalanceQuery(undefined, { skip: !token })
@@ -174,24 +273,64 @@ const RouletteGame = () => {
       pollingInterval: 8000,
     })
 
+  const _roundId = wsRoundId || currentRound?.data?.roundId || currentRound?.roundId || ""
+  const { data: myRoundBetsData } =
+    useGetMyRoundBetsQuery(_roundId, {
+      skip: !_roundId,
+      pollingInterval: 3000,
+    })
+
   const [placeBet, { isLoading: isBetting }] = usePlaceRouletteBetMutation()
 
   const roundId: string = wsRoundId || currentRound?.data?.roundId || currentRound?.roundId || "—"
   const isSuspended     = phase !== "betting"
-  const history         = wsHistory.length > 0
-    ? wsHistory
-    : (resultsData?.data ?? resultsData?.results ?? [])
+  const history         = resultsData?.data ?? resultsData?.results ?? []
   const openBets: any[]      = pendingData?.data  ?? pendingData?.bets ?? []
   const completedBets: any[] = completedData?.data ?? completedData?.bets ?? []
 
-  const lastResult = wsResult ?? (history.length > 0 ? history[0] : null)
+  const lastResult  = wsResult ?? (history.length > 0 ? history[0] : null)
+
+  const roundBets: any[] = myRoundBetsData?.data ?? []
+  const roundOutcomes: any[] = myRoundBetsData?.outcomes ?? []
+
+  // betOn (lowercase) → stake — to know which buttons have active bets
+  const betsMap: Record<string, number> = roundBets.reduce((acc: Record<string, number>, b: any) => {
+    const k = String(b.betOn ?? '').toLowerCase()
+    if (k) acc[k] = (acc[k] || 0) + (b.stake || 0)
+    return acc
+  }, {})
+
+  // outcome label (lowercase) → netPL — from API outcomes array
+  const plMap: Record<string, number> = roundOutcomes.reduce((acc: Record<string, number>, o: any) => {
+    if (o.label != null) acc[String(o.label).toLowerCase()] = Number(o.netPL)
+    return acc
+  }, {})
+
+  // Latest-ref pattern — lets WS closure read current values without re-subscribing
+  const plMapRef       = useRef(plMap)
+  const roundBetsRef   = useRef(roundBets)
+  const refetchResultsRef = useRef(refetchResults)
+  const refetchPendingRef = useRef(refetchPending)
+  const tokenRef       = useRef(token)
+  useEffect(() => { plMapRef.current = plMap })
+  useEffect(() => { roundBetsRef.current = roundBets })
+  useEffect(() => { refetchResultsRef.current = refetchResults })
+  useEffect(() => { refetchPendingRef.current = refetchPending })
+  useEffect(() => { tokenRef.current = token })
+
+  const fmtPL = (pl: number): string => {
+    const abs = Math.abs(pl) >= 1000
+      ? `${(Math.abs(pl) / 1000).toFixed(1).replace(/\.0$/, '')}K`
+      : String(Math.abs(pl))
+    return pl >= 0 ? `+${abs}` : `-${abs}`
+  }
 
   // ── WebSocket ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!mongoId) return
     const base = (import.meta.env.VITE_WS_BASE_URL ?? "wss://guru99.co")
       .replace(/^http/, "ws")
-    const url = `${base}/api/roulette/ws?userId=${mongoId}&token=${token}`
+    const url = `${base}/api/roulette/ws?userId=${mongoId}&token=${tokenRef.current}`
 
     const connect = () => {
       const ws = new WebSocket(url)
@@ -205,7 +344,6 @@ const RouletteGame = () => {
           // ── init: initial state on connect ──────────────────
           if (type === "init") {
             if (msg.roundId) setWsRoundId(msg.roundId)
-            if (Array.isArray(msg.lastResults)) setWsHistory(msg.lastResults)
             if (msg.result !== null && msg.result !== undefined) {
               setWsResult({ result: msg.result, color: msg.color ?? "black" })
             }
@@ -244,6 +382,7 @@ const RouletteGame = () => {
             if (msg.roundId) setWsRoundId(msg.roundId)
             setWsResult(null)
             setPhase("spinning")
+            playSpinSound()
             if (cdRef.current) clearInterval(cdRef.current)
             const secs = parseInt(msg.spinningLeft ?? "0")
             if (secs > 0) startCountdown(secs)
@@ -252,21 +391,25 @@ const RouletteGame = () => {
 
           // ── result / betResult: round result ───────────────
           if (type === "result" || type === "betResult") {
+            const hasWin = roundBetsRef.current.some((b: any) =>
+              (plMapRef.current[String(b.betOn ?? '').toLowerCase()] ?? 0) > 0
+            )
+            stopSpinSound()
+            playResultSound(hasWin)
             if (msg.result !== null && msg.result !== undefined) {
               const entry = { result: msg.result, color: msg.color ?? "black" }
               setWsResult(entry)
-              setWsHistory(prev => [entry, ...prev].slice(0, 20))
             }
             resultTimeRef.current = Date.now()
             setPhase("result")
             if (cdRef.current) clearInterval(cdRef.current)
             setCountdown(0)
-            refetchResults()
+            refetchResultsRef.current()
           }
 
           // ── settled: bets settled ───────────────────────────
           if (type === "settled") {
-            refetchPending()
+            refetchPendingRef.current()
           }
         } catch { /* ignore */ }
       }
@@ -294,7 +437,7 @@ const RouletteGame = () => {
       if (wsRef.current) wsRef.current.onclose = null
       wsRef.current?.close()
     }
-  }, [mongoId])
+  }, [mongoId, playSpinSound, stopSpinSound, playResultSound])
 
   // ── Countdown from REST fallback ─────────────────────────────────────────
   useEffect(() => {
@@ -303,60 +446,48 @@ const RouletteGame = () => {
     setCountdown(secs)
   }, [currentRound])
 
-  // ── Wheel spin control ────────────────────────────────────────────────────
+  // ── GSAP cleanup on unmount ───────────────────────────────────────────────
   useEffect(() => {
-    const el   = wheelRef.current
-    const ball = ballRef.current
-    if (!el || !ball) return
+    const el = wheelRef.current
+    return () => {
+      if (gsapTlRef.current) gsapTlRef.current.kill()
+      gsap.killTweensOf([el])
+    }
+  }, [])
 
-    cancelAnimationFrame(rafRef.current)
+  // ── Wheel animation ───────────────────────────────────────────────────────
+  useEffect(() => {
+    const el = wheelRef.current
+    if (!el) return
 
     if (phase === "betting") {
-      el.style.transition = ""
-      ball.style.animation = ""
-      ball.style.transform = ""
-      const tick = () => {
-        angleRef.current += 1.5
-        el.style.transform = `rotate(${angleRef.current}deg)`
-        rafRef.current = requestAnimationFrame(tick)
-      }
-      rafRef.current = requestAnimationFrame(tick)
-      return () => cancelAnimationFrame(rafRef.current)
+      if (gsapTlRef.current) { gsapTlRef.current.kill(); gsapTlRef.current = null }
+      gsap.killTweensOf([el])
+      return
     }
 
     if (phase === "spinning") {
-      el.style.transition = ""
-      ball.style.animation = "rl-ball-spin 1.1s linear infinite"
-      const tick = () => {
-        angleRef.current += 4
-        el.style.transform = `rotate(${angleRef.current}deg)`
-        rafRef.current = requestAnimationFrame(tick)
-      }
-      rafRef.current = requestAnimationFrame(tick)
-      return () => cancelAnimationFrame(rafRef.current)
+      if (gsapTlRef.current) { gsapTlRef.current.kill(); gsapTlRef.current = null }
+      const wRot = (gsap.getProperty(el, "rotation") as number) || 0
+      gsap.killTweensOf([el])
+      gsap.to(el, { rotation: wRot + 360 * 100, duration: 200, ease: "none", overwrite: true })
+      return
     }
 
-    if (phase === "result") {
-      cancelAnimationFrame(rafRef.current)
-      ball.style.animation = "none"
-      ball.style.transform = "rotate(0deg)"
+    if (phase === "result" && wsResult !== null) {
+      if (gsapTlRef.current) { gsapTlRef.current.kill(); gsapTlRef.current = null }
+      const wRot = (gsap.getProperty(el, "rotation") as number) || 0
 
-      if (wsResult !== null) {
-        const idx        = WHEEL_ORDER.indexOf(wsResult.result)
-        const targetMod  = (360 - (idx * SECTOR_DEG % 360)) % 360
-        const cur        = ((angleRef.current % 360) + 360) % 360
-        let delta        = targetMod - cur
-        if (delta < 0)   delta += 360
-        if (delta < 30)  delta += 360
-        const finalAngle = angleRef.current + delta + 2 * 360
+      const idx    = WHEEL_ORDER.indexOf(wsResult.result)
+      const tMod   = (360 - (idx * SECTOR_DEG % 360)) % 360
+      const cMod   = ((wRot % 360) + 360) % 360
+      let   wAlign = tMod - cMod
+      if (wAlign <= 0) wAlign += 360
+      const wheelFinal = wRot + wAlign
 
-        el.style.transition = "transform 4s cubic-bezier(0.17,0.67,0.15,1.0)"
-        el.style.transform  = `rotate(${finalAngle}deg)`
-        angleRef.current    = finalAngle
-
-        const t = setTimeout(() => { if (el) el.style.transition = "" }, 4100)
-        return () => clearTimeout(t)
-      }
+      const tl = gsap.timeline()
+      gsapTlRef.current = tl
+      tl.to(el, { rotation: wheelFinal, duration: 3, ease: "power3.out", overwrite: true }, 0)
     }
   }, [phase, wsResult])
 
@@ -380,10 +511,10 @@ const RouletteGame = () => {
         setStakeInput("")
         refetchPending()
       } else {
-        snackbarUtil.error(res?.data?.message ?? res?.error?.data?.message ?? "Failed to place bet")
+        // snackbarUtil.error(res?.data?.message ?? res?.error?.data?.message ?? "Failed to place bet")
       }
     } catch {
-      snackbarUtil.error("Failed to place bet")
+      // snackbarUtil.error("Failed to place bet")
     }
   }
 
@@ -398,6 +529,13 @@ const RouletteGame = () => {
         {/* Header */}
         <div className="rl-header">
           <span className="rl-title">ROULETTE</span>
+          <button
+            className="rl-sound-btn"
+            onClick={() => setSoundOn(v => !v)}
+            title={soundOn ? "Mute sounds" : "Unmute sounds"}
+          >
+            {soundOn ? "🔊" : "🔇"}
+          </button>
           <span className="rl-round-id">Round: {roundId}</span>
         </div>
 
@@ -412,28 +550,14 @@ const RouletteGame = () => {
         <div className="rl-wheel-section">
           <div className="rl-wheel-outer">
             <div className="rl-wheel-glow" />
-            <RouletteWheel resultNum={lastResult?.result ?? null} svgRef={wheelRef} />
+            <RouletteWheel resultNum={phase === "result" ? (lastResult?.result ?? null) : null} svgRef={wheelRef} />
             <div className="rl-pointer" />
-            <div ref={ballRef} className="rl-ball-orbit">
-              <div className="rl-ball" />
-            </div>
-
-            {/* Countdown in wheel center */}
-            {countdown > 0 && phase === "betting" && (
-              <div className={`rl-cd-overlay${countdown <= 5 ? " rl-cd-overlay--red" : ""}`}>
-                <span key={countdown} className="rl-cd-num">{countdown}</span>
-              </div>
-            )}
           </div>
 
-          {/* Last result below wheel */}
-          {lastResult !== null && (
-            <div className="rl-result-box">
-              <span className="rl-result-label">LAST RESULT</span>
-              <div className={`rl-hist-bubble rl-hist-bubble--${lastResult.color}`}
-                style={{ width: 52, height: 52, fontSize: 20 }}>
-                {lastResult.result}
-              </div>
+          {/* Countdown — right bottom corner of section */}
+          {countdown > 0 && phase === "betting" && (
+            <div className={`rl-cd-overlay${countdown <= 5 ? " rl-cd-overlay--red" : ""}`}>
+              <span key={countdown} className="rl-cd-num">{countdown}</span>
             </div>
           )}
         </div>
@@ -447,46 +571,116 @@ const RouletteGame = () => {
           </div>
 
           {/* Zero — full width */}
-          <div
-            className={`rl-zero-cell rl-zero-full${!isBettingOpen ? " suspended" : ""}`}
-            onClick={() => openBetSheet("0")}
-          >
-            0
+          <div className="rl-cell-wrap rl-zero-wrap">
+            <div
+              className={`rl-zero-cell rl-zero-full${!isBettingOpen ? " suspended" : ""}${betsMap["0"] ? " has-bet" : ""}`}
+              onClick={() => openBetSheet("0")}
+            >
+              0
+            </div>
+            {plMap["0"] != null && plMap["0"] !== 0 && (
+              <span className={`rl-outcome-label${plMap["0"] >= 0 ? " rl-outcome-label--win" : " rl-outcome-label--loss"}`}>{fmtPL(plMap["0"])}</span>
+            )}
           </div>
 
           <div className="rl-table">
             {TABLE_ROWS.map((row, ri) => (
               <div className="rl-table-row" key={ri}>
-                {row.map((n) => (
-                  <div
-                    key={n}
-                    className={`rl-num-cell rl-num-cell--${numClass(n)}${n === lastResult?.result ? " is-result" : ""}${!isBettingOpen ? " suspended" : ""}`}
-                    onClick={() => openBetSheet(String(n))}
-                  >{n}</div>
-                ))}
+                {row.map((n) => {
+                  const hasBet = !!betsMap[String(n)]
+                  const pl = plMap[String(n)]
+                  return (
+                    <div key={n} className="rl-cell-wrap">
+                      <div
+                        className={`rl-num-cell rl-num-cell--${numClass(n)}${phase === "result" && n === lastResult?.result ? " is-result win-col" : ""}${!isBettingOpen ? " suspended" : ""}${hasBet ? " has-bet" : ""}`}
+                        onClick={() => openBetSheet(String(n))}
+                      >
+                        {n}
+                      </div>
+                      {pl != null && pl !== 0 && (
+                        <span className={`rl-outcome-label${pl >= 0 ? " rl-outcome-label--win" : " rl-outcome-label--loss"}`}>{fmtPL(pl)}</span>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             ))}
           </div>
 
           <div className="rl-dozens">
-            {DOZEN_BETS.map(d => (
-              <div key={d.nat} className={`rl-dozen-btn${!isBettingOpen ? " suspended" : ""}`}
-                onClick={() => openBetSheet(d.nat)}>
-                {d.label}
-              </div>
-            ))}
+            {DOZEN_BETS.map(d => {
+              const hasBet = !!betsMap[getBetOn(d.nat)]
+              const pl = plMap[d.label.toLowerCase()]
+              return (
+                <div key={d.nat} className="rl-cell-wrap">
+                  <div
+                    className={`rl-dozen-btn${!isBettingOpen ? " suspended" : ""}${hasBet ? " has-bet" : ""}`}
+                    onClick={() => openBetSheet(d.nat)}
+                  >
+                    {d.display}
+                  </div>
+                  {pl != null && pl !== 0 && (
+                    <span className={`rl-outcome-label${pl >= 0 ? " rl-outcome-label--win" : " rl-outcome-label--loss"}`}>{fmtPL(pl)}</span>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <div className="rl-outside">
-            {OUTSIDE_BETS.map(b => (
-              <div key={b.nat}
-                className={`rl-outside-btn rl-outside-btn${b.mod}${!isBettingOpen ? " suspended" : ""}`}
-                onClick={() => openBetSheet(b.nat)}>
-                {b.label}
-              </div>
-            ))}
+            {OUTSIDE_BETS.map(b => {
+              const betKey = getBetOn(b.nat)
+              const hasBet = !!betsMap[betKey]
+              const pl = plMap[b.nat.toLowerCase()]
+              return (
+                <div key={b.nat} className="rl-cell-wrap">
+                  <div
+                    className={`rl-outside-btn rl-outside-btn${b.mod}${!isBettingOpen ? " suspended" : ""}${hasBet ? " has-bet" : ""}`}
+                    onClick={() => openBetSheet(b.nat)}
+                  >
+                    {b.label}
+                  </div>
+                  {pl != null && pl !== 0 && (
+                    <span className={`rl-outcome-label${pl >= 0 ? " rl-outcome-label--win" : " rl-outcome-label--loss"}`}>{fmtPL(pl)}</span>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
+
+        {/* My Round Bets summary */}
+        {/* {roundBets.length > 0 && (
+          <div className="rl-round-summary">
+            <div className="rl-round-summary__title">This Round</div>
+            <div className="rl-round-summary__rows">
+              {roundBets.map((b: any, i: number) => {
+                const outcomeLabel = b.betType === "straight"
+                  ? b.betOn
+                  : b.betOn === "dozen1" ? "1st 12"
+                  : b.betOn === "dozen2" ? "2nd 12"
+                  : b.betOn === "dozen3" ? "3rd 12"
+                  : b.betOn
+                const pl = plMap[outcomeLabel.toLowerCase()] ?? plMap[b.betOn.toLowerCase()]
+                return (
+                  <div key={b._id ?? i} className="rl-round-summary__row">
+                    <span className="rl-round-summary__bet">{b.betOn}</span>
+                    <span className="rl-round-summary__stake">₹{b.stake}</span>
+                    {pl != null && (
+                      <span className={`rl-round-summary__pl ${pl >= 0 ? "pos" : "neg"}`}>
+                        {fmtPL(pl)}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            <div className="rl-round-summary__footer">
+              <span>Total: ₹{myRoundBetsData?.summary?.totalStake ?? 0}</span>
+              <span style={{ color: "#4ade80" }}>Max Win: ₹{myRoundBetsData?.summary?.totalPotentialWin ?? 0}</span>
+            </div>
+          </div>
+        )} */}
 
         {/* History — Teen Patti style, above tabs */}
         <div className="rl-history">

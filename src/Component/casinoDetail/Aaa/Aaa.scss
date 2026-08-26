@@ -456,3 +456,91 @@ $color-lock:   rgba(0, 0, 0, 0.72);
   &.aaa-bet-loss    { background: rgba(255,82,82,0.15);  color: $color-loss; }
   &.aaa-bet-pending { background: rgba(255,193,7,0.15);  color: #ffc107; }
 }
+
+// ── Light theme ─────────────────────────────────────────────
+[data-theme="light"] {
+  .aaa-container {
+    background: var(--color-background) !important;
+    color: #111827 !important;
+  }
+
+  .aaa-timer {
+    &--open { background: rgba(0, 230, 118, 0.22) !important; }
+    &--closed { background: rgba(255, 82, 82, 0.25) !important; }
+  }
+
+  .aaa-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+    color: #ffffff !important;
+
+    .aaa-header-left { color: #ffffff !important; }
+    .aaa-header-right {
+      color: rgba(255, 255, 255, 0.75) !important;
+    }
+  }
+
+  .aaa-minmax {
+    color: #6b7280 !important;
+  }
+
+  .aaa-card-section {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .aaa-card-section-title,
+  .aaa-card-rate {
+    color: #6b7280 !important;
+  }
+
+  .aaa-history-section {
+    .aaa-result-header {
+      background: #0a0a0a !important;
+      color: #ffffff !important;
+    }
+  }
+
+  .aaa-no-history {
+    color: #6b7280 !important;
+  }
+
+  .aaa-bets-section {
+    .aaa-tab {
+      background: #ffffff !important;
+      color: #6b7280 !important;
+      border-color: #e5e7eb !important;
+
+      &--active {
+        background: #0a0a0a !important;
+        color: #ffffff !important;
+        border-color: #EFB32D !important;
+      }
+    }
+
+    .aaa-bets-wrapper {
+      border-color: #e5e7eb !important;
+    }
+
+    .aaa-bets-table {
+      background: #ffffff !important;
+
+      thead {
+        background: #0a0a0a !important;
+        th {
+          color: #ffffff !important;
+          border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+      }
+
+      tbody {
+        tr { border-color: #e5e7eb !important; }
+        tr:hover { background: rgb(238 238 238) !important; }
+
+        td { color: #111827 !important; }
+      }
+
+      .aaa-empty-row { color: #6b7280 !important; }
+    }
+  }
+}

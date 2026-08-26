@@ -569,3 +569,102 @@ $color-loss: #ff5252;
     margin: 12px 8px 0;
   }
 }
+
+// ── Light theme ─────────────────────────────────────────────
+[data-theme="light"] {
+  .dt20-container {
+    background: var(--color-background) !important;
+    color: #111827 !important;
+  }
+
+  .dt20-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+
+    .dt20-header-left {
+      color: #ffffff !important;
+    }
+
+    .dt20-rules-link {
+      color: #EFB32D !important;
+    }
+
+    .dt20-header-right {
+      color: rgba(255, 255, 255, 0.75) !important;
+    }
+  }
+
+  .dt20-timer {
+    &--open {
+      background: rgba(0, 230, 118, 0.22) !important;
+    }
+    &--closed {
+      background: rgba(255, 82, 82, 0.25) !important;
+    }
+  }
+
+  // Card display / bet sections (Dragon 11 / Tiger 11 grids)
+  .dt20-card-section {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dt20-card-section-title {
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dt20-img-wrap {
+    border-color: #e5e7eb !important;
+  }
+
+  .dt20-card-amount,
+  .dt20-min-max,
+  .dt20-no-history {
+    color: #6b7280 !important;
+  }
+
+  // Last-10-results strip
+  .dt20-last-result {
+    color: #ffffff !important;
+  }
+
+  .dt20-result-header {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  // Legacy open-bets table markup (kept for parity — the table actually
+  // rendered by DragonTiger20.tsx uses the shared .tp-bets-table styles,
+  // which already adapt to light theme in teenPatti/styles.scss).
+  .dt20-open-bets-title {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border-color: #e5e7eb !important;
+  }
+
+  .dt20-open-bets-table-wrapper {
+    border-color: #e5e7eb !important;
+  }
+
+  .dt20-open-bets-table {
+    background: #ffffff !important;
+
+    thead {
+      background: #0a0a0a !important;
+      th {
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+      }
+    }
+
+    tbody {
+      tr { border-color: #e5e7eb !important; }
+      tr:hover { background: rgb(238 238 238) !important; }
+      td { color: #111827 !important; }
+    }
+
+    .dt20-no-bets { color: #6b7280 !important; }
+  }
+}

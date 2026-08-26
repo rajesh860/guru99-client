@@ -27,7 +27,46 @@ export const cricketScoreApi = createApi({
         }
       },
     }),
+    getT10Score: builder.query<any, string>({
+      query: (marketId: string) => `/t10score?marketId=${marketId}`,
+    }),
+    getCricbuzzLiveScore: builder.query<any, string>({
+      queryFn: async (_matchId: string) => {
+        try {
+          const response = await fetch(`/cricbuzz/api/mcenter/livescore/151107`)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          const data = await response.json()
+          return { data }
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: String(error) } }
+        }
+      },
+    }),
+    getMyCricketScorecard: builder.query<any, string>({
+      queryFn: async (matchId: string) => {
+        try {
+          const response = await fetch(`/mycricket/api/v4/match/${matchId}/scorecard`)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          const data = await response.json()
+          return { data }
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: String(error) } }
+        }
+      },
+    }),
+    getCricbuzzScorecard: builder.query<any, string>({
+      queryFn: async (_matchId: string) => {
+        try {
+          const response = await fetch(`/cricbuzz/api/mcenter/scorecard/151107`)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          const data = await response.json()
+          return { data }
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: String(error) } }
+        }
+      },
+    }),
   }),
 })
 
-export const { useGetLiveCricketScoreQuery, useGetBallFeedsQuery } = cricketScoreApi
+export const { useGetLiveCricketScoreQuery, useGetBallFeedsQuery, useGetT10ScoreQuery, useGetCricbuzzLiveScoreQuery, useGetCricbuzzScorecardQuery, useGetMyCricketScorecardQuery } = cricketScoreApi

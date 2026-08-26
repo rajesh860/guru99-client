@@ -12,7 +12,7 @@ const CasinoLedger = () => {
 
   const { data: casinoLedgerData, isLoading } = useGetCasinoLedgerQuery(
     { game: game || "", date: date || "" },
-    { skip: !game || !date }
+    { skip: !game || !date, refetchOnMountOrArgChange: true }
   )
 
   const ledgerList = casinoLedgerData?.data?.rounds || []
@@ -44,8 +44,8 @@ const CasinoLedger = () => {
                 <thead>
                   <tr>
                     <th style={{ width: "6%" }}>S.NO</th>
-                    <th style={{ width: "14%" }}>Round ID</th>
-                    <th style={{ width: "15%" }}>Bet On</th>
+                    <th style={{ width: "19%" }}>Round ID</th>
+                    <th style={{ width: "10%" }}>Bet On</th>
                     <th style={{ width: "8%" }}>Odds</th>
                     <th style={{ width: "10%" }}>Stake</th>
                     <th style={{ width: "10%" }}>Won</th>

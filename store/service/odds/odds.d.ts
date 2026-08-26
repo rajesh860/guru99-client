@@ -14,6 +14,7 @@ export interface matchedData {
     matchTime: string
     isLive: boolean
     beventId: string
+    bid: string
     bmarketId: string
     status: string
     hasTV: boolean

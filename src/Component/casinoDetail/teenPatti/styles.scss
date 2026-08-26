@@ -11,7 +11,7 @@
     width: 100%;
     max-width: 100%;
    .betting-section {
-        padding-block: 10px;
+        // padding-block: 10px;
    }
     // Top header with user info
     .round-id-header {
@@ -336,7 +336,7 @@ width: 100%;
   .teenpatti-container {
     .left-col {
       .betting-section {
-        padding-block: 10px;
+        padding-block: 5px;
         // padding: 10px;
 padding-bottom: 8px;
         .bet-options {
@@ -483,4 +483,62 @@ padding-bottom: 8px;
   color: rgba(255,255,255,0.4);
   font-family: monospace;
   white-space: nowrap;
+}
+
+[data-theme="light"] {
+  .teenpatti-container .left-col .round-id-header {
+    background: #0a0a0a !important;
+    border-color: #e5e7eb !important;
+
+    .left { color: #ffffff !important; }
+    .right button { color: #ffffff !important; }
+  }
+
+  .last-10-result .result-header {
+    background-color: #0a0a0a !important;
+    color: #ffffff !important;
+  }
+
+  .dice-bets-tabs {
+    .dbt {
+      background: #e8edf5;
+      border-color: #c8d0e0;
+      color: #546e7a;
+
+      &--active {
+        background: #ffffff;
+        color: #1a1a2e;
+        border-bottom-color: #ffffff;
+      }
+      &:not(.dbt--active):hover { background: #dde4f0; color: #1a1a2e; }
+    }
+  }
+
+  .tp-bets-wrapper {
+    background: #ffffff;
+    border-color: #c8d0e0;
+  }
+
+  .tp-bets-table {
+    thead tr { background: #f0f4fa; }
+
+    th {
+      color: #546e7a;
+      border-bottom-color: #c8d0e0;
+    }
+
+    tbody tr {
+      border-bottom-color: rgba(0,0,0,0.07);
+      &:nth-child(even) { background: rgba(0,0,0,0.02); }
+      &:hover { background: rgba(0,0,0,0.04); }
+    }
+
+    td { color: #1a1a2e; }
+
+    .td-runner { color: #1a1a2e; }
+
+    .tp-bets-empty { color: #90a4ae; }
+  }
+
+  .td-round-id { color: rgba(0,0,0,0.4); }
 }

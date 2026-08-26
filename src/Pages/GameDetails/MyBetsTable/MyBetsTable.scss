@@ -12,7 +12,7 @@
     font-weight: 700;
     color: #ffffff;
     border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
+    text-align: left;
     letter-spacing: 1px;
   }
 
@@ -174,5 +174,12 @@
         }
       }
     }
+  }
+}
+
+[data-theme="light"] {
+  .my-bets-header {
+    background: #000000 !important;
+    color: #ffffff !important;
   }
 }

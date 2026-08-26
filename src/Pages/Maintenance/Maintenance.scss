@@ -1,0 +1,71 @@
+.maintenance-page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(circle at 20% 20%, #1a1a2e 0%, #0f0f23 60%, #0a0a18 100%);
+  color: #ffffff;
+  font-family: inherit;
+
+  .maintenance-card {
+    max-width: 560px;
+    width: 100%;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 48px 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+  }
+
+  .maintenance-icon {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-size: 40px;
+    animation: maintenance-spin 3.5s linear infinite;
+  }
+
+  @keyframes maintenance-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 12px;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    margin: 0 0 8px;
+  }
+
+  .maintenance-sub {
+    font-size: 13px;
+    color: #9ca3af;
+    margin-top: 16px;
+  }
+
+  .maintenance-divider {
+    height: 1px;
+    width: 60px;
+    margin: 20px auto;
+    background: rgba(255, 255, 255, 0.15);
+  }
+}

@@ -65,6 +65,15 @@ margin-bottom: 5px;
         letter-spacing: 0.5px;
       }
 
+      .upcoming-team-flag {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: rgba(255,255,255,0.06);
+        border: 2px solid rgba(255,255,255,0.12);
+      }
+
       .upcoming-team-name {
         font-size: 11px;
         font-weight: 700;
@@ -155,6 +164,12 @@ margin-bottom: 5px;
     color: #fcd34d;
     text-align: center;
     letter-spacing: 0.2px;
+
+    &--rain {
+      background: rgba(79,172,254,0.08);
+      border: 1px solid rgba(79,172,254,0.25);
+      color: #4facfe;
+    }
   }
 }
 
@@ -281,10 +296,10 @@ margin-bottom: 5px;
       flex: 1;
       min-width: 0;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 3px;
-      padding: 8px 10px;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
       border-radius: 8px;
       background: rgba(255,255,255,0.03);
       border: 1px solid rgba(255,255,255,0.05);
@@ -296,9 +311,29 @@ margin-bottom: 5px;
       }
 
       &.team-right {
-        align-items: flex-end;
+        flex-direction: row-reverse;
         text-align: right;
+        .cs-team-info { align-items: flex-end; }
         .cs-team-key { flex-direction: row-reverse; }
+      }
+
+      // Large circular team flag on the outer edge of each team block.
+      .cs-team-flag {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        background: rgba(255,255,255,0.06);
+      }
+
+      .cs-team-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        min-width: 0;
+        flex: 1;
       }
 
       .cs-team-key {
@@ -312,22 +347,35 @@ margin-bottom: 5px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        width: 100%;
+        max-width: 100%;
         .bat-icon { font-size: 11px; flex-shrink: 0; }
+        .cs-team-name { overflow: hidden; text-overflow: ellipsis; }
+      }
+
+      // Previous-innings score sits on its own line under the team name so the
+      // name is never truncated to fit it alongside.
+      .cs-prev-score {
+        font-size: 11px;
+        color: #718096;
+        font-weight: 500;
+        white-space: nowrap;
+        max-width: 100%;
       }
 
       .cs-score {
         display: flex;
         align-items: baseline;
-        gap: 3px;
+        gap: 4px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        max-width: 100%;
         strong {
-          font-size: 18px;
+          font-size: 24px;
           font-weight: 900;
           color: #fff;
           line-height: 1;
         }
-        .cs-overs { font-size: 10px; color: #718096; }
-        .cs-prev-score { font-size: 12px; color: #718096; font-weight: 500; }
+        .cs-overs { font-size: 11px; color: #718096; white-space: nowrap; flex-shrink: 0; }
       }
 
       .cs-ytb {
@@ -517,6 +565,15 @@ margin-bottom: 5px;
       }
     }
 
+    &.be-umpire {
+      .be-label {
+        color: #b794f4;
+        background: rgba(183,148,244,0.12);
+        border: 1px solid rgba(183,148,244,0.4);
+        letter-spacing: 0.5px;
+      }
+    }
+
     &.be-stop {
       .be-label {
         color: #fc8181;
@@ -650,13 +707,15 @@ margin-bottom: 5px;
         font-size: 11px; font-weight: 700; flex-shrink: 0;
       }
 
-      .ball-dot    { background: rgba(255,255,255,0.06); color: #718096; }
+      .ball-dot    { background: rgba(255,255,255,0.12); color: #cbd5e0; border: 1px solid rgba(255,255,255,0.25); }
       .ball-run    { background: rgba(79,172,254,0.2);   color: #4facfe; border: 1px solid rgba(79,172,254,0.5); }
       .ball-four   { background: rgba(39,174,96,0.2);    color: #2ecc71; border: 1px solid rgba(39,174,96,0.6); }
       .ball-six    { background: rgba(155,89,182,0.25);  color: #bb8fce; border: 1px solid rgba(155,89,182,0.6); }
       .ball-wicket { background: rgba(231,76,60,0.25);   color: #f1948a; border: 1px solid rgba(231,76,60,0.6); }
       .ball-wide   { background: rgba(243,156,18,0.15);  color: #f9ca7a; border: 1px dashed rgba(243,156,18,0.5); }
       .ball-noball { background: rgba(230,126,34,0.15);  color: #f0a165; border: 1px dashed rgba(230,126,34,0.5); }
+      .ball-bye    { background: rgba(100,220,200,0.15); color: #64dcc8; border: 1px dashed rgba(100,220,200,0.5); }
+      .ball-legbye { background: rgba(180,130,255,0.15); color: #b48bff; border: 1px dashed rgba(180,130,255,0.5); }
     }
 
     .ball-commentary {
@@ -926,4 +985,39 @@ margin-bottom: 5px;
 @keyframes beGlow {
   0%, 100% { filter: brightness(1);    transform: scale(1); }
   50%       { filter: brightness(1.4); transform: scale(1.06); }
+}
+
+// ── Mobile / narrow screens ──────────────────────────────────────────
+// Scale the score row down so the team block, flag, big score and overs
+// all fit on one line without the "(x.x ov)" wrapping onto a new line.
+@media (max-width: 480px) {
+  .cscard .cscard-scores {
+    gap: 6px;
+    padding: 10px 10px;
+
+    .cs-team {
+      gap: 7px;
+      padding: 7px 8px;
+
+      .cs-team-flag {
+        width: 34px;
+        height: 34px;
+      }
+
+      .cs-team-key {
+        font-size: 11px;
+        gap: 3px;
+      }
+
+      .cs-prev-score { font-size: 10px; }
+
+      .cs-score {
+        gap: 3px;
+        strong { font-size: 19px; }
+        .cs-overs { font-size: 10px; }
+      }
+    }
+
+    .cs-vs { font-size: 9px; }
+  }
 }
