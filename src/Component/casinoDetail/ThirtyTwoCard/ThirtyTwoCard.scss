@@ -80,11 +80,20 @@ $loss:    #ff5252;
 }
 
 .tc32-overlay-name {
-  color: green;
-  font-size: 9px;
+  color: #f6ad55;
+  font-size: 10px;
   font-weight: 700;
-  // color: #ffffff;
   letter-spacing: 0.5px;
+
+  // Currently-leading player (highest rank+seat point among dealt cards) — matches the
+  // reference "32 Cards" implementation's green highlight.
+  &--leading {
+    color: $profit;
+  }
+}
+
+.tc32-overlay-point {
+  color: #ffd700;
 }
 
 .tc32-overlay-score {
@@ -98,8 +107,8 @@ $loss:    #ff5252;
 }
 
 .tc32-overlay-card {
-  width: 16px;
-  height: 20px;
+  width: 22px;
+  height: 28px;
   object-fit: cover;
   border-radius: 2px;
   border: 1px solid rgba(255,255,255,0.25);
@@ -183,8 +192,11 @@ $loss:    #ff5252;
 
 .tc32-bet-player {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-right: 8px;
   font-size: 13px;
   font-weight: 600;
   color: $text;
@@ -192,7 +204,7 @@ $loss:    #ff5252;
 
 .tc32-bet-btns {
   display: flex;
-  gap: 4px;
+  gap: 1px;
 }
 
 .tc32-susp-overlay {
@@ -208,14 +220,14 @@ $loss:    #ff5252;
   letter-spacing: 0.5px;
   border-radius: 4px;
   height: 46px;
-  border: 1px solid rgba(255,82,82,0.2);
+  // border: 1px solid rgba(255,82,82,0.2);
 }
 
 .tc32-btn {
   flex: 1;
   height: 46px;
   border: none;
-  border-radius: 4px;
+  // border-radius: 4px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 800;
@@ -234,68 +246,18 @@ $loss:    #ff5252;
   padding: 6px 10px 8px;
 }
 
-// ── History ───────────────────────────────────────────────────
-.tc32-history {
-  margin: 10px 10px 0;
-  background: $bg2;
-  border-radius: 8px;
-  padding: 10px;
-  border: 1px solid $border;
-}
-
-.tc32-history-label {
-  font-size: 11px; font-weight: 700; color: $muted;
-  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
-}
-
-.tc32-history-dots {
-  display: flex; flex-wrap: wrap; gap: 5px;
-}
-
-.tc32-history-dot {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; font-weight: 700; color: #fff;
-  border: 1px solid rgba(255,255,255,0.15);
+// ── History — now uses Teen Patti 20-20's own .last-10-result/.result-header/.result-list/
+// .result-circle classes directly (from "../teenPatti/styles.scss", scoped under the
+// .teenpatti-container class added to the root element above). Teen Patti's .result-circle
+// has no background of its own (only its .player-a/.player-b modifiers do, which don't apply
+// to a 4-outcome game) — this local modifier just supplies the circle's color.
+.tc32-result-circle {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  box-shadow: 0 4px 12px rgba(34,197,94,0.4);
 }
 
 .tc32-no-history { font-size: 12px; color: $muted; }
 
-// ── Open Bets ─────────────────────────────────────────────────
-.tc32-open-bets { margin: 10px 10px 0; }
-
-.tc32-open-bets-title {
-  font-size: 13px; font-weight: 700; background: $header;
-  padding: 8px 12px; border-radius: 6px 6px 0 0;
-  border: 1px solid $border; border-bottom: none;
-  text-transform: uppercase; letter-spacing: 1px;
-}
-
-.tc32-table-wrap {
-  overflow-x: auto; border: 1px solid $border;
-  border-radius: 0 0 6px 6px; -webkit-overflow-scrolling: touch;
-}
-
-.tc32-table {
-  width: 100%; min-width: 460px; border-collapse: collapse;
-  background: $bg2; font-size: 12px;
-
-  thead { background: $header; }
-  th { padding: 7px 10px; text-align: left; color: $muted; font-weight: 600; font-size: 11px; border-bottom: 1px solid $border; white-space: nowrap; }
-  tbody tr { border-bottom: 1px solid rgba(58,58,90,0.5); }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.03); }
-  td { padding: 6px 10px; white-space: nowrap; }
-
-  .tc32-profit { color: $profit; }
-  .tc32-loss   { color: $loss; }
-  .tc32-no-bets { text-align: center; color: $muted; padding: 18px; font-size: 13px; white-space: normal; }
-}
-
-.tc32-badge {
-  display: inline-block; padding: 2px 7px; border-radius: 10px;
-  font-size: 10px; font-weight: 600; text-transform: capitalize;
-  &--win     { background: rgba(0,230,118,0.15); color: $profit; }
-  &--loss    { background: rgba(255,82,82,0.15);  color: $loss; }
-  &--pending { background: rgba(255,193,7,0.15);  color: #ffc107; }
-}
+// ── Open / Completed Bets tabs — now uses Teen Patti 20-20's own classes/CSS directly
+// (dice-bets-tabs/dbt, tp-bets-wrapper, tp-bets-table, td-round-id, td-runner, td-win/td-loss,
+// tp-bet-badge), imported from "../teenPatti/styles.scss" — no local rules needed here.

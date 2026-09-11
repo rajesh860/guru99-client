@@ -303,6 +303,12 @@ export const userList = createApi({
         return { url: `/casino/completed-bets?${params.toString()}`, method: "GET" }
       },
     }),
+    getCasinoRoundPl: build.query<any, { game: string; roundId: string }>({
+      query: ({ game, roundId }) => ({
+        url: `/casino/round-pl?game=${game}&roundId=${roundId}`,
+        method: "GET",
+      }),
+    }),
 
     getAccStatement: build.mutation<any, { page?: number; limit?: number }>({
       query: ({ page = 1, limit = 10 }) => ({
@@ -392,6 +398,7 @@ export const {
   useTossBetPlacedMutation,
   useGetPendingBetsQuery,
   useGetCasinoCompletedBetsQuery,
+  useGetCasinoRoundPlQuery,
   useGetCasinoGameDataQuery,
   useAviatorPlaceBetMutation,
   useAviatorCashoutMutation,

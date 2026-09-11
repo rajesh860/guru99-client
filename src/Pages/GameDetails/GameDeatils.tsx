@@ -30,7 +30,7 @@ import {
 import { j } from "vitest/dist/reporters-w_64AS5f.js"
 import OddsButton from "./OddsButton"
 import CricketScoreCard from "../../Component/CricketScoreCard"
-import { useGetLiveCricketScoreQuery, useGetBallFeedsQuery } from "../../../store/service/cricketScore/cricketScoreService"
+import { useGetLiveCricketScoreQuery, useGetBallFeedsQuery, useGetBet99ScoreQuery } from "../../../store/service/cricketScore/cricketScoreService"
 import { useTheme } from "../../context/ThemeContext"
 
 const GameDeatils = () => {
@@ -83,9 +83,19 @@ const GameDeatils = () => {
     { skip: !_matchKey, pollingInterval: 2000 }
   )
 
+  // bet99-score (sky99) — independent "who's batting" cross-check, keyed by gmid
+  const { data: bet99ScoreData } = useGetBet99ScoreQuery(gmid || "", {
+    skip: !gmid,
+    pollingInterval: 1000,
+  })
+
   // Merge ball feeds as v1 into score data
   const enrichedScoreData: any = _scoreBase
-    ? { ..._scoreBase, v1: ballFeedsData?.length ? ballFeedsData : (_scoreBase?.v1 || []) }
+    ? {
+        ..._scoreBase,
+        v1: ballFeedsData?.length ? ballFeedsData : (_scoreBase?.v1 || []),
+        bet99Score: bet99ScoreData ?? _scoreBase?.bet99Score ?? null,
+      }
     : null
 
   const finalScoreData: any = enrichedScoreData ?? null

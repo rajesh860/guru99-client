@@ -71,6 +71,7 @@ interface ScoreData {
     team2?: { name?: string; batting?: boolean; key?: string }
   }
   ename?: string
+  _battingSignalConflict?: { beventId?: string; ename?: string; signals: Record<string, string>; resolved: string } | null
 }
 
 interface Props {
@@ -406,9 +407,26 @@ function normalizeScoreData(input: any): ScoreData | null {
     inn1.runs - inn2.runs >= followOnRuns &&
     inn3.team && inn2.team && inn3.team !== inn2.team
   )
-  const inningsObj: any = isFollowOn
+  const inningsObjFollowOn: any = isFollowOn
     ? { ...inningsObjRaw, innings3: { ...inn3, team: inn2.team, teamName: inn2.teamName } }
     : inningsObjRaw
+
+  // The backend pre-populates an innings slot that hasn't actually begun yet as a zero-valued
+  // placeholder ({runs:0, wickets:0, overs:0, team, ...}) instead of omitting it — confirmed live
+  // (Namibia v South Africa, beventId 535492584): innings2 existed with team:'P' (Namibia) and
+  // all zeros while South Africa was still 146/1 in innings1. Every "does inningsN exist" check
+  // below (activeInningsData, activeInningsNum1Based, the active-slot correction) was written
+  // assuming presence means "started", so the placeholder silently pointed the whole
+  // batting-team pipeline at the wrong (not-yet-batting) team. Null out any slot with no
+  // recorded runs/wickets/overs so "present" reliably means "actually started".
+  const inningsStarted = (inn: any): boolean =>
+    !!inn && (Number(inn.runs) > 0 || Number(inn.wickets) > 0 || Number(inn.overs) > 0)
+  const inningsObj: any = {
+    ...inningsObjFollowOn,
+    innings2: inningsStarted(inningsObjFollowOn.innings2) ? inningsObjFollowOn.innings2 : null,
+    innings3: inningsStarted(inningsObjFollowOn.innings3) ? inningsObjFollowOn.innings3 : null,
+    innings4: inningsStarted(inningsObjFollowOn.innings4) ? inningsObjFollowOn.innings4 : null,
+  }
 
   const activeInningsData =
     inningsObj.innings4 || inningsObj.innings3 || inningsObj.innings2 || inningsObj.innings1
@@ -429,16 +447,125 @@ function normalizeScoreData(input: any): ScoreData | null {
   // 6. bowl_tfkey from v1 balls — in some API responses this is actually batting team
   const battingFromV1Bowl: string = (v1 as any[]).find(x => x.bowl_tfkey)?.bowl_tfkey || ''
 
+  // 0. v1 "tc" (target-chase) entry — explicitly names the team about to chase once a target
+  // is set (e.g. right at an innings break, before the new innings' score has ticked over from
+  // 0/0). This is purpose-built for exactly the moment innings.team tends to be stale/wrong, so
+  // it outranks everything else when present.
+  const battingFromTc: string = (v1 as any[]).find(x => x.type === 'tc')?.tf || ''
+
+  // -1. v1's latest over-summary for the CURRENTLY ACTIVE innings carries a readable team NAME
+  // (e.g. "Trivandrum Royals") alongside its key-based fields (tfkey/bat_team_fkey/bowl_tfkey).
+  // We've seen matches where every key-based field (tfkey, F, a, wp) is consistently wrong
+  // together — they're all derived from the same swapped-key bug in that match's feed — while
+  // this plain-text name, passed straight through rather than looked up via a key, stays
+  // correct. Fuzzy-matching it against teams.team1/2.name sidesteps the key-swap entirely, so
+  // it outranks every key-based signal below. Restricted to the active innings' own over
+  // entries (via .inning) so a lingering previous-innings entry can't leak in before the new
+  // innings' first over completes.
+  const activeInningsNum1Based = inningsObj.innings4 ? 4 : inningsObj.innings3 ? 3 : inningsObj.innings2 ? 2 : 1
+  const activeInningsIdx0 = activeInningsNum1Based - 1
+  const latestActiveOver: any = (v1 as any[]).find(
+    x => x.type === 'o' && (x.inning === undefined || x.inning === activeInningsIdx0)
+  )
+  // Two independent checks, since neither alone covers every abbreviation style a feed uses:
+  // 1. Prefix match (space-stripped) — handles heavy truncation like "UAE" vs "UAE Women",
+  //    where one name is simply a short prefix of the other; a similarity score would wrongly
+  //    reject this pair (too large a length difference).
+  // 2. Bigram (Dice coefficient) similarity — handles spelling/punctuation variants that
+  //    aren't a clean prefix relationship, like "St Kitts & Nevis Patriots" vs "St Kitts and
+  //    Nevis Pats" ("&"/"and", "Patriots"/"Pats"). Threshold 0.7 was picked by testing real
+  //    same-team pairs (0.74-1.0) against real different-team pairs, including the closest
+  //    false-positive risk found ("India" vs "Indies" scores 0.667) — 0.7 sits safely between.
+  const normTeamName = (s: any): string => String(s || '').toLowerCase().replace(/\s+/g, '')
+  const bigramCounts = (s: string): Map<string, number> => {
+    const m = new Map<string, number>()
+    for (let i = 0; i < s.length - 1; i++) {
+      const g = s.substring(i, i + 2)
+      m.set(g, (m.get(g) || 0) + 1)
+    }
+    return m
+  }
+  const diceCoefficient = (a: string, b: string): number => {
+    if (!a || !b) return 0
+    if (a === b) return 1
+    const ga = bigramCounts(a), gb = bigramCounts(b)
+    let intersection = 0
+    ga.forEach((count, g) => { if (gb.has(g)) intersection += Math.min(count, gb.get(g)!) })
+    let totalA = 0; ga.forEach(c => { totalA += c })
+    let totalB = 0; gb.forEach(c => { totalB += c })
+    return totalA + totalB === 0 ? 0 : (2 * intersection) / (totalA + totalB)
+  }
+  const teamNameMatches = (a: string, b: string): boolean => {
+    const na = normTeamName(a), nb = normTeamName(b)
+    if (!na || !nb) return false
+    if (na === nb || na.startsWith(nb) || nb.startsWith(na)) return true
+    return diceCoefficient(na, nb) >= 0.7
+  }
+  const rawTeamsForNameCheck: any = d.teams || {}
+  const rawT1KeyForNameCheck: string = rawTeamsForNameCheck.team1?.key || d.score?.team1Key || ''
+  const rawT2KeyForNameCheck: string = rawTeamsForNameCheck.team2?.key || d.score?.team2Key || ''
+  const overTeamName: string = latestActiveOver?.team || ''
+  const battingFromOverName: string =
+    overTeamName && teamNameMatches(overTeamName, rawTeamsForNameCheck.team1?.name) ? rawT1KeyForNameCheck :
+    overTeamName && teamNameMatches(overTeamName, rawTeamsForNameCheck.team2?.name) ? rawT2KeyForNameCheck :
+    ''
+
   // bat_team_fkey is unreliable — can hold bowling team's key, avoid using
 
+  // bet99-score (sky99, keyed by gmid) — a fully independent provider's live "active nation"
+  // flag (activenation1/2), not derived from any of our own feed's keys, so it can't be hit by
+  // our feed's key-swap bugs. Its spnnation1/2 fields are short ICC-style codes (e.g. "NAM",
+  // "SA", "NZ", "WI"), not full names — teamNameMatches' prefix/bigram check only covers
+  // single-word codes that are literal prefixes of the full name ("NAM" vs "Namibia"); it can't
+  // catch multi-word initialisms ("SA" vs "South Africa", "WI" vs "West Indies", "NZ" vs "New
+  // Zealand") since those letters aren't contiguous in the full name. teamAcronym covers that
+  // case by taking the first letter of each word.
+  const teamAcronym = (name: any): string =>
+    String(name || '').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase()
+  const nationCodeMatches = (code: string, fullName: any): boolean => {
+    if (!code || !fullName) return false
+    if (teamNameMatches(code, fullName)) return true
+    return teamAcronym(fullName) === String(code).toUpperCase().trim()
+  }
+  const bet99Score: any = d.bet99Score?.score || null
+  const bet99ActiveNation: string =
+    bet99Score?.activenation1 === '1' ? String(bet99Score.spnnation1 || '') :
+    bet99Score?.activenation2 === '1' ? String(bet99Score.spnnation2 || '') :
+    ''
+  const battingFromBet99: string =
+    bet99ActiveNation && nationCodeMatches(bet99ActiveNation, rawTeamsForNameCheck.team1?.name) ? rawT1KeyForNameCheck :
+    bet99ActiveNation && nationCodeMatches(bet99ActiveNation, rawTeamsForNameCheck.team2?.name) ? rawT2KeyForNameCheck :
+    ''
+
+  // F/a/wp are live, continuously-updated "who's facing now" fields — more durably reliable
+  // than innings.team at the innings-break transition, but (like innings.team) they can still
+  // be wrong for a whole match if that match's feed has a key-swap bug — battingFromOverName
+  // catches that case since it doesn't depend on any key lookup.
   const battingTeamKey: string =
-    battingFromInnings ||
+    battingFromTc ||
+    battingFromOverName ||
+    battingFromBet99 ||
     fField ||
     aField ||
     battingFromWp ||
+    battingFromInnings ||
     battingFromOver ||
     battingFromV1Bowl ||
     ''
+
+  // Conflict visibility: this feed has repeatedly had ONE of these signals silently wrong in a
+  // different way each time (innings.team wrong, then F/a/wp wrong, then v1 keys wrong — always
+  // some NEW pattern). We can't fix the feed itself, so instead of hoping the current priority
+  // order covers every future case too, surface every disagreement — so a bad match can be
+  // caught from logs before a client has to report it again.
+  const battingSignals: Record<string, string> = {
+    tc: battingFromTc, overName: battingFromOverName, bet99: battingFromBet99, F: fField, a: aField,
+    wp: battingFromWp, innings: battingFromInnings, over: battingFromOver, v1Bowl: battingFromV1Bowl,
+  }
+  const distinctBattingValues = Array.from(new Set(Object.values(battingSignals).filter(Boolean)))
+  const battingSignalConflict = distinctBattingValues.length > 1
+    ? { beventId: d.beventId, ename: d.ename, signals: battingSignals, resolved: battingTeamKey }
+    : null
 
   // Data already has score — just fix batting flags and innings team mapping
   if (d.score !== undefined) {
@@ -470,13 +597,40 @@ function normalizeScoreData(input: any): ScoreData | null {
 
     // Fix innings.innings1.team so the component computes t1First correctly
     // (starts from inningsObj, not raw d.innings, so the follow-on correction above carries through)
-    const existingInnings: any = inningsObj
+    let existingInnings: any = inningsObj
+
+    // Active-innings team-swap correction: some feeds mistag the CURRENTLY ACTIVE innings'
+    // .team for its entire duration — seen with innings1 while a team's the only one to have
+    // batted so far, and separately with innings2 well past the first few balls once actual
+    // runs are on the board. Only applies while innings1/innings2 is the active one (no
+    // innings3/4 yet — Test follow-on has its own correction above). If our derived
+    // battingTeamKey disagrees with the active slot's tag, trust it and fix that slot — and if
+    // that leaves the OTHER known slot wrongly tagged as the same team (impossible, two
+    // innings can't both belong to one team), flip that one too.
+    if (!existingInnings.innings3) {
+      const activeSlotNum = existingInnings.innings2 ? 2 : 1
+      const activeSlotKey = activeSlotNum === 2 ? 'innings2' : 'innings1'
+      const activeSlotData = existingInnings[activeSlotKey]
+      if (activeSlotData && battingTeamKey && activeSlotData.team && activeSlotData.team !== battingTeamKey) {
+        const otherKey = battingTeamKey === t1Key ? t2Key : t1Key
+        const otherSlotKey = activeSlotNum === 2 ? 'innings1' : null
+        const otherSlotData = otherSlotKey ? existingInnings[otherSlotKey] : null
+        existingInnings = {
+          ...existingInnings,
+          [activeSlotKey]: { ...activeSlotData, team: battingTeamKey },
+          ...(otherSlotKey && otherSlotData && otherSlotData.team === battingTeamKey
+            ? { [otherSlotKey]: { ...otherSlotData, team: otherKey } }
+            : {})
+        }
+      }
+    }
+
     let fixedInnings = existingInnings
     // Only compute innings1.team if raw data doesn't already have it (Test matches provide it)
     if (score.innings1 && battingTeamKey && !existingInnings.innings1?.team) {
       // innings1 team = batting team if only 1 innings played (they're on their first)
       // innings1 team = bowling team if 2 innings played (batting team is in 2nd innings)
-      const innings1Team = !score.innings2
+      const innings1Team = !inningsStarted(score.innings2)
         ? battingTeamKey
         : (battingTeamKey === t1Key ? t2Key : t1Key)
       fixedInnings = {
@@ -485,7 +639,18 @@ function normalizeScoreData(input: any): ScoreData | null {
       }
     }
 
-    return { ...d, teams: fixedTeams, innings: fixedInnings } as ScoreData
+    // scoreData.score.innings2/3/4 (plain runs/wickets/overs, no team tag) is what the render
+    // function destructures directly for activeInnNum/t1First/chase-target — it needs the same
+    // started-vs-placeholder cleanup as inningsObj above, or a not-yet-started slot leaks through
+    // there even though the batting-team pipeline above already got it right.
+    const cleanedScore: any = {
+      ...score,
+      innings2: inningsStarted(score.innings2) ? score.innings2 : null,
+      innings3: inningsStarted(score.innings3) ? score.innings3 : null,
+      innings4: inningsStarted(score.innings4) ? score.innings4 : null,
+    }
+
+    return { ...d, teams: fixedTeams, innings: fixedInnings, score: cleanedScore, _battingSignalConflict: battingSignalConflict } as ScoreData
   }
 
   // Raw cricket API format (no score field) — build from scratch
@@ -538,8 +703,22 @@ function normalizeScoreData(input: any): ScoreData | null {
 const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const scoreData = (normalizeScoreData(rawProp as any) ?? undefined) as ScoreData | undefined
   const prevBallRef = useRef<string | null>(null)
+  const loggedConflictRef = useRef<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [voiceOn, setVoiceOn] = useState(false)
+
+  // Log (once per distinct conflict, not every poll) when the feed's own batting-team signals
+  // disagree with each other — visibility for a feed that's had a different signal wrong each
+  // time so far, rather than waiting on a client to notice a wrong team name again.
+  const conflict = scoreData?._battingSignalConflict
+  useEffect(() => {
+    if (!conflict) return
+    const sig = `${conflict.beventId}:${JSON.stringify(conflict.signals)}`
+    if (loggedConflictRef.current === sig) return
+    loggedConflictRef.current = sig
+    // eslint-disable-next-line no-console
+    console.warn('[CricketScoreCard] batting-team signal conflict', conflict)
+  }, [conflict])
 
   const rawB0 = scoreData?.liveData?.B ? String(scoreData.liveData.B).trim() : null
   const lastBallEarly = rawB0 && !isBreakStatus(rawB0) ? rawB0 : null
@@ -574,10 +753,18 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const t1Key = team1Key || ''
   const t2Key = team2Key || ''
 
-  // teams.name is already sanitized by fixName() in normalizeScoreData — trust it first.
-  // speech_names/raw key are only fallbacks for feeds where teams.name itself is missing.
+  // speech_names has short, clean display names ("Trinbago") — prefer it when the feed
+  // provides one. teams.name (already sanitized by fixName() in normalizeScoreData) is the
+  // fallback for feeds without speech_names, and the raw key is the last resort.
   const speechNames: Record<string, string> = (scoreData as any).liveData?.speech_names || {}
   const teamsInfo = scoreData.teams || {}
+  // teams.name MUST win over speech_names: every score-to-team assignment below (battingTeamKey,
+  // innings.team, F/a/wp) is derived from the same key convention as teams.name. Some matches
+  // have a speech_names table that uses the OPPOSITE key<->team mapping (confirmed via a real
+  // match: Namibia/Zimbabwe, where speech_names had the two teams' keys swapped relative to
+  // everything else) — trusting it for the name while score-assignment still follows teams.name
+  // produces a team correctly labeled but attached to the OTHER team's score. speech_names is
+  // only a fallback for when teams.name itself is missing.
   const team1Name = teamsInfo.team1?.name || speechNames[t1Key] || t1Key || ''
   const team2Name = teamsInfo.team2?.name || speechNames[t2Key] || t2Key || ''
 
@@ -821,9 +1008,11 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
           // per-innings .team tag (follow-on corrected in normalizeScoreData) instead of
           // assuming strict odd/even alternation — alternation breaks whenever a team follows
           // on and bats two innings in a row (e.g. innings2 AND innings3 both theirs).
-          const scoreSlots: Array<{ n: number; data: Innings }> = (
-            [[1, innings1], [2, innings2], [3, innings3], [4, innings4]] as const
-          ).filter((s): s is [number, Innings] => !!s[1]).map(([n, data]) => ({ n, data }))
+          const scoreSlots: Array<{ n: number; data: Innings }> = []
+          if (innings1) scoreSlots.push({ n: 1, data: innings1 })
+          if (innings2) scoreSlots.push({ n: 2, data: innings2 })
+          if (innings3) scoreSlots.push({ n: 3, data: innings3 })
+          if (innings4) scoreSlots.push({ n: 4, data: innings4 })
 
           const teamForSlot = (n: number): string => {
             const tagged = inningsRaw[`innings${n}`]?.team

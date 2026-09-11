@@ -27,6 +27,18 @@ export const cricketScoreApi = createApi({
         }
       },
     }),
+    getBet99Score: builder.query<any, string>({
+      queryFn: async (gmid: string) => {
+        try {
+          const response = await fetch(`https://api.sky99.co/api/bet99-score/${gmid}`)
+          if (!response.ok) throw new Error(`HTTP ${response.status}`)
+          const data = await response.json()
+          return { data }
+        } catch (error: any) {
+          return { error: { status: 'FETCH_ERROR', error: String(error) } }
+        }
+      },
+    }),
     getT10Score: builder.query<any, string>({
       query: (marketId: string) => `/t10score?marketId=${marketId}`,
     }),
@@ -69,4 +81,4 @@ export const cricketScoreApi = createApi({
   }),
 })
 
-export const { useGetLiveCricketScoreQuery, useGetBallFeedsQuery, useGetT10ScoreQuery, useGetCricbuzzLiveScoreQuery, useGetCricbuzzScorecardQuery, useGetMyCricketScorecardQuery } = cricketScoreApi
+export const { useGetLiveCricketScoreQuery, useGetBallFeedsQuery, useGetBet99ScoreQuery, useGetT10ScoreQuery, useGetCricbuzzLiveScoreQuery, useGetCricbuzzScorecardQuery, useGetMyCricketScorecardQuery } = cricketScoreApi

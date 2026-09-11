@@ -4,6 +4,7 @@ import DiceGame from "../../Component/casinoDetail/Dice/DiceGame"
 import DragonTigerGame from "../../Component/casinoDetail/DragonTiger/DragonTiger20"
 import Lucky7Game from "../../Component/casinoDetail/Lucky7/Lucky7"
 import AaaGame from "../../Component/casinoDetail/Aaa/index"
+import ThirtyTwoCardGame from "../../Component/casinoDetail/ThirtyTwoCard/ThirtyTwoCard"
 import ComingSoon from "../../Component/casinoDetail/ComingSoon"
 
 const CasinoDetail = () => {
@@ -12,6 +13,7 @@ const CasinoDetail = () => {
   if (id === "51")  return <TeenPattiGame />
   if (id === "52")  return <DragonTigerGame />
   if (id === "53")  return <Lucky7Game />
+  if (id === "55")  return <ThirtyTwoCardGame />
   if (id === "62")  return <AaaGame />
   if (id === "99")  return <DiceGame />
   return <ComingSoon />
