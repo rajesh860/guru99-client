@@ -432,7 +432,11 @@ function normalizeScoreData(input: any): ScoreData | null {
     inningsObj.innings4 || inningsObj.innings3 || inningsObj.innings2 || inningsObj.innings1
   const battingFromInnings: string = activeInningsData?.team || ''
 
-  // 2. liveData.F field — "^14D" format, strip ^ prefix
+  // 2. liveData.F field — "^14D" format, strip ^ prefix.
+  // NOT a batting signal: F mirrors raw.flb ("^Q|1.58|1.57") — it's the betting
+  // FAVOURITE. Confirmed live (South Africa v Australia, beventId 842360185):
+  // F:"^Q" (Australia) while a/wp/innings all said South Africa was batting.
+  // Kept only for the conflict log below; never used to pick the batting team.
   const fField: string = rawMatch?.F ? String(rawMatch.F).replace(/^\^/, '') : ''
 
   // 3. liveData.a field — "14D.PF" format, first part is batting team
@@ -522,35 +526,89 @@ function normalizeScoreData(input: any): ScoreData | null {
   // case by taking the first letter of each word.
   const teamAcronym = (name: any): string =>
     String(name || '').split(/\s+/).filter(Boolean).map(w => w[0]).join('').toUpperCase()
+  // Women's sides carry a trailing marker on both feeds ("NSW W", "Queensland Fire W") —
+  // compare the team itself, not the suffix.
+  const stripWomen = (v: any): string => String(v || '').trim().replace(/\s+(W|Women)$/i, '').trim()
   const nationCodeMatches = (code: string, fullName: any): boolean => {
-    if (!code || !fullName) return false
-    if (teamNameMatches(code, fullName)) return true
-    return teamAcronym(fullName) === String(code).toUpperCase().trim()
+    const c = stripWomen(code), full = stripWomen(fullName)
+    if (!c || !full) return false
+    if (teamNameMatches(c, full)) return true
+    // Initials: "SA" = South Africa, "NSW" = New South Wales Breakers, "QF" = Queensland Fire
+    const cu = c.toUpperCase().replace(/\s+/g, '')
+    const acr = teamAcronym(full)
+    return acr === cu || (cu.length >= 2 && acr.startsWith(cu))
   }
+
+  // bet99-score (sky99) is now the PRIMARY source when it's fresh: it gives side 1/2 names,
+  // each side's score and an explicit "batting now" flag, so it decides who's batting and
+  // whose runs are whose. Map its sides onto backend team keys by name; if only one side
+  // matches, the other side is the remaining team.
   const bet99Score: any = d.bet99Score?.score || null
-  const bet99ActiveNation: string =
-    bet99Score?.activenation1 === '1' ? String(bet99Score.spnnation1 || '') :
-    bet99Score?.activenation2 === '1' ? String(bet99Score.spnnation2 || '') :
-    ''
-  const battingFromBet99: string =
-    bet99ActiveNation && nationCodeMatches(bet99ActiveNation, rawTeamsForNameCheck.team1?.name) ? rawT1KeyForNameCheck :
-    bet99ActiveNation && nationCodeMatches(bet99ActiveNation, rawTeamsForNameCheck.team2?.name) ? rawT2KeyForNameCheck :
+  const bet99Fresh: boolean = !!bet99Score && d.bet99Score?.status === 'ok' &&
+    (!d.bet99Score?.receivedAt || Date.now() - Number(d.bet99Score.receivedAt) < 3 * 60 * 1000)
+  const bet99SideKeys: [string, string] | null = (() => {
+    if (!bet99Fresh || !rawT1KeyForNameCheck || !rawT2KeyForNameCheck) return null
+    const t1Name = rawTeamsForNameCheck.team1?.name, t2Name = rawTeamsForNameCheck.team2?.name
+    const sideOf = (nm: any): 1 | 2 | 0 => {
+      const m1 = nationCodeMatches(nm, t1Name), m2 = nationCodeMatches(nm, t2Name)
+      return m1 && !m2 ? 1 : m2 && !m1 ? 2 : 0
+    }
+    let s1 = sideOf(bet99Score.spnnation1), s2 = sideOf(bet99Score.spnnation2)
+    if (s1 && !s2) s2 = s1 === 1 ? 2 : 1
+    if (s2 && !s1) s1 = s2 === 1 ? 2 : 1
+    if (!s1 || !s2 || s1 === s2) return null
+    const keyOf = (side: 1 | 2) => (side === 1 ? rawT1KeyForNameCheck : rawT2KeyForNameCheck)
+    return [keyOf(s1), keyOf(s2)]
+  })()
+  const battingFromBet99: string = !bet99SideKeys ? '' :
+    bet99Score.activenation1 === '1' ? bet99SideKeys[0] :
+    bet99Score.activenation2 === '1' ? bet99SideKeys[1] :
     ''
 
   // F/a/wp are live, continuously-updated "who's facing now" fields — more durably reliable
   // than innings.team at the innings-break transition, but (like innings.team) they can still
   // be wrong for a whole match if that match's feed has a key-swap bug — battingFromOverName
   // catches that case since it doesn't depend on any key lookup.
+  // Raw-feed keys vs backend keys: tc/F/a/wp/over-tfkey/bowl_tfkey come straight from the
+  // raw feed, while teams/innings use the BACKEND's key→team mapping — and the two can be
+  // swapped. Confirmed live (NSW Breakers W v Queensland Fire W, beventId 473059755):
+  // backend teams 3N=NSW / O2=Queensland, but the raw feed's speech_names say 3N=Queensland /
+  // O2=NSW (and its over summary "NSW Women" carries tfkey O2). Reading a raw "O2 is batting"
+  // against backend teams showed Queensland batting while NSW were chasing. Translate raw
+  // keys into backend keys by matching speech_names' team names to teams.team1/2.name; if
+  // only one side matches by name, the other key is the remaining team.
+  const rawSpeechNames: Record<string, string> = rawMatch?.speech_names || {}
+  const rawKeyToBackend: Record<string, string> = (() => {
+    const map: Record<string, string> = {}
+    const t1Name = rawTeamsForNameCheck.team1?.name, t2Name = rawTeamsForNameCheck.team2?.name
+    if (!rawT1KeyForNameCheck || !rawT2KeyForNameCheck || !t1Name || !t2Name) return map
+    const rawKeys = Object.keys(rawSpeechNames)
+    if (rawKeys.length !== 2) return map
+    const sideOf = (rk: string): 1 | 2 | 0 => {
+      const nm = rawSpeechNames[rk]
+      const m1 = nationCodeMatches(nm, t1Name), m2 = nationCodeMatches(nm, t2Name)
+      return m1 && !m2 ? 1 : m2 && !m1 ? 2 : 0
+    }
+    const [ka, kb] = rawKeys
+    let sa = sideOf(ka), sb = sideOf(kb)
+    if (sa && !sb) sb = sa === 1 ? 2 : 1
+    if (sb && !sa) sa = sb === 1 ? 2 : 1
+    if (!sa || !sb || sa === sb) return map
+    map[ka] = sa === 1 ? rawT1KeyForNameCheck : rawT2KeyForNameCheck
+    map[kb] = sb === 1 ? rawT1KeyForNameCheck : rawT2KeyForNameCheck
+    return map
+  })()
+  const fromRaw = (k: string): string => (k && rawKeyToBackend[k]) || k
+
   const battingTeamKey: string =
-    battingFromTc ||
-    battingFromOverName ||
     battingFromBet99 ||
-    fField ||
-    aField ||
-    battingFromWp ||
+    fromRaw(battingFromTc) ||
+    battingFromOverName ||
+    fromRaw(aField) ||
+    fromRaw(battingFromWp) ||
     battingFromInnings ||
-    battingFromOver ||
-    battingFromV1Bowl ||
+    fromRaw(battingFromOver) ||
+    fromRaw(battingFromV1Bowl) ||
     ''
 
   // Conflict visibility: this feed has repeatedly had ONE of these signals silently wrong in a
@@ -559,13 +617,67 @@ function normalizeScoreData(input: any): ScoreData | null {
   // order covers every future case too, surface every disagreement — so a bad match can be
   // caught from logs before a client has to report it again.
   const battingSignals: Record<string, string> = {
-    tc: battingFromTc, overName: battingFromOverName, bet99: battingFromBet99, F: fField, a: aField,
-    wp: battingFromWp, innings: battingFromInnings, over: battingFromOver, v1Bowl: battingFromV1Bowl,
+    tc: fromRaw(battingFromTc), overName: battingFromOverName, bet99: battingFromBet99, F: fromRaw(fField), a: fromRaw(aField),
+    wp: fromRaw(battingFromWp), innings: battingFromInnings, over: fromRaw(battingFromOver), v1Bowl: fromRaw(battingFromV1Bowl),
   }
   const distinctBattingValues = Array.from(new Set(Object.values(battingSignals).filter(Boolean)))
   const battingSignalConflict = distinctBattingValues.length > 1
     ? { beventId: d.beventId, ename: d.ename, signals: battingSignals, resolved: battingTeamKey }
     : null
+
+  // bet99 "136-8 (29.1)" → { runs, wickets, overs }
+  const parseBet99 = (v: any) => {
+    const m = String(v || '').match(/^\s*(\d+)-(\d+)\s*\(([\d.]+)\)/)
+    return m ? { runs: +m[1], wickets: +m[2], overs: parseFloat(m[3]) } : null
+  }
+  // Limited-overs innings from bet99, each tagged with its team: the side NOT batting now
+  // batted first once it has any score; otherwise the batting side is on its first innings.
+  const bet99InningsFor = (k1: string, k2: string, activeKey: string) => {
+    const sides = [
+      { key: k1, sc: parseBet99(bet99Score?.score1) },
+      { key: k2, sc: parseBet99(bet99Score?.score2) },
+    ]
+    const active = sides.find(x => x.key === activeKey)
+    const other  = sides.find(x => x.key !== activeKey)
+    if (!active?.sc || !other) return null
+    const otherBatted = !!other.sc && (other.sc.runs > 0 || other.sc.wickets > 0 || other.sc.overs > 0)
+    return otherBatted
+      ? { innings1: { ...other.sc!, team: other.key }, innings2: { ...active.sc, team: active.key } }
+      : { innings1: { ...active.sc, team: active.key }, innings2: null }
+  }
+  const isTestLike: boolean =
+    /test|first.?class/i.test(String(d.score?.format || '')) ||
+    !!String(bet99Score?.dayno || '').trim() ||
+    !!inningsObj.innings3 || !!inningsObj.innings4
+
+  // Backend has no score at all (seen on guru99 for live matches) — build the card from bet99.
+  if (!d.score && bet99Fresh && !isTestLike) {
+    const n1 = String(bet99Score.spnnation1 || '').trim() || 'Team 1'
+    const n2 = String(bet99Score.spnnation2 || '').trim() || 'Team 2'
+    const activeKey = bet99Score.activenation1 === '1' ? 'B1' : bet99Score.activenation2 === '1' ? 'B2' : ''
+    const inn = activeKey ? bet99InningsFor('B1', 'B2', activeKey) : null
+    if (inn) {
+      const plain = (x: any) => (x ? { runs: x.runs, wickets: x.wickets, overs: x.overs } : null)
+      return {
+        ...d,
+        ename: d.ename || `${n1} v ${n2}`,
+        teams: {
+          team1: { key: 'B1', name: n1, batting: activeKey === 'B1' },
+          team2: { key: 'B2', name: n2, batting: activeKey === 'B2' },
+        },
+        innings: { innings1: inn.innings1, innings2: inn.innings2, innings3: null, innings4: null },
+        score: {
+          format: '', status: String(bet99Score.spnmessage || '').trim(),
+          team1Key: 'B1', team2Key: 'B2',
+          innings1: plain(inn.innings1), innings2: plain(inn.innings2), innings3: null, innings4: null,
+          raw: {},
+        },
+        v1: d.v1 || [],
+        liveData: d.liveData || {},
+        _battingSignalConflict: null,
+      } as ScoreData
+    }
+  }
 
   // Data already has score — just fix batting flags and innings team mapping
   if (d.score !== undefined) {
@@ -648,6 +760,25 @@ function normalizeScoreData(input: any): ScoreData | null {
       innings2: inningsStarted(score.innings2) ? score.innings2 : null,
       innings3: inningsStarted(score.innings3) ? score.innings3 : null,
       innings4: inningsStarted(score.innings4) ? score.innings4 : null,
+    }
+
+    // bet99 scores onto the right teams (limited overs, only when bet99 mapped both sides).
+    if (bet99SideKeys && battingFromBet99 && battingTeamKey === battingFromBet99 && !isTestLike) {
+      const inn = bet99InningsFor(bet99SideKeys[0], bet99SideKeys[1], battingFromBet99)
+      if (inn) {
+        fixedInnings = {
+          ...fixedInnings,
+          innings1: { ...(fixedInnings.innings1 || {}), ...inn.innings1 },
+          innings2: inn.innings2 ? { ...(fixedInnings.innings2 || {}), ...inn.innings2 } : null,
+        }
+        cleanedScore.innings1 = { runs: inn.innings1.runs, wickets: inn.innings1.wickets, overs: inn.innings1.overs }
+        cleanedScore.innings2 = inn.innings2
+          ? { runs: inn.innings2.runs, wickets: inn.innings2.wickets, overs: inn.innings2.overs }
+          : null
+        if (!String(cleanedScore.status || '').trim() && bet99Score.spnmessage) {
+          cleanedScore.status = String(bet99Score.spnmessage).trim()
+        }
+      }
     }
 
     return { ...d, teams: fixedTeams, innings: fixedInnings, score: cleanedScore, _battingSignalConflict: battingSignalConflict } as ScoreData
@@ -825,17 +956,18 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const activeInnNum = innings4 ? 4 : innings3 ? 3 : innings2 ? 2 : 1
 
   // teams.batting was already resolved in normalizeScoreData via the reliable priority chain
-  // (innings.team > F > a > wp > tfkey). Trust it — don't re-derive with a different, conflicting
+  // (tc > over name > bet99 > a > wp > innings.team > tfkey). Trust it — don't re-derive with a different, conflicting
   // priority here, or the two computations can disagree on which team is batting.
   const hasBattingFlag = typeof teamsInfo.team1?.batting === 'boolean' || typeof teamsInfo.team2?.batting === 'boolean'
 
   // Fallback signals only used when normalizeScoreData had nothing to resolve teams.batting from
   const batFromV1: string = (v1 as any[]).find((x: any) => x.type === 'b' && x.bat_team_fkey)?.bat_team_fkey || ''
-  const batFromF: string = (liveData as any)?.F ? String((liveData as any).F).replace(/^\^/, '') : ''
-  const batFromA: string = (liveData as any)?.a ? (String((liveData as any).a).split('.')[1] || '') : ''
+  // liveData.a is "BAT.BOWL" — first part is the batting team (same as normalizeScoreData).
+  // liveData.F is the betting favourite, not the batting team, so it's not used here.
+  const batFromA: string = (liveData as any)?.a ? (String((liveData as any).a).split('.')[0] || '') : ''
   const batFromInn: string = inningsRaw.innings4?.team || inningsRaw.innings3?.team ||
                              inningsRaw.innings2?.team || inningsRaw.innings1?.team || ''
-  const activeBattingKey: string = batFromV1 || batFromF || batFromA || batFromInn
+  const activeBattingKey: string = batFromV1 || batFromA || batFromInn
 
   const team1BattingFinal: boolean = hasBattingFlag
     ? !!teamsInfo.team1?.batting

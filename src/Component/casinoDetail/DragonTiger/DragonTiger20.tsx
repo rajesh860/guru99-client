@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { FaLock } from "react-icons/fa"
-import BackBtn from "../../BackBtn/BackBtn"
+import CasinoGameSelect from "../../CasinoGameSelect/CasinoGameSelect"
 import { useGetCasinoMyBetsQuery, useGetCasinoCompletedBetsQuery } from "../../../../store/service/userServices/userServices"
 import PlaceBetModal from "../teenPatti/PlaceBetModal"
 import DT20RoundDetailModal from "./DT20RoundDetailModal"
 import "./DragonTiger20.scss"
 import { getCardImage } from "../../../utils/cardImage"
+import CasinoVideo from "../CasinoVideo"
 
 const DragonTiger20: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -120,7 +121,7 @@ const DragonTiger20: React.FC = () => {
 
   return (
     <>
-      <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
+      <CasinoGameSelect currentId="52" />
 
       <div className="dt20-container">
         {/* Header */}
@@ -137,11 +138,7 @@ const DragonTiger20: React.FC = () => {
         {/* Video + cards wrapper */}
         <div className="dt20-video-wrapper">
           <div className="dt20-video-area">
-            <iframe
-              src="https://alpha-g.qnsports.live/route/rih2.php?id=3035"
-              title="20-20 Dragon Tiger Stream"
-              allowFullScreen
-            />
+            <CasinoVideo qnId="3035" title="20-20 Dragon Tiger" />
           </div>
 
           {/* Cards overlay — server sends "1" when hidden, actual code when revealed */}

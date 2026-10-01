@@ -1,5 +1,4 @@
 import { useEffect } from "react"
-import { FaTimes, FaCheck } from "react-icons/fa"
 import { useBetPlacedMutation, useTossBetPlacedMutation } from "../../../store/service/userServices/userServices"
 import snackbarUtil from "../../utils/Snackbar"
 import { useParams } from "react-router-dom"
@@ -13,7 +12,11 @@ interface Props {
   setTimer: React.Dispatch<React.SetStateAction<number>>
   checkOddsValid: () => { valid: boolean; message: string }
   onOddsInvalid: () => void
+  matchName?: string
 }
+
+const QUICK_STAKES = [200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000]
+const STAKE_STEP = 100
 
 const Betslip = ({
   focusAmountInput,
@@ -24,6 +27,7 @@ const Betslip = ({
   setTimer,
   checkOddsValid,
   onOddsInvalid,
+  matchName,
 }: Props) => {
   const { id } = useParams<{ id: string }>()
   const [trigger, { data: betplaceData, isLoading }] = useBetPlacedMutation()
@@ -48,6 +52,10 @@ const Betslip = ({
       amountInputRef.current.value = String(value)
     }
   }
+
+  const clearAmount = () => setAmount(0)
+  const incrementStake = () => setAmount(Number(placeBetData?.stake || 0) + STAKE_STEP)
+  const decrementStake = () => setAmount(Math.max(0, Number(placeBetData?.stake || 0) - STAKE_STEP))
 
   useEffect(() => {
     const timers = setTimeout(() => {
@@ -99,107 +107,102 @@ const Betslip = ({
     }
   }, [betplaceData, tossPlaceData, id])
 
+  if (!isOpen) return null
+
+  const isFancy = placeBetData?.betType === "fancy"
+  const isBack = isFancy ? placeBetData?.backOrLay === "yes" : placeBetData?.backOrLay === "back"
+  const contentClass = isBack ? "back-bet-content" : "lay-bet-content"
+  const betType = isBack ? "back-bet" : "lay-bet"
+  const selectionLabel = isFancy
+    ? `[ ${isBack ? "YES" : "NO"} ] ${placeBetData?.fancyName}`
+    : `[ ${isBack ? "LAGAI" : "KHAI"} ] ${placeBetData?.team}`
+
   return (
-    <>
-      {isOpen && (
-        <div className="betslip-modal-overlay" onClick={closeSlip}>
-          <div
-            className={`betslip-modal ${
-              placeBetData?.betType === "fancy" 
-                ? (placeBetData?.backOrLay === "yes" ? "betslip-modal--back" : "betslip-modal--lay")
-                : (placeBetData?.backOrLay === "back" ? "betslip-modal--back" : "betslip-modal--lay")
-            }`}
-            onClick={e => {
-              e.stopPropagation()
-            }}
-          >
-            {/* Close Button */}
-            <button
-              type="button"
-              className="betslip-modal-close"
-              onClick={closeSlip}
-            >
-              ×
-            </button>
-
-            {/* Header */}
-            <div className="betslip-modal-header">
-              <span className="betslip-modal-title">
-                [ {placeBetData?.betType === "fancy"
-                    ? placeBetData?.backOrLay === "yes" ? "YES" : "NO"
-                    : placeBetData?.backOrLay === "back" ? "LAGAI" : "KHAI"
-                } ] {placeBetData?.betType === "fancy" ? placeBetData?.fancyName : placeBetData?.team}
-              </span>
+    <div className="betslip-embedded-overlay" onClick={closeSlip}>
+      <div className="betslip-embedded" onClick={e => e.stopPropagation()}>
+        <div className="betslip-embedded-container">
+          <div className={`betslip-embedded-content ${contentClass}`}>
+            {/* Countdown Timer */}
+            <div className="countdown-timer">
+              <span className="countdown-text">Auto-close in: </span>
+              <span className="countdown-value">{timer || 0}s</span>
+              <button type="button" className="close-btn" onClick={closeSlip}>×</button>
             </div>
 
-            {/* Rate and Input */}
-            <div className="betslip-modal-rate-section">
-              <span className="betslip-modal-rate-label">Rate : {placeBetData?.odds || 0}</span>
-              <input
-                type="number"
-                ref={amountInputRef}
-                autoComplete="OFF"
-                className="betslip-modal-input"
-                onChange={handleAmountChange}
-                placeholder="0"
-              />
+            {/* Match Info */}
+            <div className="match-info">
+              <h3>{matchName}</h3>
             </div>
 
-            {/* Quick Amount Buttons */}
-            <div className="betslip-modal-amounts">
-              <div className="betslip-modal-quick">
-                {[200, 500, 1000, 2000,5000].map(v => (
-                  <button
-                    key={v}
-                    type="button"
-                    className="betslip-modal-chip"
-                    onClick={() => setAmount(v)}
-                  >
-                    {v >= 1000 ? `${v / 1000}K` : v}
-                  </button>
-                ))}
+            {/* Bet Selection */}
+            <div className={`bet-selection ${betType}`}>
+              <div className="selection-header">
+                <span>{selectionLabel}</span>
               </div>
-              <div className="betslip-modal-quick">
-                {[10000,20000, 50000, 100000, 200000].map(v => (
-                  <button
-                    key={v}
-                    type="button"
-                    className="betslip-modal-chip"
-                    onClick={() => setAmount(v)}
-                  >
-                    {v >= 1000 ? `${v / 1000}K` : v}
-                  </button>
-                ))}
-              </div>
-            </div>
 
-            {/* Footer Buttons */}
-            <div className="betslip-modal-footer">
-              <button
-                type="button"
-                className="betslip-modal-cancel-btn"
-                onClick={closeSlip}
-              >
-                Cancel
-              </button>
-              <span className="betslip-modal-timer">{timer || 0}</span>
-              {isLoading || isTossLoading ? (
-                <div className="loading-spinner" />
-              ) : (
-                <button
-                  type="button"
-                  className="betslip-modal-submit-btn"
-                  onClick={handleBetPlaced}
-                  disabled={Number(timer || 0) === 0}
-                >
-                  Submit
-                </button>
-              )}
+              {/* Odds and Stake Section */}
+              <div className="odds-stake-section">
+                <div className="odds-section">
+                  <label>Odds</label>
+                  <div className="odds-input">
+                    <span className="odds-value">{placeBetData?.odds || 0}</span>
+                  </div>
+                </div>
+
+                <div className="stake-section">
+                  <label>Stake</label>
+                  <div className="stake-input">
+                    <button type="button" className="stake-step minus" onClick={decrementStake}>−</button>
+                    <input
+                      type="number"
+                      ref={amountInputRef}
+                      autoComplete="off"
+                      onChange={handleAmountChange}
+                      placeholder="0"
+                    />
+                    <button type="button" className="stake-step plus" onClick={incrementStake}>+</button>
+                    <button type="button" className="clear-btn" onClick={clearAmount}>clear</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Stakes */}
+              <div className="quick-stakes">
+                <div className="stakes-grid">
+                  {QUICK_STAKES.map(v => (
+                    <button
+                      key={v}
+                      type="button"
+                      className="stake-btn"
+                      onClick={() => setAmount(v)}
+                    >
+                      {v >= 1000 ? `${v / 1000}K` : v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="action-buttons">
+                <button type="button" className="cancel-btn" onClick={closeSlip}>Cancel Bet</button>
+                {isLoading || isTossLoading ? (
+                  <div className="loading-spinner" />
+                ) : (
+                  <button
+                    type="button"
+                    className="place-btn"
+                    onClick={handleBetPlaced}
+                    disabled={Number(timer || 0) === 0}
+                  >
+                    Place Bet
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   )
 }
 

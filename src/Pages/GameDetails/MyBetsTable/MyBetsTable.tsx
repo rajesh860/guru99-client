@@ -26,12 +26,7 @@ const MyBetsTable = ({ beventId }: Props) => {
   }
 
   if (bets.length === 0) {
-    return (
-      <div className="my-bets-table">
-        <div className="my-bets-header">My Bets</div>
-        <div className="my-bets-empty">No open bets</div>
-      </div>
-    )
+    return null
   }
 
   return (

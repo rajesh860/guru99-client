@@ -1,6 +1,7 @@
 import "./dash.scss"
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import LudoLaunchModal from "../../Component/LudoLaunchModal/LudoLaunchModal"
 import {
   FaFileAlt,
   FaBook,
@@ -43,6 +44,14 @@ const Dashboard = () => {
       comingSoon: false,
     },
     {
+      icon: <img src="/img/casinoImg.png" alt="Casino Games" style={{ width: "52px", height: "52px", objectFit: "contain" }} />,
+      title: "Casino Games",
+      subtitle: "Play & Win Big",
+      link: "/casino-list",
+      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+      color: "#4facfe"
+    },
+    {
       icon: <span style={{ fontSize: "48px", lineHeight: 1 }}>🎲</span>,
       title: "Dice",
       subtitle: "Odd Even Number Bet",
@@ -66,24 +75,16 @@ const Dashboard = () => {
       link: "/roulette",
       gradient: "linear-gradient(135deg, #eb3349 0%, #6b1414 100%)",
       color: "#eb3349",
-      comingSoon: true,
+      comingSoon: false,
     },
     {
       icon: <img src="/img/ludo.png" alt="Ludo" style={{ width: "52px", height: "52px", objectFit: "contain" }} />,
       title: "Ludo",
       subtitle: "Roll & Race",
-      link: "/casino-list",
+      link: "/ludo",
       gradient: "linear-gradient(135deg, #f857a6 0%, #ff5858 100%)",
       color: "#f857a6",
-      comingSoon: true,
-    },
-    {
-      icon: <img src="/img/casinoImg.png" alt="Casino Games" style={{ width: "52px", height: "52px", objectFit: "contain" }} />,
-      title: "Casino Games",
-      subtitle: "Play & Win Big",
-      link: "/casino-list",
-      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      color: "#4facfe"
+      comingSoon: false,
     },
     {
       icon: <FaFileAlt />,
@@ -153,6 +154,7 @@ const Dashboard = () => {
 
   return (
     <div className={`modern-dashboard ${visible ? "page-visible" : ""}`}>
+      <LudoLaunchModal />
       {/* Hero Section */}
       {/* <div className="dashboard-hero">
         <div className="hero-content">
@@ -197,7 +199,7 @@ const Dashboard = () => {
                 <div className="card-icon" style={{ color: item.color, animationDelay: `${index * 70 + 300}ms` } as React.CSSProperties}>
                   {item.icon}
                 </div>
-                <div className="card-arrow">→</div>
+                {/* <div className="card-arrow">→</div> */}
               </div>
               <div className="card-content">
                 <h3>{item.title}</h3>
@@ -216,7 +218,7 @@ const Dashboard = () => {
                 <div className="card-icon" style={{ color: item.color, animationDelay: `${index * 70 + 300}ms` } as React.CSSProperties}>
                   {item.icon}
                 </div>
-                <div className="card-arrow">→</div>
+                {/* <div className="card-arrow">→</div> */}
               </div>
               <div className="card-content">
                 <h3>{item.title}</h3>

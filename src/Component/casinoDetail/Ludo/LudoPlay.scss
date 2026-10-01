@@ -1,0 +1,243 @@
+.ludo-lobby {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0b1554;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.lobby-card {
+  background: #111c5c;
+  border-radius: 18px;
+  padding: 28px 22px;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.lobby-title {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.lobby-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  align-self: flex-start;
+}
+
+.fee-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.fee-btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+
+  &:hover { background: rgba(255,255,255,0.12); }
+  &:active { transform: scale(0.96); }
+
+  &.selected {
+    background: rgba(76,175,80,0.22);
+    border-color: #4CAF50;
+    color: #4CAF50;
+    box-shadow: 0 0 10px rgba(76,175,80,0.3);
+  }
+}
+
+.lobby-prize {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  strong { color: #FFD700; font-size: 15px; }
+}
+
+.find-match-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 16px rgba(76,175,80,0.4);
+  transition: opacity 0.15s, transform 0.1s;
+
+  &:hover { opacity: 0.9; }
+  &:active { transform: scale(0.98); }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+// ── Waiting screen ──
+.waiting-card { gap: 14px; }
+
+.waiting-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top-color: #4CAF50;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.waiting-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.8);
+}
+
+.room-code-box {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 0.5px;
+
+  strong {
+    color: #fff;
+    font-size: 18px;
+    letter-spacing: 4px;
+    margin-left: 6px;
+  }
+}
+
+.waiting-info {
+  font-size: 13px;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-badge {
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &.color-red    { background: rgba(244,67,54,0.25);  color: #ef5350; border: 1px solid #ef5350; }
+  &.color-blue   { background: rgba(33,150,243,0.25); color: #42a5f5; border: 1px solid #42a5f5; }
+  &.color-yellow { background: rgba(255,193,7,0.25);  color: #ffc107; border: 1px solid #ffc107; }
+  &.color-green  { background: rgba(76,175,80,0.25);  color: #4caf50; border: 1px solid #4caf50; }
+}
+
+.countdown-ring-wrap {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-num {
+  position: absolute;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.waiting-hint {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+}
+
+.btn-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  animation: btnSpin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes btnSpin { to { transform: rotate(360deg); } }
+
+.lobby-fee-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  .lfd-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .lfd-amount {
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+  }
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+
+  &:hover { color: #fff; }
+}
+
+.cancel-btn {
+  padding: 9px 28px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover { background: rgba(255,255,255,0.08); color: #fff; }
+}

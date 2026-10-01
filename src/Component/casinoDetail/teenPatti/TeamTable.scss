@@ -1,40 +1,104 @@
-.table-wrapper {
-//   padding: 10px;
-display: grid;
-grid-template-columns: 2fr 1fr;
-// gap: 8px;
-background-color: transparent;
-// margin-block: 10px;
-button{
+// Teen Patti 20-20 — bookmaker-style odds table (LAGAI / KHAI).
+// Class names are tp-book specific so nothing leaks into other screens.
+.tp-book {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--color-border, #e5e7eb);
+  background: var(--color-surface, #fff);
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
+
+.tpb-head,
+.tpb-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+}
+
+// ── Header: "Min: 100 Max: 500K | LAGAI | KHAI" ──
+.tpb-head {
+  align-items: center;
+  min-height: 36px;
+  background: linear-gradient(90deg, #2c3252 0%, #3a4063 50%, #2a2f4d 100%);
+  border-bottom: 2px solid #f5b82e;
+}
+
+.tpb-limits {
+  padding: 0 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #fff !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tpb-col-title {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: #f5b82e !important;
+}
+
+// ── Rows ──
+.tpb-row {
+  min-height: 40px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+
+  &:last-child { border-bottom: none; }
+}
+
+.tpb-name {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-text, #111827) !important;
+  background: var(--color-surface, #fff);
+}
+
+// ── Odds cells ──
+.tpb-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  outline: none;
-  padding-block:10px ;
-  // border-radius: 5px;
-  background-color: #252a3d;
-  color: white;
-  &:nth-child(1) {
-   opacity: 0;
-  }
-  &:nth-child(2) {
-  background-color: #4083f8;
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 0;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.08s;
+
+  &:hover:not(:disabled) { filter: brightness(1.06); }
+  &:active:not(:disabled) { transform: scale(0.97); }
+}
+
+.tpb-rate {
+  font-size: 14px;
+  font-weight: 900;
+  color: #111827 !important;
+}
+
+// Open: standard exchange back (blue) / lay (pink)
+.tpb-lagai { background: #72bbef; border-left-color: #5a9fd4; }
+.tpb-khai  { background: #faa9ba; border-left-color: #e48fa3; }
+
+// Locked: darkened cell, rate faded behind a white lock
+.tpb-locked {
+  cursor: not-allowed;
+
+  &.tpb-lagai { background: #3e4a58; }
+  &.tpb-khai  { background: #5b4a52; }
+
+  .tpb-rate {
+    color: rgba(255, 255, 255, 0.28) !important;
   }
 }
 
-.rate-button {
-  background-color: rgb(64 135 251) !important;
-}
-
-.locked-button {
-  background-color: rgba(64, 135, 251, 0.4) !important;
-}
-}
-
-/* Hide POSITION column on small screens */
-@media (max-width: 600px) {
-  .team-table {
-    th:nth-child(4),
-    td:nth-child(4) {
-      display: none;
-    }
-  }
+.tpb-lock {
+  position: absolute;
+  font-size: 14px;
+  color: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
 }

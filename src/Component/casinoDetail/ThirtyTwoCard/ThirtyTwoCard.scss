@@ -40,7 +40,8 @@ $loss:    #ff5252;
   background: #000;
   overflow: hidden;
 
-  iframe {
+  iframe,
+  video {
     width: 100%;
     height: 100%;
     border: none;
@@ -51,32 +52,31 @@ $loss:    #ff5252;
 // ── Card overlay ON video (left side) ────────────────────────
 .tc32-card-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
+  top: 6px;
+  left: 6px;
   width: fit-content;
-  align-items: center;
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
-  // justify-content: space-around;
-  gap: 5px;
-  padding: 6px 4px;
-  // background: linear-gradient(to right, rgba(0,0,0,0.65) 80%, transparent);
+  gap: 4px;
   pointer-events: none; // let clicks pass to iframe
 }
 
 .tc32-overlay-player {
-      display: flex;
-    flex-direction: column;
-    gap: 2px;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  padding: 3px 5px;
 }
 
 .tc32-overlay-header {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .tc32-overlay-name {

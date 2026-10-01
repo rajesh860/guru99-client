@@ -96,7 +96,7 @@ const ResultModal = ({ open, setOpen, onClose, tableId, mid, result,first }: any
                       <div key={index} className="card">
                         <img 
                           src={card ? 
-                            `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${card.includes("HH") ? card.replace(/HH/, "SS") : card.includes("SS") ? card.replace(/SS/, "DD") : card.includes("DD") ? card.replace(/DD/, "HH") : card}.jpg` 
+                            `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${card}.jpg` 
                             : resultCard
                           } 
                           alt={card}
@@ -114,7 +114,7 @@ const ResultModal = ({ open, setOpen, onClose, tableId, mid, result,first }: any
                       <div key={index} className="card">
                         <img 
                           src={card ? 
-                            `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${card.includes("HH") ? card.replace(/HH/, "SS") : card.includes("SS") ? card.replace(/SS/, "DD") : card.includes("DD") ? card.replace(/DD/, "HH") : card}.jpg` 
+                            `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${card}.jpg` 
                             : resultCard
                           } 
                           alt={card}

@@ -68,4 +68,16 @@
     margin: 20px auto;
     background: rgba(255, 255, 255, 0.15);
   }
+
+  .maintenance-countdown {
+    margin-top: 18px;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }

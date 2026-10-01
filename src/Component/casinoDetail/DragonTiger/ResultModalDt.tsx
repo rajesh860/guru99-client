@@ -80,7 +80,7 @@ const ResultModal = ({ open, setOpen, onClose, tableId, mid }: any) => {
                         {/* <div className="card-label" style={cardStyles.cardLabel}>DRAGON</div> */}
                         {dragonCard ? (
                           <img 
-                            src={`https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${dragonCard.includes("HH") ? dragonCard.replace(/HH/, "SS") : dragonCard.includes("SS") ? dragonCard.replace(/SS/, "DD") : dragonCard.includes("DD") ? dragonCard.replace(/DD/, "HH") : dragonCard}.jpg`}
+                            src={`https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${dragonCard}.jpg`}
                             alt={dragonCard}
                             onError={(e) => {
                               e.currentTarget.src = resultCard;
@@ -95,7 +95,7 @@ const ResultModal = ({ open, setOpen, onClose, tableId, mid }: any) => {
                         {/* <div className="card-label" style={cardStyles.cardLabel}>TIGER</div> */}
                         {tigerCard ? (
                           <img 
-                            src={`https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${tigerCard.includes("HH") ? tigerCard.replace(/HH/, "SS") : tigerCard.includes("SS") ? tigerCard.replace(/SS/, "DD") : tigerCard.includes("DD") ? tigerCard.replace(/DD/, "HH") : tigerCard}.jpg`}
+                            src={`https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${tigerCard}.jpg`}
                             alt={tigerCard}
                             onError={(e) => {
                               e.currentTarget.src = resultCard;

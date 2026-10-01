@@ -38,6 +38,8 @@ const AviatorGame = lazy(() => import("./Pages/Aviator/AviatorGame"))
 const RouletteGame = lazy(() => import("./Component/casinoDetail/Roulette/Roulette"))
 const MatkaDetail = lazy(() => import("./Pages/matkaDetail"))
 const AllCasinoResults = lazy(() => import("./Pages/AllCasinoResults/AllCasinoResults"))
+const LudoList = lazy(() => import("./Component/casinoDetail/Ludo/LudoList"))
+const LudoPlay = lazy(() => import("./Component/casinoDetail/Ludo/LudoPlay"))
 
 const Loading = () => (
   <>
@@ -93,6 +95,8 @@ const App = () => {
                 <Route path="/casino/:id"        element={<Navigate to="/main" replace />} />
                 <Route path="/lucky7/:id"        element={<Navigate to="/main" replace />} />
                 <Route path="/casino-bets"       element={<Navigate to="/main" replace />} />
+                <Route path="/ludo"      element={<LudoList />} />
+                <Route path="/ludo/play" element={<LudoPlay />} />
                 <Route path="/inplay" element={<Inpaly />} />
                 <Route path="/complete" element={<Complete />} />
                 <Route path="/ledger" element={<Ledger />} />

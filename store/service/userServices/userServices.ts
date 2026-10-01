@@ -253,6 +253,12 @@ export const userList = createApi({
         method: "GET",
       }),
     }),
+    getFancyPnlByMatch: build.query<any, { userId: string; gmid: string }>({
+      query: ({ userId, gmid }) => ({
+        url: `/fancy-pnl-by-match?userId=${userId}&gmid=${gmid}`,
+        method: "GET",
+      }),
+    }),
     getFancyBookData: build.query<any, { fancyId: string; beventId: string }>({
       query: ({ fancyId, beventId }) => ({
         url: `/fancy/book?fancyId=${fancyId}&beventId=${beventId}`,
@@ -386,6 +392,7 @@ export const {
   useGetChanelIdMutation,
   useActiveEventMutation,
   useGetTeamPLQuery,
+  useGetFancyPnlByMatchQuery,
   useGetFancyBookDataQuery,
   useGetCasinoMyBetsQuery,
   useGetCasinoLedgerQuery,

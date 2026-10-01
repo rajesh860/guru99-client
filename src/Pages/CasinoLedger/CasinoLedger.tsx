@@ -47,10 +47,8 @@ const CasinoLedger = () => {
                     <th style={{ width: "19%" }}>Round ID</th>
                     <th style={{ width: "10%" }}>Bet On</th>
                     <th style={{ width: "8%" }}>Odds</th>
-                    <th style={{ width: "10%" }}>Stake</th>
-                    <th style={{ width: "10%" }}>Won</th>
-                    <th style={{ width: "10%" }}>Lost</th>
-                    <th style={{ width: "10%" }}>P/L</th>
+                    <th style={{ width: "13%" }}>Stake</th>
+                    <th style={{ width: "13%" }}>P/L</th>
                     <th style={{ width: "9%" }}>Time</th>
                   </tr>
                 </thead>
@@ -64,13 +62,6 @@ const CasinoLedger = () => {
                         <td style={{ textAlign: "center" }}>{item?.odds || "-"}</td>
                         <td style={{ textAlign: "right" }}>₹{Number(item?.stake || 0).toFixed(2)}</td>
                         <td style={{ textAlign: "right" }}>
-                          <span className="casino-ledger-page__pl--positive">₹{Number(item?.won || 0).toFixed(2)}</span>
-                        </td>
-                        <td style={{ textAlign: "right" }}>
-                          <span className="casino-ledger-page__pl--negative">₹{Number(item?.lost || 0).toFixed(2)}</span>
-                        </td>
-                       
-                        <td style={{ textAlign: "right" }}>
                           <span className={Number(item?.rowPL || 0) >= 0 ? "casino-ledger-page__pl--positive" : "casino-ledger-page__pl--negative"}>
                             {Number(item?.rowPL || 0) >= 0 ? "+" : ""}₹{Number(item?.rowPL || 0).toFixed(2)}
                           </span>
@@ -82,7 +73,7 @@ const CasinoLedger = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={10} style={{ textAlign: "center", padding: "20px" }}>
+                      <td colSpan={8} style={{ textAlign: "center", padding: "20px" }}>
                         No data available
                       </td>
                     </tr>

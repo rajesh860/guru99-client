@@ -8,8 +8,19 @@ import { Provider } from "react-redux"
 import { store } from "../store/store"
 import { SnackbarUtilsConfigurator } from "./utils/Snackbar"
 
+// A stale cached index.html can keep referencing a lazy chunk that a later deploy has
+// since deleted — a plain reload() can still be served that same cached HTML from the
+// browser's own disk cache (index.html isn't always sent with cache-busting headers),
+// looping forever. Force a real network fetch via a cache-busted URL instead, and cap
+// retries so a genuine outage doesn't spin forever.
 window.addEventListener('vite:preloadError', () => {
-  window.location.reload()
+  const key = 'preloadErrorRetryCount'
+  const attempts = Number(sessionStorage.getItem(key) || '0')
+  if (attempts >= 2) return
+  sessionStorage.setItem(key, String(attempts + 1))
+  const url = new URL(window.location.href)
+  url.searchParams.set('_r', Date.now().toString())
+  window.location.replace(url.toString())
 })
 
 const container = document.getElementById("root")
@@ -46,6 +57,7 @@ if (container) {
       </SnackbarProvider>
     </Router>,
   )
+  sessionStorage.removeItem('preloadErrorRetryCount')
 } else {
   throw new Error(
     "Root element with ID 'root' was not found in the document. Ensure there is a corresponding HTML element with the ID 'root' in your HTML file.",

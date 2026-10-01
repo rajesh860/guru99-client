@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { FaLock } from "react-icons/fa"
-import BackBtn from "../../BackBtn/BackBtn"
+import CasinoGameSelect from "../../CasinoGameSelect/CasinoGameSelect"
 import { useGetCasinoMyBetsQuery, useGetCasinoCompletedBetsQuery } from "../../../../store/service/userServices/userServices"
 import PlaceBetModal from "../teenPatti/PlaceBetModal"
 import AaaRoundDetailModal from "./AaaRoundDetailModal"
@@ -9,6 +9,7 @@ import { getCardImage } from "../../../utils/cardImage"
 import { videoIdById } from "../../Casino_Data/Constant"
 import "./Aaa.scss"
 import "../teenPatti/styles.scss"
+import CasinoVideo from "../CasinoVideo"
 
 const RESULT_COLORS: Record<string, string> = {
   A: "linear-gradient(135deg,#7b1a1a,#a02020)",
@@ -129,7 +130,7 @@ const AAA: React.FC = () => {
 
   return (
     <>
-      <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
+      <CasinoGameSelect currentId="62" />
 
       <div className="aaa-container">
 
@@ -151,11 +152,7 @@ const AAA: React.FC = () => {
             <div className="aaa-card-label">Card</div>
           </div>
           <div className="aaa-video-area">
-            <iframe
-              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoId}`}
-              title="AAA Stream"
-              allowFullScreen
-            />
+            <CasinoVideo qnId={videoId} title="Amar Akbar Anthony" />
           </div>
         </div>
 
@@ -172,22 +169,23 @@ const AAA: React.FC = () => {
             { opt: anthonyOpt, mod: "anthony", label: "Anthony" },
           ] as const).map(({ opt, mod, label }) => (
             <div key={mod} className="aaa-main-col">
-              <div className="aaa-main-label">{label}</div>
+              {/* Coloured box: name on top, odds below (reference design) */}
               <button
                 className={`aaa-main-btn aaa-main-btn--${mod} ${isSuspended(opt) ? "aaa-main-btn--suspended" : ""}`}
                 onClick={() => handleRateClick(opt)}
                 disabled={isSuspended(opt)}
               >
+                <span className="aaa-btn-name">{label}</span>
                 <span className="aaa-btn-rate">{opt?.rate ?? opt?.b1 ?? "—"}</span>
                 {isSuspended(opt) && (
-                  <div className="aaa-lock-overlay"><FaLock size={14} color="#fff" /></div>
+                  <div className="aaa-lock-overlay"><FaLock size={16} color="#fff" /></div>
                 )}
               </button>
-              <div className="aaa-pl">
-                {opt?.pnl !== undefined && opt.pnl !== 0 ? (
-                  <span style={{ color: opt.pnl > 0 ? "#00e676" : "#ff5252" }}>{opt.pnl}</span>
-                ) : <span>0</span>}
-              </div>
+              {opt?.pnl !== undefined && opt.pnl !== 0 && (
+                <div className="aaa-pl">
+                  <span style={{ color: opt.pnl > 0 ? "#16a34a" : "#dc2626" }}>{opt.pnl}</span>
+                </div>
+              )}
             </div>
           ))}
         </div>

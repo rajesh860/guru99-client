@@ -1,12 +1,14 @@
+import { getCardImage } from "../../../utils/cardImage"
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { FaLock } from "react-icons/fa"
-import BackBtn from "../../BackBtn/BackBtn"
+import CasinoGameSelect from "../../CasinoGameSelect/CasinoGameSelect"
 import { useGetCasinoMyBetsQuery, useGetCasinoCompletedBetsQuery, useGetCasinoRoundPlQuery } from "../../../../store/service/userServices/userServices"
 import { videoIdById } from "../../Casino_Data/Constant"
 import PlaceBetModal from "../teenPatti/PlaceBetModal"
 import "../teenPatti/styles.scss"
 import "./ThirtyTwoCard.scss"
+import CasinoVideo from "../CasinoVideo"
 
 const VIDEO_BASE = "https://alpha-g.qnsports.live/route/rih2.php?id="
 
@@ -14,14 +16,6 @@ const VIDEO_BASE = "https://alpha-g.qnsports.live/route/rih2.php?id="
 const PLAYERS = ["Player 8", "Player 9", "Player 10", "Player 11"]
 const SEATS = [8, 9, 10, 11]
 
-// This game's own card CDN path — deliberately separate from the shared utils/cardImage.ts
-// (used by other games), which applies an HH/SS/DD suit-swap. Confirmed (via a working
-// reference implementation of this same "32 Cards" game) that this game's raw code needs NO
-// swap — applying it shifts the suit to the wrong one.
-const getCard32Image = (cardCode?: string) => {
-  const code = !cardCode || cardCode === "1" ? "1" : cardCode
-  return `https://versionobj.ecoassetsservice.com/v105/static/admin/img/cards/${code}.png`
-}
 
 // 32-Cards "point" = the card's rank value + the player's seat number (8/9/10/11). Whoever is
 // currently highest is leading. Code format: rank + doubled suit letter (e.g. "8CC", "JHH").
@@ -100,6 +94,30 @@ const ThirtyTwoCard = () => {
     return () => { if (ws.readyState === WebSocket.OPEN) ws.close() }
   }, [])
 
+  // 2026-09-26: overlay ke PATTE sky99 se (wahi table/stream). Guru backend kabhi
+  // galat suit bhejta tha (video me 7♥, guru data me 7DD). Bets/odds/timer abhi bhi
+  // guru backend (wsData) se hi aate hain — sirf patton ka display sky99 se.
+  const [skyT1, setSkyT1] = useState<any>(null)
+  useEffect(() => {
+    let ws: WebSocket | null = null
+    let stopped = false
+    let retry: ReturnType<typeof setTimeout> | undefined
+    const connect = () => {
+      ws = new WebSocket("wss://api.sky99.co/ws/casino")
+      ws.onopen = () => ws?.send(JSON.stringify({ type: "subscribe", game: "card32eu" }))
+      ws.onmessage = (e) => {
+        try {
+          const m = JSON.parse(e.data)
+          if (m.type === "gameData" && m.t1) setSkyT1(m.t1)
+        } catch {}
+      }
+      ws.onclose = () => { if (!stopped) retry = setTimeout(connect, 3000) }
+      ws.onerror = () => {}
+    }
+    connect()
+    return () => { stopped = true; if (retry) clearTimeout(retry); ws?.close() }
+  }, [])
+
   useEffect(() => {
     const autotime = wsData?.t1?.autotime ?? wsData?.autotime
     if (!autotime) { setCountdown("00:00"); setRemainingSecs(null); return }
@@ -144,7 +162,9 @@ const ThirtyTwoCard = () => {
   // tie-break card to those same 4 slots (still in P8/P9/P10/P11 order) — so card index i
   // belongs to player (i % 4), and a player can end up with more than one card across rounds
   // if they were involved in a tie-break. "1" is the sentinel for "not dealt this round".
-  const descCards = String(t1.desc || "").split(",")
+  // Same round ho to sky99 ke `cards` (same layout: batches of 4) use karo, warna guru ka desc.
+  const skyCards = skyT1 && String(skyT1.mid) === String(t1.mid) ? skyT1.cards : null
+  const descCards = String(skyCards || t1.desc || "").split(",")
   const getCards = (playerIndex: number): string[] => {
     const cards: string[] = []
     for (let i = playerIndex; i < descCards.length; i += 4) {
@@ -156,7 +176,7 @@ const ThirtyTwoCard = () => {
 
   return (
     <>
-      <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
+      <CasinoGameSelect currentId="55" />
 
       <div className="tc32-container teenpatti-container">
 
@@ -168,7 +188,7 @@ const ThirtyTwoCard = () => {
 
         {/* Video + card overlay */}
         <div className="tc32-video-wrap">
-          <iframe src={`${VIDEO_BASE}${videoId}`} title="32 Card Stream" allowFullScreen />
+          <CasinoVideo qnId={videoId} title="32 Card B" />
 
           {/* Cards overlaid on left side of video */}
           <div className="tc32-card-overlay">
@@ -197,7 +217,7 @@ const ThirtyTwoCard = () => {
                   <div key={name} className="tc32-overlay-player">
                     <div className="tc32-overlay-header">
                       <span className={`tc32-overlay-name${isLeading ? " tc32-overlay-name--leading" : ""}`}>
-                        {name.toUpperCase()}{point != null && <span className="tc32-overlay-point">:{point}</span>}
+                        {name.toUpperCase()}{point != null && <span className="tc32-overlay-point"> : {point}</span>}
                       </span>
                       {score !== undefined && (
                         <span className="tc32-overlay-score" style={{ color: score > 0 ? "#00e676" : "#fff" }}>
@@ -209,7 +229,7 @@ const ThirtyTwoCard = () => {
                       {cards.map((c, ci) => (
                         <img
                           key={ci}
-                          src={getCard32Image(c)}
+                          src={getCardImage(c)}
                           alt={c}
                           className="tc32-overlay-card"
                         />

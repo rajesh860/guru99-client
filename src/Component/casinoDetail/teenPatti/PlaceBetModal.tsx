@@ -22,7 +22,7 @@ interface Props {
   roundSeconds?: number
 }
 
-const quickAmounts = [100, 500, 1000, 2000, 5000, 10000, 25000, 50000, 100000]
+const quickAmounts = [100, 500, 1000, 5000, 10000, 20000]
 
 // Close the bet module this many seconds before the round ends — frontend
 // pre-empts the backend suspend so no bet is placed in the last moments.
@@ -159,11 +159,14 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
 
   return (
     <div className="pbm-overlay" onClick={onClose}>
-      <div className="pbm-sheet" onClick={(e) => e.stopPropagation()}>
+      <div
+        className={`pbm-sheet ${selectedPlayer.isBack ? "pbm-sheet--back" : "pbm-sheet--lay"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
 
         <div className="pbm-handle" />
 
-        {/* Top row: name | odds | timer */}
+        {/* Title row: type + name on the left, close on the right */}
         <div className="pbm-toprow">
           <div className="pbm-left">
             <span className={`pbm-type ${selectedPlayer.isBack ? "pbm-type--back" : "pbm-type--lay"}`}>
@@ -171,10 +174,19 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
             </span>
             <span className="pbm-name">{selectedPlayer.nat}</span>
           </div>
-          <span className={`pbm-odds ${selectedPlayer.isBack ? "pbm-odds--back" : "pbm-odds--lay"}`}>
-            {selectedPlayer.rate}
+          <button className="pbm-close" onClick={onClose} aria-label="Close">✕</button>
+        </div>
+
+        {/* Info row: odds chip + timer chip */}
+        <div className="pbm-subrow">
+          <div className={`pbm-odds-chip ${selectedPlayer.isBack ? "pbm-odds-chip--back" : "pbm-odds-chip--lay"}`}>
+            <span className="pbm-odds-chip-label">Odds</span>
+            <span className="pbm-odds-chip-val">{selectedPlayer.rate}</span>
+          </div>
+          <span className={`pbm-timer ${countdown <= 3 ? "pbm-timer--danger" : countdown <= 6 ? "pbm-timer--warn" : ""}`}>
+            <span className="pbm-timer-dot" />
+            Closes in {countdown}s
           </span>
-          <span className="pbm-timer">{countdown}s</span>
         </div>
 
         {/* Amount input */}
@@ -187,7 +199,9 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Enter amount"
           />
-          <button className="pbm-clear" onClick={() => setAmount("")}>C</button>
+          {amount && (
+            <button className="pbm-clear" onClick={() => setAmount("")}>✕</button>
+          )}
         </div>
 
         {/* Quick chips */}
@@ -203,15 +217,13 @@ const PlaceBetModal = ({ isOpen, onClose, selectedPlayer, matchId, game = "teen2
           ))}
         </div>
 
-        {/* Potential win */}
-        <div className="pbm-potential">
-          <span>Potential {selectedPlayer.isBack ? "Win" : "Liability"}</span>
-          <span className="pbm-potential-val">₹{potentialWin}</span>
-        </div>
+        {/* Potential win + CTA, 50/50 */}
+        <div className="pbm-bottom-row">
+          <div className="pbm-potential">
+            <span className="pbm-potential-label">Potential {selectedPlayer.isBack ? "Win" : "Liability"}</span>
+            <span className="pbm-potential-val">₹{potentialWin}</span>
+          </div>
 
-        {/* Buttons */}
-        <div className="pbm-actions">
-          <button className="pbm-cancel" onClick={onClose}>Cancel ({countdown}s)</button>
           <button
             className={`pbm-submit ${selectedPlayer.isBack ? "pbm-submit--back" : "pbm-submit--lay"}`}
             onClick={handlePlaceBet}

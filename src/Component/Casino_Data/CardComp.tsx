@@ -10,7 +10,7 @@ const CardComp = ({ shown, card }: any) => {
           <div className="flip-card-back">
             <img
               className="card_front"
-              src={`https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${card.includes("HH") ? card.replace(/HH/, "SS") : card.includes("SS") ? card.replace(/SS/, "DD") : card.includes("DD") ? card.replace(/DD/, "HH") : card}.jpg`}
+              src={`https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${card}.jpg`}
               alt=""
             />
           </div>

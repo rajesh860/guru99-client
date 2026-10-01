@@ -1,5 +1,4 @@
 import type React from "react"
-import BackBtn from "../../Component/BackBtn/BackBtn"
 import { useNavigate } from "react-router-dom"
 import snackbarUtil from "../../utils/Snackbar"
 import "./style.css"
@@ -17,6 +16,7 @@ const Casino = () => {
     { tableId: '59', name: 'Poker 20-20' },
     { tableId: '55', name: '32 Cards' },
     { tableId: '8',  name: 'Baccarat' },
+    { tableId: 'ludo', name: 'Ludo' },
     // { tableId: '99', name: 'Dice Game' },
   ]
 
@@ -32,7 +32,8 @@ const Casino = () => {
     if (nameCheck.includes('32')) return '/img/casino2.png'
     if (nameCheck.includes('baccarat')) return '/img/casino3.png'
     if (nameCheck.includes('dice')) return '/img/casino4.png'
-    if (nameCheck.includes('roulette')) return '/img/casino3.png'
+    if (nameCheck.includes('roulette')) return '/img/roulete.png'
+    if (nameCheck.includes('ludo')) return '/img/ludo.png'
     if (nameCheck.includes('one day')) return '/img/oneDayTeenPatti.jpg'
     
     // Default based on tableId if name doesn't match
@@ -42,12 +43,17 @@ const Casino = () => {
   }
 
   // Active casino games — add tableId here to enable
-  const ACTIVE_IDS = new Set<string>(['51', '52', '53', '55', '62', '99'])
+  const ACTIVE_IDS = new Set<string>(['51', '52', '53', '55', '62', '99', 'ludo'])
 
   const handleCardClick = (e: React.MouseEvent, casino: any) => {
     if (!ACTIVE_IDS.has(casino.tableId)) {
       e.preventDefault()
       snackbarUtil.info("Coming Soon!")
+      return
+    }
+    // Ludo is its own table-selection flow (/ludo), not the generic /casino/detail/:id page.
+    if (casino.tableId === 'ludo') {
+      navigate('/ludo')
       return
     }
     navigate(`/casino/detail/${casino.tableId}`)
@@ -58,11 +64,10 @@ const Casino = () => {
 
   return (
     <>
-      <BackBtn to="/main" name="BACK TO MAIN MENU" />
       <div className="casino-page">
         <div className="casino-header">
+          <span className="casino-header-icon">🎰</span>
           <h1 className="casino-title">Casino Games</h1>
-          <p className="casino-subtitle">Choose your game and start playing</p>
         </div>
 
         <div className="casino-grid">
@@ -73,10 +78,13 @@ const Casino = () => {
             return (
               <div
                 key={casino.tableId}
-                className="casino-card"
+                className={`casino-card ${active ? "" : "casino-card--soon"}`}
                 onClick={(e) => handleCardClick(e, casino)}
-                style={{ cursor: 'pointer' }}
               >
+                <span className={`casino-status-badge ${active ? "casino-status-badge--live" : "casino-status-badge--soon"}`}>
+                  {active ? "● LIVE" : "SOON"}
+                </span>
+
                 <div className="casino-card-image">
                   <img
                     src={image}
@@ -85,17 +93,13 @@ const Casino = () => {
                       e.currentTarget.src = `/img/casino.png`
                     }}
                   />
+                  <div className="casino-card-scrim" />
                   <div className="casino-card-overlay">
                     <span className="casino-play-btn">
                       {active ? 'PLAY NOW' : 'COMING SOON'}
                     </span>
                   </div>
-                </div>
-                <div className="casino-card-content">
                   <h3 className="casino-card-title">{casino.name}</h3>
-                  {/* <div className="casino-card-status">
-                    <span className="casino-status-badge">LIVE</span>
-                  </div> */}
                 </div>
               </div>
             )

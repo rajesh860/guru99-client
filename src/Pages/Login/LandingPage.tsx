@@ -1,4 +1,5 @@
 import { Box, Button, Checkbox, FormControlLabel, Paper, TextField, Typography } from "@mui/material"
+import { markLudoLaunchPopup } from "../../Component/LudoLaunchModal/LudoLaunchModal"
 import "./LandingPage.css"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
@@ -57,8 +58,8 @@ export default function LandingPage() {
       if (data?.token) {
         nav("/tc")
         localStorage.setItem("client-token", data?.token)
-        localStorage.setItem("userId", data?.userId)
-        localStorage.setItem("welShow", "true")
+        markLudoLaunchPopup()
+        if (data?.userId) localStorage.setItem("userId", data.userId)
         localStorage.setItem('firstTimeLogin', `${data?.firstTimeLogin}`)
         snackbarUtil.success("Success")
       } else {

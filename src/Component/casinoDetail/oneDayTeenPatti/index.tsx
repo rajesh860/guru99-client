@@ -13,6 +13,7 @@ import "./styles.scss"
 import TeamTable from "./TeamTable"
 import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
 import { getCardImage } from "../../../utils/cardImage"
+import CasinoVideo from "../CasinoVideo"
 
 const OneDayTeenPatti = () => {
   const { id } = useParams()
@@ -103,11 +104,7 @@ const OneDayTeenPatti = () => {
 
           <div className="game-section">
             <div className="timer">{data?.t1[0]?.autotime}</div>
-            <iframe
-              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id] || "3035"}`}
-              title="DragonTiger Stream"
-              allowFullScreen
-            ></iframe>
+            <CasinoVideo qnId={videoIdById[id] || "3035"} title="DragonTiger Stream" />
 
             {/* Minimal layout; expand with card visuals if needed */}
             <div className="card-area-box-teenpatti">

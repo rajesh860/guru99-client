@@ -43,6 +43,7 @@ const formatTimestamp = (timestamp: number) => {
 }
 
 import { getCardImage } from "../../../utils/cardImage"
+import CasinoVideo from "../CasinoVideo"
 
 const DragonTiger2 = () => {
   const { id } = useParams()
@@ -194,11 +195,7 @@ const DragonTiger2 = () => {
             >
               {countdown === "00:00" ? "BETTING CLOSED" : `Time: ${countdown}`}
             </div>
-            <iframe
-              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id] || "3035"}`}
-              title="DragonTiger Stream"
-              allowFullScreen
-            ></iframe>
+            <CasinoVideo qnId={videoIdById[id] || "3035"} title="DragonTiger Stream" />
 
             <div className="card-area-box">
               <img src={getCardImage(data?.t1?.[0]?.C1)} alt="Dragon card" />

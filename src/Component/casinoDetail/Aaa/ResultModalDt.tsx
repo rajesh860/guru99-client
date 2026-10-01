@@ -84,7 +84,7 @@ const ResultModal = ({ open, setOpen, onClose, tableId, mid, result,first }: any
                 <div className="card">
                   <img 
                     src={cardValue ? 
-                      `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${cardValue.includes("HH") ? cardValue.replace(/HH/, "SS") : cardValue.includes("SS") ? cardValue.replace(/SS/, "DD") : cardValue.includes("DD") ? cardValue.replace(/DD/, "HH") : cardValue}.jpg` 
+                      `https://versionobj.ecoassetsservice.com/v14/static/front/img/cards/${cardValue}.jpg` 
                       : resultCard
                     } 
                     alt="Result Card" 

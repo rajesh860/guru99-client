@@ -1,0 +1,759 @@
+/* ═══════════════════════════════════════
+   WRAPPER — deep navy, full-height app shell
+════════════════════════════════════════ */
+.ludo-wrapper {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0b1554;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  color: #fff;
+  overflow-x: hidden;
+  /* Single source of truth for cell size — shared by board, player rows, badges */
+  --cell: min(calc((100vw - 4px) / 15), 28px);
+}
+
+/* ═══════════════════════════════════════
+   PLAYER ROWS — same width as board, players align with their quadrants
+════════════════════════════════════════ */
+.ludo-players-row {
+  display: flex;
+  align-items: center;
+  /* exactly matches board width so players sit beside their home quadrant */
+  width: calc(15 * var(--cell) + 14px);
+  max-width: 100%;
+  background: #07104a;
+  padding: 6px 0;
+  gap: 4px;
+  flex-shrink: 0;
+  /* table can seat up to 3 opponents at once — scroll instead of overflow/squeeze */
+  overflow-x: auto;
+}
+
+.ludo-players-row:first-child { border-bottom: 1px solid rgba(255,255,255,0.07); }
+.ludo-players-row:last-child  { border-top:    1px solid rgba(255,255,255,0.07); }
+
+/* Center message / button between the two players */
+.pp-center-msg {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+  text-align: center;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+/* Individual player card — tinted with that player's own color so the panel
+   reads as a self-contained block, instead of floating over whatever
+   quadrant happens to sit beneath it on screen. */
+.player-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: default;
+  flex-shrink: 0;
+  opacity: 0.5;
+  transition: opacity 0.2s, background 0.2s;
+  min-width: 64px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  position: relative;
+}
+.player-panel.pp-active { opacity: 1; cursor: pointer; }
+
+/* Last-3-seconds 3 → 2 → 1 overlay in the middle of the board.
+   Number is keyed per value in JSX so the pop animation replays each second. */
+.board-countdown {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+  line-height: 1;
+}
+.board-countdown-num {
+  width: calc(var(--cell, 44px) * 4);
+  height: calc(var(--cell, 44px) * 4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 16, 74, 0.82);
+  border: 4px solid var(--bc-color, #fff);
+  box-shadow: 0 0 24px var(--bc-color, #fff);
+  color: #fff;
+  font-size: calc(var(--cell, 44px) * 2.4);
+  font-weight: 900;
+  text-shadow: 0 0 14px var(--bc-color, #fff);
+  animation: boardCountPop 1s ease-out both;
+}
+.bc-red    { --bc-color: #F44336; }
+.bc-blue   { --bc-color: #2196F3; }
+.bc-yellow { --bc-color: #FFC107; }
+.bc-green  { --bc-color: #4CAF50; }
+@keyframes boardCountPop {
+  0%   { transform: scale(1.6); opacity: 0; }
+  20%  { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(0.92); opacity: 0.9; }
+}
+
+/* Solid, high-contrast — the earlier 14% tint was too subtle to read as
+   "this whole block belongs to green" against the dark background. */
+.pp-red    { background: rgba(239,83,80,0.32);  border: 1.5px solid rgba(239,83,80,0.6); }
+.pp-blue   { background: rgba(66,165,245,0.32); border: 1.5px solid rgba(66,165,245,0.6); }
+.pp-green  { background: rgba(102,187,106,0.32); border: 1.5px solid rgba(102,187,106,0.6); }
+.pp-yellow { background: rgba(255,202,40,0.32); border: 1.5px solid rgba(255,202,40,0.6); }
+.player-panel.pp-right  { align-items: center; }
+
+.pp-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Avatar circle */
+.pp-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+
+.av-red    { background: radial-gradient(135deg, #EF5350, #B71C1C); }
+.av-blue   { background: radial-gradient(135deg, #42A5F5, #0D47A1); }
+.av-yellow { background: radial-gradient(135deg, #FFD54F, #E65100); color: #333; }
+.av-green  { background: radial-gradient(135deg, #81C784, #2E7D32); }
+
+.pp-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+}
+.player-panel.pp-active .pp-name { color: #fff; }
+
+.pp-tokens {
+  font-size: 10px;
+  color: rgba(255,255,255,0.45);
+}
+.player-panel.pp-active .pp-tokens { color: rgba(255,255,255,0.75); }
+
+/* ── Mini per-player Dice ── */
+/* Inactive = dark 3D dice with white pips (like Zupee disabled dice) */
+.mini-dice {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  position: relative;
+  flex-shrink: 0;
+  background: linear-gradient(145deg, #4a5068 0%, #2c3150 55%, #1e2440 100%);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12);
+  transition: transform 0.15s, background 0.2s;
+}
+
+/* White pips on dark inactive dice */
+.md-pip {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.88);
+  transform: translate(-50%, -50%);
+}
+
+/* Active (current player, not yet rolled) → white dice with dark pips */
+.mini-dice.md-active {
+  /* background: #ffffff; */
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.mini-dice.md-active .md-pip {
+  background: #222;
+}
+
+.mini-dice.md-rolling { animation: mdRoll 0.6s ease; background: #fff; }
+
+@keyframes mdRoll {
+  0%   { transform: rotate(0deg)   scale(1); }
+  25%  { transform: rotate(90deg)  scale(1.2); }
+  50%  { transform: rotate(180deg) scale(0.8); }
+  75%  { transform: rotate(270deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+.md-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 5px;
+}
+
+.md-emoji {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+
+/* ═══════════════════════════════════════
+   BOARD FRAME
+════════════════════════════════════════ */
+.ludo-board-wrap {
+  position: relative;
+  flex-shrink: 0;
+  line-height: 0;
+  /* inherits --cell from .ludo-wrapper */
+  border: 3px solid rgba(120,170,255,0.85);
+  border-radius: 14px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15), 0 4px 20px rgba(0,0,0,0.4);
+  overflow: hidden; /* clip the square grid to the rounded frame */
+}
+
+.ludo-board {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(15, var(--cell));
+  grid-template-rows: repeat(15, var(--cell));
+  background: #8a90a0;
+  gap: 0.5px;
+}
+
+/* ═══════════════════════════════════════
+   QUADRANT SCORE BADGE — Zupee-style big
+   "Score" circle + mover label per corner
+════════════════════════════════════════ */
+.lqb {
+  /* Fills almost the whole 6x6 home quadrant — tokens (z-index 2) render
+     above this (z-index 1), so they stay visible over the circle. */
+  position: absolute;
+  width: calc(var(--cell) * 6);
+  height: calc(var(--cell) * 6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--cell) * 0.3);
+  pointer-events: none;
+  z-index: 1; /* above quadrant background, below tokens (z-index 2) */
+}
+
+.lqb-green  { top: 0;    left: 0; }
+.lqb-yellow { top: 0;    left: calc(var(--cell) * 9); }
+.lqb-red    { top: calc(var(--cell) * 9); left: 0; }
+.lqb-blue   { top: calc(var(--cell) * 9); left: calc(var(--cell) * 9); }
+
+.lqb-circle {
+  width: calc(var(--cell) * 3.7);
+  height: calc(var(--cell) * 3.7);
+  border-radius: 50%;
+  background: #ffffff; /* fully opaque — a translucent white here let the quadrant color bleed through and muddy the text */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 -3px 6px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+
+.lqb-active .lqb-circle {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4), 0 0 0 3px #FFD700, 0 0 12px 2px rgba(255,215,0,0.6);
+}
+
+/* Unfilled seat — dimmed, dashed outline, no score/mover text so it can't be
+   mistaken for a real opponent. */
+.lqb-empty {
+  opacity: 0.4;
+}
+.lqb-empty .lqb-circle {
+  background: transparent;
+  border: 2px dashed rgba(255,255,255,0.4);
+  box-shadow: none;
+}
+.lqb-empty .lqb-label {
+  color: rgba(255,255,255,0.6);
+}
+.lqb-empty .lqb-mover {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  text-shadow: none;
+}
+
+.lqb-label {
+  font-size: calc(var(--cell) * 0.26);
+  font-weight: 600;
+  color: #58606e;
+  letter-spacing: 0.3px;
+  margin-bottom: calc(var(--cell) * 0.04);
+}
+
+.lqb-val {
+  font-size: calc(var(--cell) * 0.72);
+  font-weight: 900;
+  color: #16181d;
+  line-height: 1.05;
+}
+
+/* Light, translucent pill behind the mover text */
+.lqb-mover {
+  font-size: calc(var(--cell) * 0.32);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  white-space: nowrap;
+  padding: calc(var(--cell) * 0.36) calc(var(--cell) * 0.6);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* ═══════════════════════════════════════
+   BASE CELL
+════════════════════════════════════════ */
+.ludo-cell {
+  width: var(--cell, 44px);
+  height: var(--cell, 44px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* ═══════════════════════════════════════
+   HOME QUADRANTS — one flat solid color block
+   (no checkered sub-grid / circle slots — Score
+   badge + waiting tokens float directly on top)
+════════════════════════════════════════ */
+/* box-shadow (same color, overlapping) papers over the 0.5px grid gap
+   between adjacent cells of the same quadrant, so it reads as one solid
+   block instead of a checkerboard of thin seams. */
+.hb-solid-red    { background: #D32F2F; box-shadow: 0 0 0 1px #D32F2F; }
+.hb-solid-blue   { background: #1565C0; box-shadow: 0 0 0 1px #1565C0; }
+.hb-solid-yellow { background: #F9A825; box-shadow: 0 0 0 1px #F9A825; }
+.hb-solid-green  { background: #2E7D32; box-shadow: 0 0 0 1px #2E7D32; }
+
+/* ═══════════════════════════════════════
+   PATH CELLS
+════════════════════════════════════════ */
+.cell-path  { background: #ffffff; }
+.cell-empty { background: #dce3f0; }
+
+.cell-safe { background: #fff; }
+.cell-safe::after {
+  content: '★';
+  position: absolute;
+  font-size: calc(var(--cell, 44px) * 0.42);
+  color: #c8a800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.cell-start-red    { background: #FFCDD2; }
+.cell-start-blue   { background: #BBDEFB; }
+.cell-start-yellow { background: #FFF9C4; }
+.cell-start-green  { background: #C8E6C9; }
+
+/* Last track cell before each color's home column — arrow/border hint */
+.cell-pre-home-red    { background: #fff; border: 2px solid rgba(239,83,80,0.65); }
+.cell-pre-home-blue   { background: #fff; border: 2px solid rgba(66,165,245,0.65); }
+.cell-pre-home-yellow { background: #fff; border: 2px solid rgba(255,202,40,0.65); }
+.cell-pre-home-green  { background: #fff; border: 2px solid rgba(102,187,106,0.65); }
+.cell-pre-home-red::after    { content: '▲'; color: rgba(239,83,80,0.8);  font-size: calc(var(--cell,44px)*0.32); position:absolute; }
+.cell-pre-home-blue::after   { content: '◀'; color: rgba(66,165,245,0.8); font-size: calc(var(--cell,44px)*0.32); position:absolute; }
+.cell-pre-home-yellow::after { content: '▼'; color: rgba(255,202,40,0.9); font-size: calc(var(--cell,44px)*0.32); position:absolute; }
+.cell-pre-home-green::after  { content: '▶'; color: rgba(102,187,106,0.8);font-size: calc(var(--cell,44px)*0.32); position:absolute; }
+
+/* ═══════════════════════════════════════
+   HOME STRETCH LANES
+════════════════════════════════════════ */
+.cell-stretch-red    { background: #EF5350; }
+.cell-stretch-blue   { background: #42A5F5; }
+.cell-stretch-yellow { background: #FFCA28; }
+.cell-stretch-green  { background: #66BB6A; }
+
+/* ═══════════════════════════════════════
+   CENTER AREA
+════════════════════════════════════════ */
+.cell-center {
+  background: #fff;
+  z-index: 2;
+}
+.cell-center::after {
+  content: '⭐';
+  font-size: calc(var(--cell, 44px) * 0.55);
+  position: absolute;
+}
+
+.cell-tri-red    { background: #EF5350; }
+.cell-tri-blue   { background: #42A5F5; }
+.cell-tri-yellow { background: #FFCA28; }
+.cell-tri-green  { background: #66BB6A; }
+.cell-center-corner { background: #f0f0f0; }
+
+/* ═══════════════════════════════════════
+   TOKENS — glossy pawn/pin look (Zupee-style)
+════════════════════════════════════════ */
+.ludo-token {
+  width: calc(var(--cell, 44px) * 0.6);
+  height: calc(var(--cell, 44px) * 0.76);
+  /* dome-topped pawn silhouette instead of a flat circle */
+  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  cursor: default;
+  flex-shrink: 0;
+  margin: 1px;
+  transition: transform 0.18s, box-shadow 0.18s;
+  border: 1.5px solid rgba(255,255,255,0.65);
+}
+
+/* Drop shadow puddle beneath the pawn, grounding it on the cell */
+.ludo-token::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  width: 72%;
+  height: 18%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.4);
+  border-radius: 50%;
+  filter: blur(1px);
+  z-index: -1;
+}
+
+/* Multiple tokens in one cell */
+.ludo-cell:has(.ludo-token ~ .ludo-token) .ludo-token {
+  width: calc(var(--cell, 44px) * 0.36);
+  height: calc(var(--cell, 44px) * 0.46);
+  border-width: 1px;
+}
+.ludo-cell:has(.ludo-token ~ .ludo-token) .token-inner {
+  width: 42%;
+  height: 30%;
+}
+
+/* Glossy highlight near the top of the pawn's head */
+.token-inner {
+  width: 42%;
+  height: 26%;
+  margin-top: 10%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.65);
+  display: block;
+  pointer-events: none;
+}
+
+/* Token colors — bright Zupee palette, glossy dome shading */
+.token-red {
+  background: radial-gradient(circle at 38% 24%, #FF8A80 0%, #F44336 45%, #B71C1C 100%);
+  box-shadow: 0 3px 8px rgba(244,67,54,0.6), inset 0 -3px 5px rgba(0,0,0,0.28), inset 0 2px 3px rgba(255,255,255,0.35);
+}
+.token-blue {
+  background: radial-gradient(circle at 38% 24%, #82C4FA 0%, #2196F3 45%, #0D47A1 100%);
+  box-shadow: 0 3px 8px rgba(33,150,243,0.6), inset 0 -3px 5px rgba(0,0,0,0.28), inset 0 2px 3px rgba(255,255,255,0.35);
+}
+.token-yellow {
+  background: radial-gradient(circle at 38% 24%, #FFF59D 0%, #FFC107 45%, #E65100 100%);
+  box-shadow: 0 3px 8px rgba(255,193,7,0.6), inset 0 -3px 5px rgba(0,0,0,0.28), inset 0 2px 3px rgba(255,255,255,0.35);
+}
+.token-green {
+  background: radial-gradient(circle at 38% 24%, #A5D6A7 0%, #4CAF50 45%, #1B5E20 100%);
+  box-shadow: 0 3px 8px rgba(76,175,80,0.6), inset 0 -3px 5px rgba(0,0,0,0.28), inset 0 2px 3px rgba(255,255,255,0.35);
+}
+
+/* Selectable — white glow pulse */
+.ludo-token.selectable {
+  cursor: pointer;
+  animation: tokenPulse 0.65s ease-in-out infinite alternate;
+}
+
+@keyframes tokenPulse {
+  from { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  to   { transform: scale(1.28); box-shadow: 0 0 0 4px rgba(255,255,255,0.85), 0 0 12px 4px rgba(255,220,50,0.45); }
+}
+
+/* Just returned home after capture */
+.ludo-token.just-returned {
+  animation: tokenReturn 0.55s cubic-bezier(0.36,0.07,0.19,0.97) forwards;
+}
+@keyframes tokenReturn {
+  0%   { transform: scale(0) rotate(360deg); opacity: 0; }
+  55%  { transform: scale(1.4) rotate(-18deg); opacity: 1; }
+  78%  { transform: scale(0.88) rotate(6deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════
+   CAPTURE BURST
+════════════════════════════════════════ */
+.capture-blast {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  z-index: 30;
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: captureBurst 0.7s ease-out forwards;
+}
+.capture-blast::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation: captureBurst 0.7s ease-out 0.12s forwards;
+  opacity: 0.6;
+}
+
+.blast-red    { background: radial-gradient(circle, rgba(255,120,120,0.95) 0%, rgba(211,47,47,0.5) 45%, transparent 72%); }
+.blast-red::after { background: radial-gradient(circle, rgba(255,80,80,0.7) 0%, transparent 65%); }
+.blast-blue   { background: radial-gradient(circle, rgba(100,181,246,0.95) 0%, rgba(21,101,192,0.5) 45%, transparent 72%); }
+.blast-blue::after { background: radial-gradient(circle, rgba(66,165,245,0.7) 0%, transparent 65%); }
+.blast-yellow { background: radial-gradient(circle, rgba(255,241,118,0.95) 0%, rgba(249,168,37,0.5) 45%, transparent 72%); }
+.blast-yellow::after { background: radial-gradient(circle, rgba(255,202,40,0.7) 0%, transparent 65%); }
+.blast-green  { background: radial-gradient(circle, rgba(129,199,132,0.95) 0%, rgba(46,125,50,0.5) 45%, transparent 72%); }
+.blast-green::after { background: radial-gradient(circle, rgba(76,175,80,0.7) 0%, transparent 65%); }
+
+@keyframes captureBurst {
+  0%   { transform: translate(-50%,-50%) scale(0.3); opacity: 1; }
+  45%  { transform: translate(-50%,-50%) scale(2.4); opacity: 0.85; }
+  100% { transform: translate(-50%,-50%) scale(3.8); opacity: 0; }
+}
+
+/* ═══════════════════════════════════════
+   WINNER OVERLAY (on top of board)
+════════════════════════════════════════ */
+.winner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.overlay-red    { background: rgba(183, 28, 28, 0.9); }
+.overlay-blue   { background: rgba(13, 71, 161, 0.9); }
+.overlay-yellow { background: rgba(230, 81, 0, 0.88); }
+.overlay-green  { background: rgba(27, 94, 32, 0.9); }
+
+.winner-trophy {
+  font-size: 60px;
+  animation: trophyBounce 0.75s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+@keyframes trophyBounce {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
+
+.winner-label {
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  animation: trophyBounce 0.75s 0.12s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.btn-play-again {
+  padding: 12px 36px;
+  border-radius: 28px;
+  border: 2px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: background 0.18s, transform 0.1s;
+  backdrop-filter: blur(4px);
+}
+.btn-play-again:hover  { background: rgba(255,255,255,0.32); transform: scale(1.04); }
+.btn-play-again:active { transform: scale(0.97); }
+
+
+/* Declare --arc as an animatable CSS property (Houdini @property) */
+@property --arc {
+  syntax: '<angle>';
+  initial-value: 360deg;
+  inherits: false;
+}
+
+/* ── Countdown ring around mini-dice ── */
+/* 44px circle wraps 32px dice — the ~6px gap shows the depleting arc */
+.md-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 32%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.08);
+  flex-shrink: 0;
+}
+
+.md-ring.md-ring-active {
+  background: conic-gradient(
+    var(--ring-color, #4CAF50) var(--arc),
+    rgba(255,255,255,0.12) var(--arc)
+  );
+  animation: countdownArc 15s linear forwards;
+}
+
+.ring-red.md-ring-active    { --ring-color: #F44336; }
+.ring-blue.md-ring-active   { --ring-color: #2196F3; }
+.ring-yellow.md-ring-active { --ring-color: #FFC107; }
+.ring-green.md-ring-active  { --ring-color: #4CAF50; }
+
+@keyframes countdownArc {
+  from { --arc: 360deg; }
+  to   { --arc: 0deg; }
+}
+
+/* ── Miss-turn toast ── */
+.miss-toast {
+  position: fixed;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 10, 30, 0.92);
+  color: #fff;
+  padding: 13px 22px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  z-index: 200;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: toastIn 0.3s ease both, toastOut 0.35s ease 2.1s forwards;
+  white-space: nowrap;
+}
+
+.miss-icon { font-size: 18px; }
+
+.toast-red    { border-top: 3px solid #F44336; }
+.toast-blue   { border-top: 3px solid #2196F3; }
+.toast-yellow { border-top: 3px solid #FFC107; }
+.toast-green  { border-top: 3px solid #4CAF50; }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, -60%) scale(0.88); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  to   { opacity: 0; transform: translate(-50%, -44%) scale(0.92); }
+}
+
+/* ── New Game button ── */
+.btn-new {
+  padding: 9px 0;
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.btn-new:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+/* Notifications shown in the middle of the board (above the 3-2-1 countdown) */
+.board-toast-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 30;
+  line-height: 1.3;
+  padding: 0 12px;
+}
+.board-toast {
+  max-width: 90%;
+  padding: 12px 20px;
+  border-radius: 14px;
+  background: rgba(7, 16, 74, 0.94);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  animation: boardToastIn 0.25s ease-out both;
+}
+@keyframes boardToastIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Walking token: small hop each time it lands on the next square
+   (the token remounts in each new cell, so this replays per step). */
+.ludo-token.token-hop { animation: tokenHop 0.18s ease-out; z-index: 5; }
+@keyframes tokenHop {
+  0%   { transform: translateY(0)    scale(1); }
+  45%  { transform: translateY(-35%) scale(1.12); }
+  100% { transform: translateY(0)    scale(1); }
+}
+
+/* ── Per-viewer board rotation ──
+   The board turns (via the independent `rotate` property, so it never fights the
+   transform-based token animations) until the viewer's own quadrant is bottom-left.
+   Tokens, score badges, stars and overlays turn back by the same amount so they
+   stay upright; path arrows rotate with the board so they keep pointing the right way. */
+.ludo-board { rotate: var(--board-rot, 0deg); }
+.ludo-board .ludo-token,
+.ludo-board .lqb,
+.ludo-board .cell-safe::after,
+.ludo-board .board-countdown-num,
+.ludo-board .board-toast {
+  rotate: calc(-1 * var(--board-rot, 0deg));
+}

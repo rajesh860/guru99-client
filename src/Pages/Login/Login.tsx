@@ -1,4 +1,5 @@
 import { Box, Checkbox, FormControlLabel, TextField } from "@mui/material"
+import { markLudoLaunchPopup } from "../../Component/LudoLaunchModal/LudoLaunchModal"
 import { useEffect, useState } from "react"
 import "./login.scss"
 import { useLoginMutation } from "../../../store/service/authService"
@@ -51,7 +52,9 @@ const Login = () => {
       // }
 
       const apiBase = import.meta.env.VITE_API_BASE_URL || ''
-      const appUrl = apiBase ? new URL(apiBase).hostname : window.location.hostname
+      const appUrl = import.meta.env.DEV
+        ? "localhost"
+        : apiBase ? new URL(apiBase).hostname : window.location.hostname
       trigger({
         username: "C" + clientCode,
         password: password,
@@ -68,8 +71,8 @@ const Login = () => {
       if (data?.token) {
         nav("/tc")
         localStorage.setItem("client-token", data?.token)
-        localStorage.setItem("userId", data?.userId)
-        localStorage.setItem("welShow", "true")
+        markLudoLaunchPopup()
+        if (data?.userId) localStorage.setItem("userId", data.userId)
 
         // snackbarUtil.success(data?.message)
       } else {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import "../teenPatti/styles.scss"
 import { FaArrowRight, FaLock } from "react-icons/fa"
-import BackBtn from "../../BackBtn/BackBtn"
+import CasinoGameSelect from "../../CasinoGameSelect/CasinoGameSelect"
 import {
   useBetPlaceMutation,
 } from "../../../../store/service/casino/casinoServices"
@@ -19,6 +19,7 @@ import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
 import RoundDetailModal from "./RoundDetailModal"
 import cardBack from "../../../../public/casino/cardBack.png"
 import { getCardImage } from "../../../utils/cardImage"
+import CasinoVideo from "../CasinoVideo"
 
 interface SelectedPlayerType {
   gstatus: boolean
@@ -182,7 +183,7 @@ const TeenPattiGame = () => {
 
   return (
     <>
-      <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
+      <CasinoGameSelect currentId="51" />
 
       <div className="teenpatti-container">
         <div className="left-col">
@@ -210,11 +211,7 @@ const TeenPattiGame = () => {
           </div>
 
           <div className="game-section">
-            <iframe
-              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoIdById[id ?? ""] ?? "3030"}`}
-              title="Teen Patti Stream"
-              allowFullScreen
-            ></iframe>
+            <CasinoVideo qnId="3030" title="Teenpatti 2020" />
 
             {/* Countdown Timer */}
             <div className={`tp-timer ${countdown === "00:00" ? "tp-timer--closed" : "tp-timer--open"}`}>

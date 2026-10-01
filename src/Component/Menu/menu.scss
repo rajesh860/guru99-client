@@ -9,6 +9,24 @@
     display: block;
     background: var(--color-primary);
   }
+
+  // Message scrolls fully off-screen, pauses, then re-enters from the right —
+  // no overlapping repeats, so it's always clear where it starts.
+  .mq-wrap {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .mq-track {
+    position: absolute;
+    left: 0;
+    white-space: nowrap;
+    will-change: transform;
+  }
 }
 
 .mar_head,

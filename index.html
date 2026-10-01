@@ -2,6 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Hint against caching this shell page — it must always point at the current
+         deploy's asset hashes, or a stale copy will keep requesting chunks a later
+         deploy has since deleted. (Belt-and-suspenders: the server should also send a
+         real Cache-Control header for this exact reason.) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link

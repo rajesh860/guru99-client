@@ -10,12 +10,17 @@ import {
 import snackbarUtil from "../../utils/Snackbar"
 
 const NAV_ITEMS = [
-  { to: "/inplay",    icon: "/img/crick.png",    label: "In Play" },
-  { to: "/statement", icon: "/img/settlmen.png", label: "Statement" },
-  { to: "/ledger",    icon: "/img/CL.png",        label: "My Ledger" },
-  { to: "/complete",  icon: "/img/CG1.jpg",       label: "Complete Games" },
-  { to: "/password",  icon: "/img/CP.png",        label: "Change Password" },
-  { to: "/profile",   icon: "/img/Profile.png",   label: "My Profile" },
+  { to: "/inplay",         icon: "/img/crick.png",     label: "In Play" },
+  { to: "/satta-matka",    icon: "/casino/matka.png",  label: "Matka" },
+  { to: "/casino-list",    icon: "/img/casinoImg.png", label: "Casino" },
+  { to: "/casino/detail/99", icon: "/img/dice.png",    label: "Dice" },
+  { to: "/roulette",       icon: "/img/roulete.png",   label: "Roulette" },
+  { to: "/aviator",        icon: "/img/aviator.png",   label: "Aviator" },
+  { to: "/statement",      icon: "/img/settlmen.png",  label: "Statement" },
+  { to: "/ledger",         icon: "/img/CL.png",         label: "My Ledger" },
+  { to: "/complete",       icon: "/img/CG1.jpg",        label: "Complete Games" },
+  { to: "/password",       icon: "/img/CP.png",         label: "Change Password" },
+  { to: "/profile",        icon: "/img/Profile.png",    label: "My Profile" },
 ]
 
 const Header = () => {
@@ -23,7 +28,8 @@ const Header = () => {
   const [showSidebar, setShowSidebar]             = useState(false)
   const [logOut]                                  = useLogOutMutation()
   const token  = localStorage.getItem("client-token")
-  const userId = localStorage.getItem("userId")
+  const storedUserId = localStorage.getItem("userId")
+  const userId = storedUserId && storedUserId !== "undefined" ? storedUserId : ""
   const navigator = useNavigate()
 
   const { data: pendingBetsData } = useGetPendingBetsQuery(undefined, {
@@ -98,7 +104,7 @@ const Header = () => {
       {/* ── Exposure Modal ── */}
       {showExposureModal && (
         <div className="modal-overlay" onClick={() => setShowExposureModal(false)}>
-          <div className="modal-box" onClick={e => e.stopPropagation()}>
+          <div className="modal-box exposure-modal" onClick={e => e.stopPropagation()}>
 
             {/* Sticky header */}
             <div className="modal-header">
@@ -254,11 +260,12 @@ const Header = () => {
 
             {/* Nav links */}
             <nav className="sidebar__nav">
-              {NAV_ITEMS.map(item => (
+              {NAV_ITEMS.map((item, i) => (
                 <Link
                   key={item.to}
                   to={item.to}
                   className="sidebar__item"
+                  style={{ animationDelay: `${i * 35}ms` }}
                   onClick={() => setShowSidebar(false)}
                 >
                   <img src={item.icon} alt="" className="sidebar__icon" />
@@ -269,60 +276,10 @@ const Header = () => {
                 </Link>
               ))}
 
-              {/* Matka */}
-              <Link
-                to="/satta-matka"
-                className="sidebar__item"
-                onClick={() => setShowSidebar(false)}
-              >
-                <img src="/casino/matka.png" alt="" className="sidebar__icon" />
-                <span>Matka</span>
-                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
-
-              {/* Dice */}
-              <Link
-                to="/casino/detail/99"
-                className="sidebar__item"
-                onClick={() => setShowSidebar(false)}
-              >
-                <img src="/img/dice.png" alt="" className="sidebar__icon" />
-                <span>Dice</span>
-                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
-
-              {/* Roulette — coming soon */}
-              <button
-                className="sidebar__item"
-                onClick={() => { setShowSidebar(false); snackbarUtil.info("Coming Soon!") }}
-              >
-                <img src="/img/roulete.png" alt="" className="sidebar__icon" />
-                <span>Roulette</span>
-                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </button>
-
-              {/* Aviator */}
-              <Link
-                to="/aviator"
-                className="sidebar__item"
-                onClick={() => setShowSidebar(false)}
-              >
-                <img src="/img/aviator.png" alt="" className="sidebar__icon" />
-                <span>Aviator</span>
-                <svg className="sidebar__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
-
               {/* Logout */}
               <button
                 className="sidebar__item sidebar__item--logout"
+                style={{ animationDelay: `${NAV_ITEMS.length * 35}ms` }}
                 onClick={() => { setShowSidebar(false); handleLogOut() }}
               >
                 <img src="/img/LGTop.png" alt="" className="sidebar__icon" />

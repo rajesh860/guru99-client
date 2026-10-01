@@ -1,4 +1,7 @@
 // header.scss — modern redesign
+// Unused on purpose: a stale CDN edge had cached an HTML error page under this bundle's old
+// content hash, so real visitors got no CSS at all. Bumping this forces a new hash on deploy.
+:root { --cache-bust-2026-09-13b: 1; }
 
 // ── Main header bar ───────────────────────────────────────────
 .hdr {
@@ -296,6 +299,9 @@
 }
 
 // ── Sidebar ───────────────────────────────────────────────────
+// Always dark/black-themed regardless of the active site theme (light theme's
+// own override used to lighten this to a white panel with cramped padding —
+// kept consistently dark here instead, same look on both themes).
 @keyframes slideInLeft {
   from { transform: translateX(-100%); }
   to   { transform: translateX(0); }
@@ -304,6 +310,16 @@
 @keyframes fadeInBg {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes sidebarItemIn {
+  from { opacity: 0; transform: translateX(-14px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sidebarHeadShine {
+  0%   { background-position: -150% 0; }
+  100% { background-position: 250% 0; }
 }
 
 .sidebar-overlay {
@@ -320,23 +336,35 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 240px;
-  background: var(--color-sidebarBg, #111927);
+  width: 250px;
+  background: #0d1420 !important;
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  animation: slideInLeft 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+  animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 4px 0 32px rgba(0, 0, 0, 0.55);
 
   // Sidebar header
   &__head {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 24px 16px 18px;
-    background: linear-gradient(160deg, #1a2a44 0%, #0f1923 100%);
+    padding: 26px 16px 20px;
+    background: linear-gradient(160deg, #1a2a44 0%, #0f1923 100%) !important;
     border-bottom: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.09) 50%, transparent 60%);
+      background-size: 250% 100%;
+      animation: sidebarHeadShine 5s ease-in-out infinite;
+      pointer-events: none;
+    }
   }
 
   &__avatar {
@@ -348,6 +376,7 @@
   }
 
   &__fullName {
+    position: relative;
     font-size: 14px;
     font-weight: 700;
     color: #fff;
@@ -357,6 +386,7 @@
   }
 
   &__statsRow {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -385,24 +415,46 @@
   }
 
   &__item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 13px 18px;
-    color: rgba(255, 255, 255, 0.82);
+    padding: 12px 18px;
+    color: rgba(255, 255, 255, 0.82) !important;
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
     border: none;
-    background: transparent;
+    background: transparent !important;
     width: 100%;
     text-align: left;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.04) !important;
+    opacity: 0;
+    animation: sidebarItemIn 0.32s ease forwards;
 
-    &:hover { background: rgba(255,255,255,0.07); color: #fff; }
-    &:active { background: rgba(255,255,255,0.04); }
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: linear-gradient(180deg, #4087fb, #667eea);
+      transform: scaleY(0);
+      transition: transform 0.18s ease;
+    }
+
+    &:hover {
+      background: rgba(64, 135, 251, 0.1) !important;
+      color: #fff !important;
+
+      &::before { transform: scaleY(1); }
+      .sidebar__icon { transform: scale(1.1); background: rgba(64, 135, 251, 0.18); }
+    }
+    &:active { background: rgba(255,255,255,0.04) !important; }
 
     &--disabled {
       opacity: 0.6;
@@ -418,31 +470,36 @@
       margin: 12px auto 4px;
       padding: 12px 20px;
       border-radius: 999px;
-      background: rgba(255, 107, 107, 0.1);
+      background: rgba(255, 107, 107, 0.1) !important;
       border: 1.5px solid rgba(255, 107, 107, 0.5);
-      border-bottom: 1.5px solid rgba(255, 107, 107, 0.5);
-      color: #ff6b6b;
+      color: #ff6b6b !important;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
       text-align: center;
 
+      &::before { display: none; }
+
       .sidebar__icon {
         width: 18px;
         height: 18px;
+        background: transparent;
       }
 
-      &:hover { background: rgba(255, 107, 107, 0.18); }
-      &:active { background: rgba(255, 107, 107, 0.22); }
+      &:hover { background: rgba(255, 107, 107, 0.18) !important; }
+      &:active { background: rgba(255, 107, 107, 0.22) !important; }
     }
   }
 
   &__icon {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
+    padding: 4px;
     object-fit: contain;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 9px;
     flex-shrink: 0;
+    transition: transform 0.18s ease, background 0.18s ease;
   }
 
   &__arrow {
@@ -466,40 +523,104 @@
   }
 }
 
+// Light theme — white body (header cap stays dark, same as dark theme).
 [data-theme="light"] {
   .sidebar {
     background: #ffffff !important;
 
-    &__head {
-      background: linear-gradient(165deg, #2b1055 0%, #180a33 75%, #0a0518 100%) !important;
-    }
+    &__nav::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }
 
     &__item {
       color: #111827 !important;
-      padding: 7px 18px !important;
       border-bottom-color: rgba(0, 0, 0, 0.06) !important;
 
-      &:hover { background: rgba(0, 0, 0, 0.05) !important; color: #000 !important; }
-      &:active { background: rgba(0, 0, 0, 0.08) !important; }
+      &:hover {
+        background: rgba(64, 135, 251, 0.08) !important;
+        color: #000 !important;
+      }
+      &:active { background: rgba(0, 0, 0, 0.05) !important; }
     }
 
     &__item--logout {
-      display: flex !important;
-      justify-content: center !important;
-      width: 90% !important;
-      margin: 12px auto 4px !important;
-      padding: 12px 20px !important;
-      border-radius: 999px !important;
       background: rgba(255, 107, 107, 0.08) !important;
-      border: 1.5px solid rgba(255, 82, 82, 0.6) !important;
+      border-color: rgba(255, 82, 82, 0.5);
       color: #ff5252 !important;
 
-      &:hover { background: rgba(255, 107, 107, 0.15) !important; color: #ff5252 !important; }
+      &:hover { background: rgba(255, 107, 107, 0.15) !important; }
     }
+
+    &__icon { background: rgba(0, 0, 0, 0.05); }
 
     &__arrow {
       opacity: 0.4;
       filter: invert(1);
     }
   }
+}
+
+
+// ── Exposure (Pending Bets) modal — light theme ───────────────
+// The modal reuses Bootstrap-like class names (.modal-header/.modal-body), which
+// global light-theme rules repaint white. Scope everything under
+// .exposure-modal with !important so the popup stays readable in white theme.
+[data-theme="light"] .exposure-modal {
+  background: #ffffff !important;
+  box-shadow: 0 12px 36px rgba(17, 24, 39, 0.25) !important;
+
+  .modal-header {
+    background: var(--color-gradient, linear-gradient(135deg, #5B3FE0 0%, #3B2A99 100%)) !important;
+    border-bottom: none !important;
+  }
+  .modal-title { color: #ffffff !important; }
+  .modal-close {
+    color: rgba(255, 255, 255, 0.85) !important;
+    &:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.18) !important; }
+  }
+
+  .modal-summary {
+    background: #f9fafb !important;
+    border-bottom: 1px solid #e5e7eb !important;
+
+    span {
+      color: #4b5563 !important;
+      background: #ffffff !important;
+      border-color: #e5e7eb !important;
+      b { color: #111827 !important; }
+    }
+  }
+  .modal-summary__total {
+    background: rgba(245, 158, 11, 0.1) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #b45309 !important;
+    b { color: #b45309 !important; }
+  }
+
+  .modal-body { background: #ffffff !important; }
+  .modal-body::-webkit-scrollbar-thumb,
+  .modal-table-wrap::-webkit-scrollbar-thumb { background: rgba(17, 24, 39, 0.18) !important; }
+
+  .modal-section { border-bottom-color: #eef0f3 !important; }
+  .modal-section-title { color: #6b7280 !important; }
+
+  .modal-table {
+    border: 1px solid #e5e7eb !important;
+
+    th {
+      background: #f3f4f6 !important;
+      color: #374151 !important;
+      border-bottom: 1px solid #e5e7eb !important;
+    }
+    td {
+      background: #ffffff !important;
+      color: #111827 !important;
+      border-bottom: 1px solid #f1f2f4 !important;
+    }
+  }
+  .modal-empty { color: #9ca3af !important; background: #ffffff !important; }
+
+  .td-green { color: #16a34a !important; }
+  .td-red   { color: #dc2626 !important; }
+  .modal-mode--back { color: #0284c7 !important; }
+  .modal-mode--lay  { color: #ea580c !important; }
+  .modal-mode--number, .modal-mode--odd, .modal-mode--even { color: #7c3aed !important; }
 }

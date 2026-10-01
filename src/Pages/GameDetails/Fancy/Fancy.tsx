@@ -28,9 +28,10 @@ interface Props {
   beventId?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   marketLimits?: any
+  sessionPL?: number | null
 }
 
-const Fancy = ({ fancyData, groupName, handleBetData, focusAmountInput, teamPLData, beventId, marketLimits }: Props) => {
+const Fancy = ({ fancyData, groupName, handleBetData, focusAmountInput, teamPLData, beventId, marketLimits, sessionPL }: Props) => {
   const [selectedFancy, setSelectedFancy] = useState<{ fancyId: string; name: string } | null>(null)
   const { themeName } = useTheme()
 
@@ -106,13 +107,24 @@ const Fancy = ({ fancyData, groupName, handleBetData, focusAmountInput, teamPLDa
 
       {/* Ribbon header (matches Bookmaker) */}
       <div className="gd-ribbon" style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(0, 1fr)", marginBottom: "4px", gap: "0", borderRadius: "6px 6px 0 0", alignItems: "center" }}>
-        <div className="gd-ribbon__left" style={{ padding: "8px 10px", minWidth: 0, overflow: "hidden" }}>
+        <div className="gd-ribbon__left" style={{ padding: "5px 10px", minWidth: 0, overflow: "hidden" }}>
           <span className="gd-ribbon__icon">📋</span>
-          <span className="gd-ribbon__title">{groupName || "Session"}</span>
-          <span className="gd-ribbon__info">i</span>
-          {(groupMin > 0 || groupMax > 0) && (
-            <span className="gd-ribbon__meta" style={{ marginLeft: "6px" }}>MIN:{formatLimit(groupMin)} MAX:{formatLimit(groupMax)}</span>
-          )}
+          <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <div>
+              <span className="gd-ribbon__title">{groupName || "Session"}</span>
+              <span className="gd-ribbon__info">i</span>
+              {(groupMin > 0 || groupMax > 0) && (
+                <span className="gd-ribbon__meta" style={{ marginLeft: "6px" }}>MIN:{formatLimit(groupMin)} MAX:{formatLimit(groupMax)}</span>
+              )}
+            </div>
+            {sessionPL != null && (
+              <div
+                style={{ color: sessionPL >= 0 ? "#4CAF50" : "#f44336", fontWeight: 700, fontSize: "12px" }}
+              >
+                P/M:{sessionPL >= 0 ? "+" : ""}{sessionPL}
+              </div>
+            )}
+          </div>
         </div>
         <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4px" }}>
           <div style={{ padding: "4px", paddingInline: 0 }}>
@@ -152,7 +164,7 @@ const Fancy = ({ fancyData, groupName, handleBetData, focusAmountInput, teamPLDa
               {/* Left cell */}
               <div style={{ background: themeName === "light" ? "rgb(238 238 238)" : "var(--bg-panel)", padding: "6px 10px", borderTop: "1px solid rgba(128,128,128,0.2)", borderBottom: "1px solid rgba(128,128,128,0.2)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "6px", minWidth: 0, overflow: "hidden" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0, overflow: "hidden" }}>
-                  <span style={{ fontWeight: "600", fontSize: "13px", color: "var(--color-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
+                  <span style={{ fontWeight: "800", fontSize: "13px", color: "var(--color-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{name}</span>
                   {(rowMin > 0 || rowMax > 0) && (
                     <span style={{ fontSize: "10px", color: themeName === "light" ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)" }}>Min: {formatLimit(rowMin)} | Max: {formatLimit(rowMax)}</span>
                   )}

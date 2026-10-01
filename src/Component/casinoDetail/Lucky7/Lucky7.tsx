@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { FaLock } from "react-icons/fa"
-import BackBtn from "../../BackBtn/BackBtn"
+import CasinoGameSelect from "../../CasinoGameSelect/CasinoGameSelect"
 import { useGetCasinoMyBetsQuery, useGetCasinoCompletedBetsQuery } from "../../../../store/service/userServices/userServices"
 import { videoIdById } from "../../Casino_Data/Constant"
 import PlaceBetModal from "../teenPatti/PlaceBetModal"
 import Lucky7RoundDetailModal from "./Lucky7RoundDetailModal"
 import { getCardImage } from "../../../utils/cardImage"
 import "./Lucky7.scss"
+import CasinoVideo from "../CasinoVideo"
 
 
 const Lucky7: React.FC = () => {
@@ -131,7 +132,7 @@ const isSuspended = (item: any) => !item || item.gstatus !== "1" || remainingSec
 
   return (
     <>
-      <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
+      <CasinoGameSelect currentId="53" />
 
       <div className="l7n-container">
         <div className="l7n-header">
@@ -152,11 +153,7 @@ const isSuspended = (item: any) => !item || item.gstatus !== "1" || remainingSec
             <div className="l7n-card-label-text">Card</div>
           </div>
           <div className="l7n-video-area">
-            <iframe
-              src={`https://alpha-g.qnsports.live/route/rih2.php?id=${videoId}`}
-              title="Lucky 7 Stream"
-              allowFullScreen
-            />
+            <CasinoVideo qnId={videoId} title="Lucky 7 - B" />
           </div>
         </div>
 

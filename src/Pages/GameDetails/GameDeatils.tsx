@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import { useParams, useSearchParams } from "react-router-dom"
-import { useGetTeamPLQuery } from "../../../store/service/userServices/userServices"
+import { useGetTeamPLQuery, useGetFancyPnlByMatchQuery } from "../../../store/service/userServices/userServices"
 import { useMarketLimitsQuery } from "../../../store/service/odds/oddsServices"
 import Betslip from "./Betslip"
 import Fancy from "./Fancy/Fancy"
@@ -55,6 +55,19 @@ const GameDeatils = () => {
     { beventId: id || "" },
     { skip: !id, pollingInterval: 2000 }
   )
+
+  // Session (fancy) P/L for this match — shown next to the "Session" ribbon title
+  const clientUserId = localStorage.getItem("userId") || ""
+  const { data: fancyPnlData } = useGetFancyPnlByMatchQuery(
+    { userId: clientUserId, gmid: gmid || "" },
+    { skip: !clientUserId || !gmid, pollingInterval: 3000 }
+  )
+  const sessionPL: number | null = (() => {
+    const d: any = fancyPnlData?.data ?? fancyPnlData
+    const v = d?.netPL
+    return typeof v === "number" ? v : (v != null && !isNaN(Number(v)) ? Number(v) : null)
+  })()
+
 
   // Per-match market limits (min/max) — 5s polling
   const { data: marketLimitsData } = useMarketLimitsQuery(id || "", {
@@ -821,6 +834,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
               teamPLData={teamPLData}
               beventId={id}
               marketLimits={marketLimitsData}
+              sessionPL={sessionPL}
             />
           ) : null
         })()}
@@ -836,6 +850,7 @@ const amountInputRef = useRef<HTMLInputElement>(null)
         setTimer={setTimer}
         checkOddsValid={checkOddsValid}
         onOddsInvalid={handleOddsInvalid}
+        matchName={oddsData?.ename || ""}
       />
 
       {/* My Bets Table */}

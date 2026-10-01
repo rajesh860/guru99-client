@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 export interface Theme {
   name: string
@@ -140,22 +140,35 @@ interface ThemeContextType {
   currentTheme: Theme
   themeName: string
   setTheme: (themeName: string) => void
+  randomizeTheme: () => void
+}
+
+const pickRandomThemeName = (): string => {
+  const names = Object.keys(themes)
+  return names[Math.floor(Math.random() * names.length)]
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [themeName, setThemeName] = useState<string>(() => {
-    return localStorage.getItem('app-theme') || 'dark'
-  })
+  // Always pick randomly among the available themes on every fresh load — no persisted
+  // preference, so it doesn't stick to whatever was picked (or manually chosen) before.
+  const [themeName, setThemeName] = useState<string>(pickRandomThemeName)
 
   const currentTheme = themes[themeName] || themes.dark
 
-  const setTheme = (name: string) => {
+  // Stable identities (empty deps) — callers put these in a useEffect dependency array
+  // (e.g. the login-success effect), and a new function reference each render would re-fire
+  // that effect every time the theme changes, which randomizeTheme itself triggers.
+  const setTheme = useCallback((name: string) => {
     setThemeName(name)
-    localStorage.setItem('app-theme', name)
     document.documentElement.setAttribute('data-theme', name)
-  }
+  }, [])
+
+  // Login is a client-side route change (no full page reload), so the app never remounts and
+  // the theme picked at the initial page load would otherwise stick across every login within
+  // the same tab. Called explicitly on login success so each login re-randomizes too.
+  const randomizeTheme = useCallback(() => setTheme(pickRandomThemeName()), [setTheme])
 
   useEffect(() => {
     const root = document.documentElement
@@ -167,7 +180,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [currentTheme, themeName])
 
   return (
-    <ThemeContext.Provider value={{ currentTheme, themeName, setTheme }}>
+    <ThemeContext.Provider value={{ currentTheme, themeName, setTheme, randomizeTheme }}>
       {children}
     </ThemeContext.Provider>
   )

@@ -778,7 +778,6 @@ const RouletteGame = () => {
                 value={stakeInput}
                 onChange={e => setStakeInput(e.target.value)}
                 placeholder="Enter stake (min ₹100)"
-                autoFocus
               />
               <button className="dbs-clear" onClick={() => setStakeInput("")}>C</button>
             </div>

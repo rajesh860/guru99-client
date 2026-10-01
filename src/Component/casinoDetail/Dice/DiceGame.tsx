@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { FaLock } from "react-icons/fa"
-import BackBtn from "../../BackBtn/BackBtn"
+import CasinoGameSelect from "../../CasinoGameSelect/CasinoGameSelect"
 import snackbarUtil from "../../../utils/Snackbar"
 
 import { useGetDiceCurrentRoundQuery, useGetDiceResultsQuery, usePlaceDiceBetMutation, useGetDiceRoundSummaryQuery, useGetDicePendingBetsQuery, useGetDiceCompletedBetsQuery } from "../../../../store/service/dice/diceServices"
@@ -406,7 +406,7 @@ const DiceGame = () => {
 
   return (
     <>
-      <BackBtn to="/casino-list" name="BACK TO CASINO MENU" />
+      <CasinoGameSelect currentId="99" />
 
       <div className="dice-container">
 

@@ -71,6 +71,19 @@
         }
       }
 
+      // sky99 HLS stream: size to the stream's own 16:9 shape instead of a
+      // fixed height — a fixed 300/400px box letterboxed the picture and left
+      // black bands above and below it on narrow screens.
+      video {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border: none;
+        display: block;
+        background: #000;
+      }
+
       .countdown-timer { display: none; }
 
       .tp-timer {

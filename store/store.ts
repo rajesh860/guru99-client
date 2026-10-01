@@ -12,6 +12,7 @@ import { scorecardApi } from "./service/scorecard/scorecardService"
 import { cricketScoreApi } from "./service/cricketScore/cricketScoreService"
 import { diceApi } from "./service/dice/diceServices"
 import { rouletteApi } from "./service/roulette/rouletteServices"
+import { ludoApi } from "./service/ludo/ludoApi"
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     [cricketScoreApi.reducerPath]: cricketScoreApi.reducer,
     [diceApi.reducerPath]: diceApi.reducer,
     [rouletteApi.reducerPath]: rouletteApi.reducer,
+    [ludoApi.reducerPath]: ludoApi.reducer,
   },
   middleware: defaultMiddleware =>
     defaultMiddleware()
@@ -41,5 +43,6 @@ export const store = configureStore({
       .concat(scorecardApi.middleware)
       .concat(cricketScoreApi.middleware)
       .concat(diceApi.middleware)
-      .concat(rouletteApi.middleware),
+      .concat(rouletteApi.middleware)
+      .concat(ludoApi.middleware),
 })

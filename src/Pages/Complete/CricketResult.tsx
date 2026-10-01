@@ -14,6 +14,13 @@ const CricketResult = () => {
 
   const isMatka = ledgerBetData?.marketType === "matka"
 
+  // ── Casino round data (roulette, and any other game using the same
+  // per-round ledger shape: `data` is an array of round-bet objects) ──
+  const isCasinoRounds = !isMatka && Array.isArray(ledgerBetData?.data)
+  const casinoBets: any[] = isCasinoRounds ? ledgerBetData.data : []
+  const casinoMatchName   = ledgerBetData?.matchName ?? ""
+  const casinoSummary     = ledgerBetData?.summary ?? { totalBets: 0, totalWon: 0, totalLost: 0, netPL: 0 }
+
   // ── Matka data ──────────────────────────────────────────
   const matkaBets: any[]  = ledgerBetData?.matka ?? []
   const matkaSummary      = ledgerBetData?.summary ?? { totalBets: 0, netPL: 0, won: 0, lost: 0 }
@@ -103,6 +110,78 @@ const CricketResult = () => {
                   { label: "Lost",        value: matkaSummary.totalLost   ?? matkaSummary.lost,                    cls: "cr-loss",                                                        plain: true },
                   { label: "Commission",  value: matkaSummary.totalCommission ?? matkaSummary.totalComm,           cls: "cr-info",                                                        plain: true },
                   { label: "Net P/L",      value: matkaSummary.netPL,                                              cls: plClass(matkaSummary.netPL ?? 0),                                 bold: true },
+                ].map(({ label, value, cls, bold, plain }) => (
+                  <div key={label} className="cr-summary-row">
+                    <span className="cr-summary-label">{label}</span>
+                    <span className={`cr-summary-value ${cls}`} style={{ fontWeight: bold ? 700 : 500 }}>
+                      {plain ? value : `${Number(value) >= 0 ? "+" : ""}${Number(value).toFixed(2)}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : isCasinoRounds ? (
+
+          /* ══════════════ CASINO RESULT (roulette, etc.) ══════════════ */
+            <>
+              <p className="cr-match-name-bg">{casinoMatchName}</p>
+
+              <p className="cr-section-header">Bet(s)</p>
+              <div className="cr-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      {["Round ID", "Bet On", "Bet Type", "Odds", "Stake", "Result", "P/L", "Status", "Date/Time"].map(h => (
+                        <th key={h} className="cr-th">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {casinoBets.length > 0 ? casinoBets.map((item: any, i: number) => (
+                      <tr key={item?.roundId || i} className="cr-tr">
+                        <td style={{ minWidth: 140 }}>{item?.roundId}</td>
+                        <td style={{ textAlign: "center" }}>{item?.betOn}</td>
+                        <td style={{ textTransform: "capitalize", whiteSpace: "nowrap" }}>
+                          {item?.betType?.replace(/_/g, " ")}
+                        </td>
+                        <td style={{ textAlign: "right" }}>{item?.odds}</td>
+                        <td style={{ textAlign: "right" }}>{item?.stake?.toLocaleString?.() ?? item?.stake}</td>
+                        <td style={{ textAlign: "center" }}>{item?.result}</td>
+                        <td className={item?.pl >= 0 ? "cr-win" : "cr-loss"} style={{ textAlign: "right" }}>
+                          {item?.pl >= 0 ? "+" : ""}{item?.pl}
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <span className={item?.status === "won" ? "cr-win" : "cr-loss"}>
+                            {item?.status}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "center", minWidth: 110 }}>
+                          {moment(item?.date).format("DD/MM/YY hh:mm A")}
+                        </td>
+                      </tr>
+                    )) : (
+                      <tr className="cr-tr">
+                        <td colSpan={9} style={{ textAlign: "center", padding: "12px" }}>No bets found</td>
+                      </tr>
+                    )}
+                    <tr className="cr-summary-row">
+                      <td colSpan={9} style={{ textAlign: "center" }} className={plClass(casinoSummary.netPL ?? 0)}>
+                        You {(casinoSummary.netPL ?? 0) >= 0 ? "Win" : "Loss"} {Math.abs(casinoSummary.netPL ?? 0)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ height: 12 }} />
+
+              <p className="cr-section-header">Summary</p>
+              <div className="cr-summary-card">
+                {[
+                  { label: "Total Bets", value: casinoSummary.totalBets, cls: "cr-info", plain: true },
+                  { label: "Won",        value: casinoSummary.totalWon,  cls: "cr-win",  plain: true },
+                  { label: "Lost",       value: casinoSummary.totalLost, cls: "cr-loss", plain: true },
+                  { label: "Net P/L",    value: casinoSummary.netPL,     cls: plClass(casinoSummary.netPL ?? 0), bold: true },
                 ].map(({ label, value, cls, bold, plain }) => (
                   <div key={label} className="cr-summary-row">
                     <span className="cr-summary-label">{label}</span>
