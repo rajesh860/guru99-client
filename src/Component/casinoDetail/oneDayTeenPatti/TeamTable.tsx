@@ -28,7 +28,7 @@ const TeamTable: React.FC<Props> = ({
   const isBettingLocked = countdown <= 0;
 
   const handleBetClick = (item: any, isBack: boolean = true) => {
-    if (item?.gstatus === "ACTIVE" && !isBettingLocked) {
+    if (item?.gstatus === "OPEN" && !isBettingLocked) {
       const betData = {
         ...item,
         isBack,
@@ -58,7 +58,7 @@ const TeamTable: React.FC<Props> = ({
         <tbody>
           {oddsData.map((player, index) => {
             const liability = getLiabilityBySectionId(player?.sectionId);
-            const isLocked = player?.gstatus !== "ACTIVE" || isBettingLocked;
+            const isLocked = player?.gstatus !== "OPEN" || isBettingLocked;
             
             return (
               <tr key={player?.sectionId || index}>

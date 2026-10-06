@@ -16,7 +16,6 @@ const Casino = () => {
     { tableId: '59', name: 'Poker 20-20' },
     { tableId: '55', name: '32 Cards' },
     { tableId: '8',  name: 'Baccarat' },
-    { tableId: 'ludo', name: 'Ludo' },
     // { tableId: '99', name: 'Dice Game' },
   ]
 
@@ -43,17 +42,12 @@ const Casino = () => {
   }
 
   // Active casino games — add tableId here to enable
-  const ACTIVE_IDS = new Set<string>(['51', '52', '53', '55', '62', '99', 'ludo'])
+  const ACTIVE_IDS = new Set<string>(['51', '52', '53', '55', '62', '99'])
 
   const handleCardClick = (e: React.MouseEvent, casino: any) => {
     if (!ACTIVE_IDS.has(casino.tableId)) {
       e.preventDefault()
       snackbarUtil.info("Coming Soon!")
-      return
-    }
-    // Ludo is its own table-selection flow (/ludo), not the generic /casino/detail/:id page.
-    if (casino.tableId === 'ludo') {
-      navigate('/ludo')
       return
     }
     navigate(`/casino/detail/${casino.tableId}`)

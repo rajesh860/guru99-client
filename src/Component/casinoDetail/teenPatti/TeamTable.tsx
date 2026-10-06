@@ -4,7 +4,7 @@ import PlaceBetModal from "./PlaceBetModal";
 import { FaLock } from "react-icons/fa";
 
 interface SelectedPlayerType {
-  gstatus: boolean
+  gstatus: string
   max: number
   mid: string
   min: number
@@ -45,7 +45,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ data, handleRateClick, liabilityD
   }
   const backRate = (p: any) => validRate(p?.rate ?? p?.b1)
   const layRate  = (p: any) => validRate(p?.l1)
-  const isOpen   = (p: any) => !!p && String(p.gstatus) === "1" && !roundSuspended
+  const isOpen   = (p: any) => !!p && p.gstatus === "OPEN" && !roundSuspended
 
   const handlePlayerClick = (player: any, isBack: boolean) => {
     const rate = isBack ? backRate(player) : layRate(player)
@@ -56,7 +56,7 @@ const TeamTable: React.FC<TeamTableProps> = ({ data, handleRateClick, liabilityD
       rate,
       isBack,
       sid: player.sid,
-      mid: player.mid || data?.mid || "",
+      mid: player.mid || data?.t1?.mid || data?.roundId || "",
     });
     setBetModalOpen(true);
   };

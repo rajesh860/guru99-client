@@ -3,7 +3,7 @@ import "./Maintenance.scss"
 
 const getTargetTime = () => {
   const target = new Date()
-  target.setHours(16, 0, 0, 0)
+  target.setHours(16, 30, 0, 0)
   if (target.getTime() < Date.now()) {
     target.setDate(target.getDate() + 1)
   }
@@ -41,11 +41,11 @@ const Maintenance = () => {
         <div className="maintenance-icon">🛠️</div>
         <h1>साइट जल्द वापस आएगी</h1>
         <p>
-          साइट 2:30 से 4 बजे तक बंद रहेगी।
+          साइट अभी तकनीकी कारणों से बंद है।
         </p>
         <p>अगर इस बीच किसी की बेट आएगी तो वो वैध नहीं होगी।</p>
         <div className="maintenance-divider" />
-        <p className="maintenance-sub">शाम 4:00 बजे तक साइट वापस चालू हो जाएगी</p>
+        <p className="maintenance-sub">शाम 4:30 बजे तक साइट वापस चालू हो जाएगी</p>
         <div className="maintenance-countdown">{formatTime(remaining)}</div>
       </div>
     </div>

@@ -30,6 +30,7 @@ import {
 import { j } from "vitest/dist/reporters-w_64AS5f.js"
 import OddsButton from "./OddsButton"
 import CricketScoreCard from "../../Component/CricketScoreCard"
+import MatchTvStream from "../../Component/MatchTvStream"
 import { useGetLiveCricketScoreQuery, useGetBallFeedsQuery, useGetBet99ScoreQuery } from "../../../store/service/cricketScore/cricketScoreService"
 import { useTheme } from "../../context/ThemeContext"
 
@@ -529,15 +530,11 @@ const amountInputRef = useRef<HTMLInputElement>(null)
           overflow: "hidden",
           boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
         }}>
-          <iframe
-            src={`https://e765432.diamondcricketid.com/dtv.php?id=${bid}`}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none"
-            }}
-            title="Live TV"
-            allowFullScreen
+          {/* 2026-10-03: sky99 match-TV (hls); na mile to purana diamond iframe */}
+          <MatchTvStream
+            gmid={gmid || ""}
+            eventName={oddsData?.ename || ""}
+            fallbackSrc={`https://e765432.diamondcricketid.com/dtv.php?id=${bid}`}
           />
         </div>
       )}

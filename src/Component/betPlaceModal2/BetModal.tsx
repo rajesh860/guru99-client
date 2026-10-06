@@ -17,7 +17,7 @@ const SUSPEND_THRESHOLD = 2
 type Props = {
   onClose?: () => void
   selectedPlayer?: {
-    gstatus: boolean
+    gstatus: string
     max: number
     mid: string
     min: number

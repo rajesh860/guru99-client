@@ -18,7 +18,7 @@ import "./styles.scss"
 import BetHistoryTable from "../../betHistoryTable/BetHistoryTable"
 
 interface SelectedPlayerType {
-  gstatus: boolean
+  gstatus: string
   max: number
   mid: string
   min: number
@@ -81,7 +81,7 @@ const DragonTiger2 = () => {
     console.log("Rate clicked:", item)
 
     // Check if betting option is suspended
-    if (!item?.gstatus) {
+    if (item?.gstatus !== "OPEN") {
       console.log("Betting option is suspended, modal will not open")
       snackbarUtil.error("This betting option is currently suspended")
       return
@@ -273,22 +273,22 @@ const DragonTiger2 = () => {
                   )?.liability || 0}
                 </div>
                 <button
-                  className={`btn ${!data?.t2?.find(t => t.nat === "Dragon")?.gstatus ? "suspended" : ""}`}
+                  className={`btn ${data?.t2?.find(t => t.nat === "Dragon")?.gstatus !== "OPEN" ? "suspended" : ""}`}
                   onClick={() => {
                     const dragonOption = data?.t2?.find(t => t.nat === "Dragon")
-                    if (dragonOption?.gstatus) {
+                    if (dragonOption?.gstatus === "OPEN") {
                       handleRateClick(dragonOption)
                     }
                   }}
                   style={{
                     position: "relative",
-                    cursor: data?.t2?.find(t => t.nat === "Dragon")?.gstatus
+                    cursor: data?.t2?.find(t => t.nat === "Dragon")?.gstatus === "OPEN"
                       ? "pointer"
                       : "not-allowed",
                   }}
                 >
                   DRAGON
-                  {!data?.t2?.find(t => t.nat === "Dragon")?.gstatus && (
+                  {data?.t2?.find(t => t.nat === "Dragon")?.gstatus !== "OPEN" && (
                     <div
                       className="overlay"
                       style={{
@@ -333,22 +333,22 @@ const DragonTiger2 = () => {
                   )?.liability || 0}
                 </div>
                 <button
-                  className={`btn ${!data?.t2?.find(t => t.nat === "Tie")?.gstatus ? "suspended" : ""}`}
+                  className={`btn ${data?.t2?.find(t => t.nat === "Tie")?.gstatus !== "OPEN" ? "suspended" : ""}`}
                   onClick={() => {
                     const tieOption = data?.t2?.find(t => t.nat === "Tie")
-                    if (tieOption?.gstatus) {
+                    if (tieOption?.gstatus === "OPEN") {
                       handleRateClick(tieOption)
                     }
                   }}
                   style={{
                     position: "relative",
-                    cursor: data?.t2?.find(t => t.nat === "Tie")?.gstatus
+                    cursor: data?.t2?.find(t => t.nat === "Tie")?.gstatus === "OPEN"
                       ? "pointer"
                       : "not-allowed",
                   }}
                 >
                   TIE
-                  {!data?.t2?.find(t => t.nat === "Tie")?.gstatus && (
+                  {data?.t2?.find(t => t.nat === "Tie")?.gstatus !== "OPEN" && (
                     <div
                       className="overlay"
                       style={{
@@ -393,22 +393,22 @@ const DragonTiger2 = () => {
                   )?.liability || 0}
                 </div>
                 <button
-                  className={`btn ${!data?.t2?.find(t => t.nat === "Tiger")?.gstatus ? "suspended" : ""}`}
+                  className={`btn ${data?.t2?.find(t => t.nat === "Tiger")?.gstatus !== "OPEN" ? "suspended" : ""}`}
                   onClick={() => {
                     const tigerOption = data?.t2?.find(t => t.nat === "Tiger")
-                    if (tigerOption?.gstatus) {
+                    if (tigerOption?.gstatus === "OPEN") {
                       handleRateClick(tigerOption)
                     }
                   }}
                   style={{
                     position: "relative",
-                    cursor: data?.t2?.find(t => t.nat === "Tiger")?.gstatus
+                    cursor: data?.t2?.find(t => t.nat === "Tiger")?.gstatus === "OPEN"
                       ? "pointer"
                       : "not-allowed",
                   }}
                 >
                   TIGER
-                  {!data?.t2?.find(t => t.nat === "Tiger")?.gstatus && (
+                  {data?.t2?.find(t => t.nat === "Tiger")?.gstatus !== "OPEN" && (
                     <div
                       className="overlay"
                       style={{

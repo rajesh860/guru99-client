@@ -104,17 +104,23 @@ const Lucky7: React.FC = () => {
 
   const getOption = (nat: string) => t2.find((o: any) => o.nat === nat)
 
-  const lowOption   = getOption("LOW Card")
-  const highOption  = getOption("HIGH Card")
+  // Real feed sends "Low Card"/"High Card" (confirmed live) — the old "LOW
+  // Card"/"HIGH Card" casing never matched, so these were always undefined,
+  // which made isSuspended(undefined) always true regardless of gstatus.
+  const lowOption   = getOption("Low Card")
+  const highOption  = getOption("High Card")
   const card7Option = getOption("Card 7")
 
 // Suspend when backend marks it closed, OR within 2s of the round ending
 // (frontend pre-empts the backend suspend).
-const isSuspended = (item: any) => !item || item.gstatus !== "1" || remainingSecs <= 2
+const isSuspended = (item: any) => !item || item.gstatus !== "OPEN" || remainingSecs <= 2
 
   const handleRateClick = (item: any) => {
     if (isSuspended(item)) return
-    setSelectedPlayer({ ...item, isBack: true })
+    // item (a t2 bet-option entry) has no mid of its own — the round id has to be
+    // attached here explicitly, or every bet goes out with roundId: "" and the
+    // backend rejects it ("game, roundId, sid, stake are required").
+    setSelectedPlayer({ ...item, isBack: true, mid: roundId })
     setBetModalVisible(true)
   }
 

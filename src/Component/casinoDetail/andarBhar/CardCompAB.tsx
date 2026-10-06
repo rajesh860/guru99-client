@@ -43,7 +43,7 @@ const CardCompAB = ({ sid, br, t2BySid, liblity }: any) => {
   const isSidInBr = br.length && br.includes(`${sid}`)
   const cardSrc = `/casino/CARD ${isSidInBr ? cardNation : "0"}.png`
   return (
-    <div onClick={() => t2BySid?.[sid]?.gstatus && handleClick(card)}>
+    <div onClick={() => t2BySid?.[sid]?.gstatus === "OPEN" && handleClick(card)}>
       <img alt="" src={cardSrc} />
       <div
         className="mb-n1 desk-view-casino"

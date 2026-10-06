@@ -63,7 +63,10 @@ const DragonTiger20: React.FC = () => {
 
   const handleRateClick = (item: any) => {
     if (!item || isSuspended(item)) return
-    setSelectedPlayer({ ...item, isBack: true })
+    // item (a t2 bet-option entry) has no mid of its own — the round id has to be
+    // attached here explicitly, or every bet goes out with roundId: "" and the
+    // backend rejects it ("game, roundId, sid, stake are required").
+    setSelectedPlayer({ ...item, isBack: true, mid: roundId })
     setBetModalVisible(true)
   }
 
@@ -112,8 +115,8 @@ const DragonTiger20: React.FC = () => {
   const tigerMain  = getOption("Tiger")
   const tieMain    = getOption("Tie")
 
-  // gstatus "1" = active, "0" = suspended; also suspend within 2s of round end.
-  const isSuspended = (item: any) => !item || item.gstatus !== "1" || remainingSecs <= 2
+  // gstatus "OPEN" = active, anything else = suspended; also suspend within 2s of round end.
+  const isSuspended = (item: any) => !item || item.gstatus !== "OPEN" || remainingSecs <= 2
 
   const resultHistory: any[] = wsData?.t3 ?? []
 

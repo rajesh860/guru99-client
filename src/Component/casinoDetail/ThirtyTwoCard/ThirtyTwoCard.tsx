@@ -144,14 +144,17 @@ const ThirtyTwoCard = () => {
   const videoId = videoIdById[id ?? ""] ?? "3034"
   const isClosed = countdown === "00:00"
 
-  const isSuspended = (item: any) => !item || item.gstatus !== "ACTIVE"
+  const isSuspended = (item: any) => !item || item.gstatus !== "OPEN"
 
   const handleBet = (item: any, isBack: boolean) => {
     if (isSuspended(item)) return
     // PlaceBetModal reads selectedPlayer.nat/.rate directly (no b1/l1/nation fallback) — t2
     // items only carry nation (not nat) and b1/l1 (not rate), so without this the modal shows
     // "undefined" for the selection and NaN odds/Potential Win.
-    setSelectedPlayer({ ...item, isBack, nat: item.nation, rate: isBack ? item.b1 : item.l1 })
+    // item (a t2 bet-option entry) has no mid of its own — the round id has to be
+    // attached here explicitly, or every bet goes out with roundId: "" and the
+    // backend rejects it ("game, roundId, sid, stake are required").
+    setSelectedPlayer({ ...item, isBack, nat: item.nation, rate: isBack ? item.b1 : item.l1, mid: roundId })
     setBetModalVisible(true)
   }
 

@@ -35,8 +35,11 @@ const RoundDetailModal = ({ isOpen, onClose, roundId, game, t3Item }: Props) => 
 
   if (!isOpen) return null
 
-  // API data first, t3 fallback second
-  const data = apiData ?? parseT3(t3Item)
+  // API data first, t3 fallback second — but only trust apiData if it actually carries
+  // card data; some backend responses for this endpoint come back success:false (or
+  // without a `cards` field) while still being a truthy object, which would otherwise
+  // bypass the t3 fallback and crash below on `data.cards[player]`.
+  const data = (apiData && (apiData as any).cards) ? apiData : parseT3(t3Item)
 
   return (
     <div className="round-detail-overlay" onClick={onClose}>
@@ -67,7 +70,7 @@ const RoundDetailModal = ({ isOpen, onClose, roundId, game, t3Item }: Props) => 
                     {data.winner === player && <div className="trophy-icon">🏆</div>}
                   </div>
                   <div className="cards-row">
-                    {(data.cards[player] ?? []).map((card: string, idx: number) => (
+                    {(data.cards?.[player] ?? []).map((card: string, idx: number) => (
                       <img
                         key={idx}
                         src={getCardImage(card)}

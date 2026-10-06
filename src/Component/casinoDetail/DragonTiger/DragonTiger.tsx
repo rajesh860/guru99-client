@@ -61,7 +61,7 @@ const DragonTiger = () => {
   const [trigger, { data: betPlaceResponse, isLoading }] = useBetPlaceMutation()
 
   const handleRateClick = (item: any) => {
-    if (!item?.gstatus) return
+    if (item?.gstatus !== "OPEN") return
     setSelectedPlayer({ ...item, isBack: true })
     setBetModalVisible(true)
   }
@@ -253,14 +253,14 @@ const DragonTiger = () => {
                   )?.liability || 0}
                 </div>
                 <button
-                  className={`btn ${!data?.t2?.find(t => t.nat === "Dragon")?.gstatus ? "suspended" : ""}`}
+                  className={`btn ${data?.t2?.find(t => t.nat === "Dragon")?.gstatus !== "OPEN" ? "suspended" : ""}`}
                   onClick={() =>
                     handleRateClick(data?.t2?.find(t => t.nat === "Dragon"))
                   }
                   style={{ position: "relative" }}
                 >
                   DRAGON
-                  {!data?.t2?.find(t => t.nat === "Dragon")?.gstatus && (
+                  {data?.t2?.find(t => t.nat === "Dragon")?.gstatus !== "OPEN" && (
                     <div
                       className="overlay"
                       style={{
@@ -305,14 +305,14 @@ const DragonTiger = () => {
                   )?.liability || 0}
                 </div>
                 <button
-                  className={`btn ${!data?.t2?.find(t => t.nat === "Tie")?.gstatus ? "suspended" : ""}`}
+                  className={`btn ${data?.t2?.find(t => t.nat === "Tie")?.gstatus !== "OPEN" ? "suspended" : ""}`}
                   onClick={() =>
                     handleRateClick(data?.t2?.find(t => t.nat === "Tie"))
                   }
                   style={{ position: "relative" }}
                 >
                   TIE
-                  {!data?.t2?.find(t => t.nat === "Tie")?.gstatus && (
+                  {data?.t2?.find(t => t.nat === "Tie")?.gstatus !== "OPEN" && (
                     <div
                       className="overlay"
                       style={{
@@ -357,14 +357,14 @@ const DragonTiger = () => {
                   )?.liability || 0}
                 </div>
                 <button
-                  className={`btn ${!data?.t2?.find(t => t.nat === "Tiger")?.gstatus ? "suspended" : ""}`}
+                  className={`btn ${data?.t2?.find(t => t.nat === "Tiger")?.gstatus !== "OPEN" ? "suspended" : ""}`}
                   onClick={() =>
                     handleRateClick(data?.t2?.find(t => t.nat === "Tiger"))
                   }
                   style={{ position: "relative" }}
                 >
                   TIGER
-                  {!data?.t2?.find(t => t.nat === "Tiger")?.gstatus && (
+                  {data?.t2?.find(t => t.nat === "Tiger")?.gstatus !== "OPEN" && (
                     <div
                       className="overlay"
                       style={{

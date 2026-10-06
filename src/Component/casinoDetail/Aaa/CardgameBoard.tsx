@@ -36,7 +36,7 @@ const CardGameBoard: React.FC<Props> = ({
 
   // Helper function to handle bet clicks
   const handleBetClick = (item: any, isBack: boolean = true) => {
-    if (item?.gstatus === "ACTIVE") {
+    if (item?.gstatus === "OPEN") {
       const betData = {
         ...item,
         isBack,
@@ -46,7 +46,7 @@ const CardGameBoard: React.FC<Props> = ({
     }
   };
 
-  // Check if betting is locked (countdown is 00:00 or gstatus is not ACTIVE)
+  // Check if betting is locked (countdown is 00:00 or gstatus is not OPEN)
   const isBettingLocked = countdown === "00:00";
 
   // Main betting options (Amar, Akbar, Anthony)
@@ -90,11 +90,11 @@ const CardGameBoard: React.FC<Props> = ({
                   </div>
                   <div className="btn-dv">
                     <div 
-                      className={`bet-btn ${(!bet || bet.gstatus !== "ACTIVE" || isBettingLocked) ? "locked" : ""}`}
+                      className={`bet-btn ${(!bet || bet.gstatus !== "OPEN" || isBettingLocked) ? "locked" : ""}`}
                       onClick={() => handleBetClick(bet, true)}
                       style={{ position: "relative" }}
                     >
-                      {(!bet || bet.gstatus !== "ACTIVE" || isBettingLocked) && (
+                      {(!bet || bet.gstatus !== "OPEN" || isBettingLocked) && (
                         <div className="lock-overlay">
                           <FaLock />
                         </div>
@@ -102,11 +102,11 @@ const CardGameBoard: React.FC<Props> = ({
                       {bet?.b1 && bet?.b1 !== "0" ? bet.b1 : "0.00"}
                     </div>
                     <div 
-                      className={`bet-btn ${(!bet || bet.gstatus !== "ACTIVE" || isBettingLocked) ? "locked" : ""}`}
+                      className={`bet-btn ${(!bet || bet.gstatus !== "OPEN" || isBettingLocked) ? "locked" : ""}`}
                       onClick={() => handleBetClick(bet, false)}
                       style={{ position: "relative" }}
                     >
-                      {(!bet || bet.gstatus !== "ACTIVE" || isBettingLocked) && (
+                      {(!bet || bet.gstatus !== "OPEN" || isBettingLocked) && (
                         <div className="lock-overlay">
                           <FaLock />
                         </div>
@@ -128,11 +128,11 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiabilityBySid("4") || 0}
               </div>
               <div 
-                className={`bet-btn ${(!evenOdd[0] || evenOdd[0].gstatus !== "ACTIVE" || isBettingLocked) ? "locked" : ""}`}
+                className={`bet-btn ${(!evenOdd[0] || evenOdd[0].gstatus !== "OPEN" || isBettingLocked) ? "locked" : ""}`}
                 onClick={() => handleBetClick(evenOdd[0], true)}
                 style={{ position: "relative" }}
               >
-                {(!evenOdd[0] || evenOdd[0].gstatus !== "ACTIVE" || isBettingLocked) && (
+                {(!evenOdd[0] || evenOdd[0].gstatus !== "OPEN" || isBettingLocked) && (
                   <div className="lock-overlay">
                     <FaLock />
                   </div>
@@ -151,11 +151,11 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiabilityBySid("5") || 0}
               </div>
               <div 
-                className={`bet-btn ${(!evenOdd[1] || evenOdd[1].gstatus !== "ACTIVE" || isBettingLocked) ? "locked" : ""}`}
+                className={`bet-btn ${(!evenOdd[1] || evenOdd[1].gstatus !== "OPEN" || isBettingLocked) ? "locked" : ""}`}
                 onClick={() => handleBetClick(evenOdd[1], true)}
                 style={{ position: "relative" }}
               >
-                {(!evenOdd[1] || evenOdd[1].gstatus !== "ACTIVE" || isBettingLocked) && (
+                {(!evenOdd[1] || evenOdd[1].gstatus !== "OPEN" || isBettingLocked) && (
                   <div className="lock-overlay">
                     <FaLock />
                   </div>
@@ -175,11 +175,11 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiabilityBySid("6") || 0}
               </div>
               <div 
-                className={`bet-btn ${(!redBlack[0] || redBlack[0].gstatus !== "ACTIVE" || isBettingLocked) ? "locked" : ""}`}
+                className={`bet-btn ${(!redBlack[0] || redBlack[0].gstatus !== "OPEN" || isBettingLocked) ? "locked" : ""}`}
                 onClick={() => handleBetClick(redBlack[0], true)}
                 style={{ position: "relative" }}
               >
-                {(!redBlack[0] || redBlack[0].gstatus !== "ACTIVE" || isBettingLocked) && (
+                {(!redBlack[0] || redBlack[0].gstatus !== "OPEN" || isBettingLocked) && (
                   <div className="lock-overlay">
                     <FaLock />
                   </div>
@@ -198,11 +198,11 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiabilityBySid("7") || 0}
               </div>
               <div 
-                className={`bet-btn ${(!redBlack[1] || redBlack[1].gstatus !== "ACTIVE" || isBettingLocked) ? "locked" : ""}`}
+                className={`bet-btn ${(!redBlack[1] || redBlack[1].gstatus !== "OPEN" || isBettingLocked) ? "locked" : ""}`}
                 onClick={() => handleBetClick(redBlack[1], true)}
                 style={{ position: "relative" }}
               >
-                {(!redBlack[1] || redBlack[1].gstatus !== "ACTIVE" || isBettingLocked) && (
+                {(!redBlack[1] || redBlack[1].gstatus !== "OPEN" || isBettingLocked) && (
                   <div className="lock-overlay">
                     <FaLock />
                   </div>

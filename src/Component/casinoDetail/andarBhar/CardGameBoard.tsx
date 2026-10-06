@@ -38,7 +38,7 @@ const CardGameBoard: React.FC<Props> = ({
 
   const handleBetClick = (item: any) => {
     if (roundSuspended) return;
-    if (onRateClick && item.gstatus === "1") {
+    if (onRateClick && item.gstatus === "OPEN") {
       onRateClick(item);
     } else {
       setModalVisible?.(true);
@@ -72,12 +72,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Ander A")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Ander A")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Ander A")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Ander A"))}
                 style={{ position: 'relative' }}
               >
                 1ST BET
-                {getBetOption("Ander A")?.gstatus === "0" && (
+                {getBetOption("Ander A")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -108,12 +108,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Ander 2")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Ander 2")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Ander 2")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Ander 2"))}
                 style={{ position: 'relative' }}
               >
                 2ND BET
-                {getBetOption("Ander 2")?.gstatus === "0" && (
+                {getBetOption("Ander 2")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -144,12 +144,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Ander 3")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Ander 3")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Ander 3")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Ander 3"))}
                 style={{ position: 'relative' }}
               >
                 3RD BET
-                {getBetOption("Ander 3")?.gstatus === "0" && (
+                {getBetOption("Ander 3")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -189,12 +189,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Bahar A")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Bahar A")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Bahar A")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Bahar A"))}
                 style={{ position: 'relative' }}
               >
                 1ST BET
-                {getBetOption("Bahar A")?.gstatus === "0" && (
+                {getBetOption("Bahar A")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -225,12 +225,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Bahar 2")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Bahar 2")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Bahar 2")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Bahar 2"))}
                 style={{ position: 'relative' }}
               >
                 2ND BET
-                {getBetOption("Bahar 2")?.gstatus === "0" && (
+                {getBetOption("Bahar 2")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -261,12 +261,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Bahar 3")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Bahar 3")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Bahar 3")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Bahar 3"))}
                 style={{ position: 'relative' }}
               >
                 3RD BET
-                {getBetOption("Bahar 3")?.gstatus === "0" && (
+                {getBetOption("Bahar 3")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -301,12 +301,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Ander 4")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Ander 4")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Ander 4")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Ander 4"))}
                 style={{ position: 'relative' }}
               >
                 EVEN
-                {getBetOption("Ander 4")?.gstatus === "0" && (
+                {getBetOption("Ander 4")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -340,12 +340,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Bahar 4")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Bahar 4")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Bahar 4")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Bahar 4"))}
                 style={{ position: 'relative' }}
               >
                 ODD
-                {getBetOption("Bahar 4")?.gstatus === "0" && (
+                {getBetOption("Bahar 4")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -380,12 +380,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Ander 5")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Ander 5")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Ander 5")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Ander 5"))}
                 style={{ position: 'relative' }}
               >
                 ♠
-                {getBetOption("Ander 5")?.gstatus === "0" && (
+                {getBetOption("Ander 5")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -419,12 +419,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Bahar 5")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Bahar 5")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Bahar 5")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Bahar 5"))}
                 style={{ position: 'relative' }}
               >
                 ♥
-                {getBetOption("Bahar 5")?.gstatus === "0" && (
+                {getBetOption("Bahar 5")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -458,12 +458,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Ander 6")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Ander 6")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Ander 6")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Ander 6"))}
                 style={{ position: 'relative' }}
               >
                 ♣
-                {getBetOption("Ander 6")?.gstatus === "0" && (
+                {getBetOption("Ander 6")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -497,12 +497,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getLiability(getBetOption("Bahar 6")?.sid) || 0}
               </div>
               <div 
-                className={`bet-btn ${getBetOption("Bahar 6")?.gstatus === "0" ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Bahar 6")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Bahar 6"))}
                 style={{ position: 'relative' }}
               >
                 ♦
-                {getBetOption("Bahar 6")?.gstatus === "0" && (
+                {getBetOption("Bahar 6")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,

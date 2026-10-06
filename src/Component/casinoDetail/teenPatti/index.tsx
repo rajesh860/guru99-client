@@ -22,7 +22,7 @@ import { getCardImage } from "../../../utils/cardImage"
 import CasinoVideo from "../CasinoVideo"
 
 interface SelectedPlayerType {
-  gstatus: boolean
+  gstatus: string
   max: number
   mid: string
   min: number
@@ -132,13 +132,16 @@ const TeenPattiGame = () => {
 
   const handleRateClick = (item: SelectedPlayerType) => {
     // Check if betting option is suspended (backend flag, or within 2s of round end)
-    if (!item?.gstatus || remainingSecs <= 2) {
+    if (item?.gstatus !== "OPEN" || remainingSecs <= 2) {
       console.log("Betting option is suspended, modal will not open")
       snackbarUtil.error("This betting option is currently suspended")
       return
     }
 
-    setSelectedPlayer({ ...item, isBack: true }) // Default to back bet; can be modified in BetModal if needed
+    // item (a t2 bet-option entry) has no mid of its own — the round id lives on
+    // t1 (the table/round object), so it has to be attached here explicitly or
+    // every bet goes out with roundId: "" and the backend rejects it.
+    setSelectedPlayer({ ...item, isBack: true, mid: wsData?.t1?.mid || wsData?.roundId })
     setBetModalVisible(true)
   }
 

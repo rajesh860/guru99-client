@@ -514,6 +514,20 @@ function normalizeScoreData(input: any): ScoreData | null {
     overTeamName && teamNameMatches(overTeamName, rawTeamsForNameCheck.team2?.name) ? rawT2KeyForNameCheck :
     ''
 
+  // d.teams.team1/2.batting — the backend's OWN explicit "who's batting" flag, computed
+  // server-side from the same feed. Confirmed live (Zimbabwe W v West Indies W, beventId
+  // 671292252, post innings-break): teams.team2.batting was correctly true for West Indies
+  // while liveData.a/wp ("6I.8Y" / "6I,...") were BOTH stale, still naming Zimbabwe (the team
+  // that had already finished batting) — and aField/wp outrank innings.team in this chain, so
+  // without this signal the stale a/wp value wins and the wrong team shows as batting right
+  // after every innings break. Ranked above aField/wp (which this incident shows can lag) but
+  // below the already-proven tc/overName signals, since this field hasn't been battle-tested
+  // against the OTHER historical bugs (follow-on, key-swaps) the way those have.
+  const battingFromTeamsFlag: string =
+    rawTeamsForNameCheck.team1?.batting === true ? rawT1KeyForNameCheck :
+    rawTeamsForNameCheck.team2?.batting === true ? rawT2KeyForNameCheck :
+    ''
+
   // bat_team_fkey is unreliable — can hold bowling team's key, avoid using
 
   // bet99-score (sky99, keyed by gmid) — a fully independent provider's live "active nation"
@@ -560,10 +574,27 @@ function normalizeScoreData(input: any): ScoreData | null {
     const keyOf = (side: 1 | 2) => (side === 1 ? rawT1KeyForNameCheck : rawT2KeyForNameCheck)
     return [keyOf(s1), keyOf(s2)]
   })()
-  const battingFromBet99: string = !bet99SideKeys ? '' :
-    bet99Score.activenation1 === '1' ? bet99SideKeys[0] :
-    bet99Score.activenation2 === '1' ? bet99SideKeys[1] :
-    ''
+  // bet99's "0-0 (0.0)" placeholder means that side hasn't faced a ball yet.
+  const bet99NotStarted = (s: any): boolean => /^\s*0-0\s*\(0(\.0+)?\)\s*$/.test(String(s || '').trim())
+  const battingFromBet99: string = (() => {
+    if (!bet99SideKeys) return ''
+    const activeIsSide1 = bet99Score.activenation1 === '1'
+    const activeIsSide2 = !activeIsSide1 && bet99Score.activenation2 === '1'
+    if (!activeIsSide1 && !activeIsSide2) return ''
+    const activeScoreStr = activeIsSide1 ? bet99Score.score1 : bet99Score.score2
+    const otherScoreStr = activeIsSide1 ? bet99Score.score2 : bet99Score.score1
+    // Between innings, activenation can still point at the side that JUST FINISHED batting
+    // (their total already on the board) instead of the side about to start — seen live on
+    // beventId 497403994 (Bangladesh Champions v England Legends): activenation1="1" kept
+    // pointing at Bangladesh (164/9, already done) during "Player Entering" for England's
+    // 2nd innings, swapping the two teams' names onto each other's scores. Detectable because
+    // the "active" side already has a score on the board while the other hasn't faced a ball
+    // yet — don't trust bet99 there, fall through to the more durable F/a/wp/teamsFlag signals.
+    const activeHasScore = !!activeScoreStr && !bet99NotStarted(activeScoreStr)
+    const otherNotStarted = bet99NotStarted(otherScoreStr)
+    if (activeHasScore && otherNotStarted) return ''
+    return activeIsSide1 ? bet99SideKeys[0] : bet99SideKeys[1]
+  })()
 
   // F/a/wp are live, continuously-updated "who's facing now" fields — more durably reliable
   // than innings.team at the innings-break transition, but (like innings.team) they can still
@@ -604,6 +635,7 @@ function normalizeScoreData(input: any): ScoreData | null {
     battingFromBet99 ||
     fromRaw(battingFromTc) ||
     battingFromOverName ||
+    battingFromTeamsFlag ||
     fromRaw(aField) ||
     fromRaw(battingFromWp) ||
     battingFromInnings ||
@@ -617,7 +649,7 @@ function normalizeScoreData(input: any): ScoreData | null {
   // order covers every future case too, surface every disagreement — so a bad match can be
   // caught from logs before a client has to report it again.
   const battingSignals: Record<string, string> = {
-    tc: fromRaw(battingFromTc), overName: battingFromOverName, bet99: battingFromBet99, F: fromRaw(fField), a: fromRaw(aField),
+    tc: fromRaw(battingFromTc), overName: battingFromOverName, teamsFlag: battingFromTeamsFlag, bet99: battingFromBet99, F: fromRaw(fField), a: fromRaw(aField),
     wp: fromRaw(battingFromWp), innings: battingFromInnings, over: fromRaw(battingFromOver), v1Bowl: fromRaw(battingFromV1Bowl),
   }
   const distinctBattingValues = Array.from(new Set(Object.values(battingSignals).filter(Boolean)))
@@ -1016,11 +1048,25 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
   const formatMaxBalls = (() => {
     if (hasRevisedTarget) return revisedBallsAllowed
     if (reducedOvers) return reducedOvers * 6
-    const f = (format || '').toLowerCase()
-    if (f.includes('t10')) return 60
+    // Also accept the spelled-out "Twenty20" (not just "T20") in case some matches' format
+    // string uses it — "twenty20" has no "t20" substring, so matching only 't20' would miss it.
+    const f = (format || '').toLowerCase().replace(/\s+/g, '')
+    if (f.includes('t10') || f.includes('ten10')) return 60
     if (f.includes('hundred')) return 100
-    if (f.includes('t20')) return 120
-    if (f.includes('odi') || f.includes('list a') || f.includes('one day')) return 300
+    if (f.includes('t20') || f.includes('twenty20')) return 120
+    if (f.includes('odi') || f.includes('lista') || f.includes('oneday')) return 300
+    // score.format comes back as an empty string for some matches (confirmed live: Zimbabwe W
+    // v West Indies W, beventId 671292252 — score.format === ""), so the checks above never
+    // match and this used to fall through to "Test, no limit" even for a 20-over match, hiding
+    // the "in X balls" part of the chase banner. liveData.pr.ps (projected-score-at-overs
+    // milestones, e.g. "10 Overs"/"15 Overs"/"20 Overs") always goes up to the match's real over
+    // limit regardless of what score.format says, so its last entry names that limit directly.
+    const projectedOvers = (liveData as any)?.pr?.ps
+    if (Array.isArray(projectedOvers) && projectedOvers.length > 0) {
+      const lastOv = String(projectedOvers[projectedOvers.length - 1]?.ov || '')
+      const oversMatch = lastOv.match(/(\d+)/)
+      if (oversMatch) return parseInt(oversMatch[1]) * 6
+    }
     return 0 // Test = no fixed limit
   })()
 
@@ -1164,11 +1210,19 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
           // CDN flag keys: v1 is newest-first, v1.find() returns current-innings keys.
           // Over summary: tfkey = batting team's CDN key, bowl_tfkey = bowling team's CDN key.
           const v1Any = v1 as any[]
-          const leftCdnKey  = v1Any.find(x => x.tfkey)?.tfkey || ''
-          const rightCdnKey = v1Any.find(x => x.bowl_tfkey)?.bowl_tfkey ||
-            (leftCdnKey ? v1Any.find(x => x.tfkey && x.tfkey !== leftCdnKey)?.tfkey : '') || ''
-          const leftKey  = leftCdnKey
-          const rightKey = rightCdnKey
+          const leftCdnKey0  = v1Any.find(x => x.tfkey)?.tfkey || ''
+          const rightCdnKey0 = v1Any.find(x => x.bowl_tfkey)?.bowl_tfkey ||
+            (leftCdnKey0 ? v1Any.find(x => x.tfkey && x.tfkey !== leftCdnKey0)?.tfkey : '') || ''
+          // Feed ne kabhi kabhi dono taraf SAME tfkey/bowl_tfkey de diya (ek hi team ka code
+          // dono innings ke liye) — isse dono flag ek hi (galat) logo dikhane lagte hain.
+          // Aisi situation mein tfkey/bowl_tfkey hi unreliable hain, lekin backend ke apne
+          // team1Key/team2Key (jo humesha ek-dusre se alag hote hain, confirmed live — Zimbabwe
+          // W v West Indies W, beventId 671292252: t1Key "6I" !== t2Key "8Y") bhi usi CDN
+          // keyspace mein kaam karte hain is match ke liye — unhi pe fallback karo taaki dono
+          // flags bilkul gayab na ho jayein, sirf tfkey/bowl_tfkey hi drop ho.
+          const sameKeyConflict = !!leftCdnKey0 && !!rightCdnKey0 && leftCdnKey0 === rightCdnKey0
+          const leftKey  = sameKeyConflict ? (team1BattingFinal ? t1Key : t2Key) : leftCdnKey0
+          const rightKey = sameKeyConflict ? (team1BattingFinal ? t2Key : t1Key) : rightCdnKey0
           const leftList  = team1BattingFinal ? t1InningsList : t2InningsList
           const rightList = team1BattingFinal ? t2InningsList : t1InningsList
 
@@ -1298,7 +1352,7 @@ const CricketScoreCard = ({ scoreData: rawProp }: Props) => {
       {/* Recent Balls */}
       {hasRecentBalls && (
         <div className="cscard-balls">
-          <span className="balls-label">Recent</span>
+          <span className="balls-label">Recent{currentOver?.o != null ? ` · Ov ${currentOver.o}` : ''}</span>
           <div className="balls-row">
             {recentBalls.map((item) =>
               item.divider ? (

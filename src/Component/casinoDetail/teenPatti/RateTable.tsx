@@ -70,10 +70,10 @@ const RateTable = ({ data, datat1, timer, lability }) => {
                 <div
                   className="rate-box"
                   onClick={() =>
-                    item?.gstatus == 0 ? "" : handleRateClick(item)
+                    item?.gstatus !== "OPEN" ? "" : handleRateClick(item)
                   }
                 >
-                  {timer <= 3 || item?.gstatus == 0 ? (
+                  {timer <= 3 || item?.gstatus !== "OPEN" ? (
                     <div className="overlay">
                       <FaLock />
                     </div>

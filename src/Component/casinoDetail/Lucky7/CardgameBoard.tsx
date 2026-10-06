@@ -30,7 +30,7 @@ const CardGameBoard: React.FC<Props> = ({
   };
 
   const handleBetClick = (item: any) => {
-    if (onRateClick && item.gstatus) {
+    if (onRateClick && item.gstatus === "OPEN") {
       onRateClick(item);
     } else {
       setModalVisible?.(true);
@@ -60,12 +60,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getBetOption("LOW Card")?.rate || "0.00"}
               </div>
               <div 
-                className={`bet-btn ${!getBetOption("LOW Card")?.gstatus ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("LOW Card")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("LOW Card"))}
                 style={{ position: 'relative' }}
               >
                 LOW CARD
-                {!getBetOption("LOW Card")?.gstatus && (
+                {getBetOption("LOW Card")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -100,12 +100,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getBetOption("HIGH Card")?.rate || "0.00"}
               </div>
               <div 
-                className={`bet-btn ${!getBetOption("HIGH Card")?.gstatus ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("HIGH Card")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("HIGH Card"))}
                 style={{ position: 'relative' }}
               >
                 HIGH CARD
-                {!getBetOption("HIGH Card")?.gstatus && (
+                {getBetOption("HIGH Card")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -137,12 +137,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getBetOption("Even")?.rate || "0.00"}
               </div>
               <div 
-                className={`bet-btn ${!getBetOption("Even")?.gstatus ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Even")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Even"))}
                 style={{ position: 'relative' }}
               >
                 EVEN
-                {!getBetOption("Even")?.gstatus && (
+                {getBetOption("Even")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -173,12 +173,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getBetOption("Odd")?.rate || "0.00"}
               </div>
               <div 
-                className={`bet-btn ${!getBetOption("Odd")?.gstatus ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Odd")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Odd"))}
                 style={{ position: 'relative' }}
               >
                 ODD
-                {!getBetOption("Odd")?.gstatus && (
+                {getBetOption("Odd")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -210,12 +210,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getBetOption("Red")?.rate || "0.00"}
               </div>
               <div 
-                className={`bet-btn ${!getBetOption("Red")?.gstatus ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Red")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Red"))}
                 style={{ position: 'relative' }}
               >
                 RED
-                {!getBetOption("Red")?.gstatus && (
+                {getBetOption("Red")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,
@@ -246,12 +246,12 @@ const CardGameBoard: React.FC<Props> = ({
                 {getBetOption("Black")?.rate || "0.00"}
               </div>
               <div 
-                className={`bet-btn ${!getBetOption("Black")?.gstatus ? 'suspended' : ''}`}
+                className={`bet-btn ${getBetOption("Black")?.gstatus !== "OPEN" ? 'suspended' : ''}`}
                 onClick={() => handleBetClick(getBetOption("Black"))}
                 style={{ position: 'relative' }}
               >
                 BLACK
-                {!getBetOption("Black")?.gstatus && (
+                {getBetOption("Black")?.gstatus !== "OPEN" && (
                   <div className="overlay" style={{
                     position: 'absolute',
                     top: 0,

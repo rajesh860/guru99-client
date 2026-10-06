@@ -113,11 +113,14 @@ const AAA: React.FC = () => {
 
   const getOption = (nat: string) => t2.find((o: any) => o.nat === nat)
   // Suspend when backend marks it inactive, OR within 2s of the round ending.
-  const isSuspended = (item: any) => !item || item.gstatus !== "ACTIVE" || remainingSecs <= 2
+  const isSuspended = (item: any) => !item || item.gstatus !== "OPEN" || remainingSecs <= 2
 
   const handleRateClick = (item: any) => {
     if (isSuspended(item)) return
-    setSelectedPlayer({ ...item, isBack: true, rate: item.rate ?? item.b1 })
+    // item (a t2 bet-option entry) has no mid of its own — the round id has to be
+    // attached here explicitly, or every bet goes out with roundId: "" and the
+    // backend rejects it ("game, roundId, sid, stake are required").
+    setSelectedPlayer({ ...item, isBack: true, rate: item.rate ?? item.b1, mid: roundId })
     setBetModalVisible(true)
   }
 

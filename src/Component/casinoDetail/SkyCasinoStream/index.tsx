@@ -207,6 +207,29 @@ export default function SkyCasinoStream({ game, className, poster, muted = true 
       }
     }, DRIFT_CHECK_MS)
 
+    // 2026-10-06: "Frozen" check — server recovery ke baad player purane stream
+    // pe atak jaata tha (na 'waiting', na live-edge badhta) — sirf refresh se
+    // chalti. Visible tab me 10s tak time na badhe to fresh restart.
+    let lastT = -1
+    let lastAdvanceAt = Date.now()
+    const frozenInterval = setInterval(() => {
+      if (destroyed) return
+      if (document.visibilityState !== "visible") {
+        lastAdvanceAt = Date.now()
+        return
+      }
+      const t = video.currentTime
+      if (t !== lastT) {
+        lastT = t
+        lastAdvanceAt = Date.now()
+        return
+      }
+      if (Date.now() - lastAdvanceAt > 10000) {
+        lastAdvanceAt = Date.now()
+        restart()
+      }
+    }, 2000)
+
     const onPause = () => {
       if (document.visibilityState === "visible" && !destroyed) tryPlay()
     }
@@ -222,6 +245,7 @@ export default function SkyCasinoStream({ game, className, poster, muted = true 
       if (stallTimer) clearTimeout(stallTimer)
       if (stallEscalateTimer) clearTimeout(stallEscalateTimer)
       clearInterval(driftInterval)
+      clearInterval(frozenInterval)
       document.removeEventListener("visibilitychange", onVisibility)
       video.removeEventListener("waiting", onWaiting)
       video.removeEventListener("playing", onPlaying)
